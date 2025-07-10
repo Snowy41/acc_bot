@@ -1,0 +1,42 @@
+import pytest
+import asyncio
+import os
+
+from db import credential_store
+
+
+@pytest.mark.asyncio
+async def test_add_and_fetch_credential(tmp_path):
+    # Use a temporary database file for isolated testing
+    db_path = tmp_path / "test_creds.db"
+    store = credential_store.CredentialStore(str(db_path))
+
+    # Initialize DB schema
+    await store.initialize()
+
+    # Test data
+    test_cred = {
+        "email": "test123@example.com",
+        "username": "testuser123",
+        "password": "SecurePass123!",
+        "phone": "+15555550123"
+    }
+
+    # Step 1: Add credential
+    await store.add_credential(**test_cred)
+
+    # Step 2: Fetch next pending credential
+    fetched = await store.get_next_pending_credential()
+    assert fetched is not None, "Should fetch the added credential"
+    assert fetched["email"] == test_cred["email"]
+    assert fetched["status"] == "pending"
+
+    # Step 3: Mark credential as used
+    await store.mark_credential_used(fetched["id"])
+
+    # Step 4: Fetch by ID and validate status
+    updated = await store.get_credential_by_id(fetched["id"])
+    assert updated["status"] == "used"
+
+    # Cleanup
+    await store.close()
