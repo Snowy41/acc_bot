@@ -2,6 +2,8 @@
 <project version="4">
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/db/credential_store.py" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/utils/inspect_db.py" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/venv/Lib/site-packages/aiosqlite" dialect="GenericSQL" />
+    <file url="PROJECT" dialect="SQLite" />
   </component>
 </project>

@@ -20,6 +20,13 @@ class CredentialStore:
         """)
         await self.conn.commit()
 
+    async def reset_all_credentials(self):
+        await self.conn.execute("""
+                                UPDATE credentials
+                                SET status = 'pending'
+                                """)
+        await self.conn.commit()
+
     async def add_credential(self, email, username, password, phone):
         await self.conn.execute("""
         INSERT INTO credentials (email, username, password, phone)
@@ -49,6 +56,15 @@ class CredentialStore:
         """, (cred_id,))
         await self.conn.commit()
 
+    async def delete_credential_by_id(self, cred_id):
+        cursor = await self.conn.execute("""
+                                         DELETE
+                                         FROM credentials
+                                         WHERE id = ?
+                                         """, (cred_id,))
+        await self.conn.commit()
+        return cursor.rowcount > 0
+
     async def get_credential_by_id(self, cred_id):
         cursor = await self.conn.execute("""
         SELECT * FROM credentials WHERE id = ?
@@ -64,6 +80,24 @@ class CredentialStore:
                 "status": row[5]
             }
         return None
+
+    async def get_all_credentials(self):
+        cursor = await self.conn.execute("""
+                                         SELECT *
+                                         FROM credentials
+                                         """)
+        rows = await cursor.fetchall()
+        result = []
+        for row in rows:
+            result.append({
+                "id": row[0],
+                "email": row[1],
+                "username": row[2],
+                "password": row[3],
+                "phone": row[4],
+                "status": row[5]
+            })
+        return result
 
     async def close(self):
         await self.conn.close()

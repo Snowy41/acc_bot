@@ -1,8 +1,7 @@
 import pytest
-import asyncio
-import os
 
 from db import credential_store
+from db.credential_store import CredentialStore
 
 
 @pytest.mark.asyncio
@@ -39,4 +38,17 @@ async def test_add_and_fetch_credential(tmp_path):
     assert updated["status"] == "used"
 
     # Cleanup
+    await store.close()
+
+
+@pytest.mark.asyncio
+async def test_add_and_get_credential():
+    store = CredentialStore(":memory:")
+    await store.initialize()
+    await store.add_credential("test@example.com", "user", "pass", "123456")
+    cred = await store.get_next_pending_credential()
+    assert cred["email"] == "test@example.com"
+    await store.mark_credential_used(cred["id"])
+    cred_used = await store.get_credential_by_id(cred["id"])
+    assert cred_used["status"] == "used"
     await store.close()
