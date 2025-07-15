@@ -229,7 +229,7 @@ def register():
 @app.route("/api/users/<usertag>", methods=["GET"])
 def get_user(usertag):
     users = load_users()
-    user = users.get(usertag.lower())
+    user = users.get(usertag) or users.get(usertag.lower())
     if user:
         profile = {
             "username": user.get("username", ""),

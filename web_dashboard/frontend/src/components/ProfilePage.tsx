@@ -36,6 +36,10 @@ export default function ProfilePage() {
       })
       .then(data => {
         if (data) setProfile(data);
+      })
+      .catch((err) => {
+        console.error("Profile fetch error:", err);
+        setNotFound(true);
       });
     fetch("/api/auth/status", { credentials: "include" })
       .then(res => res.json())
