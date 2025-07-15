@@ -1,0 +1,12 @@
+[Unit]
+Description=WhiteBot Gunicorn Service
+After=network.target
+
+[Service]
+User=YOUR_USER
+WorkingDirectory=/path/to/your/app
+ExecStart=/path/to/venv/bin/gunicorn -k eventlet -w 1 -b 127.0.0.1:8000 main:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

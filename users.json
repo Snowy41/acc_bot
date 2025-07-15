@@ -1,0 +1,39 @@
+{
+  "1": {
+    "uid": 1,
+    "username": "Professor",
+    "usertag": "1",
+    "password": "0c15d483d7512efc82be42aef0b53d082cad625aa53e979f9771961e28f8d2a5",
+    "bio": "Test",
+    "social": {
+      "github": "https://github.com/Snowy41",
+      "discord": "minecraftbeziehung",
+      "twitter": "https://twitter.com/SnowyXds"
+    },
+    "is_admin": true,
+    "color": "#f14936",
+    "tags": [
+      "Founder",
+      "Owner",
+      "$"
+    ],
+    "frame": "aqua-glow"
+  },
+  "test": {
+    "uid": 2,
+    "username": "tester",
+    "usertag": "test",
+    "password": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "tags": [],
+    "bio": "",
+    "social": {
+      "github": "https://github.com/yourname",
+      "discord": "YourName#1234",
+      "twitter": "https://twitter.com/yourname"
+    },
+    "is_admin": false,
+    "is_banned": false,
+    "is_muted": false,
+    "color": "#fff"
+  }
+}

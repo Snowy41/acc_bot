@@ -1,0 +1,11 @@
+2025-07-10 22:52:07,478 - INFO - Attempting hCaptcha solve...
+2025-07-10 22:52:08,980 - ERROR - No hCaptcha challenge frame found.
+2025-07-10 22:52:08,980 - WARNING - hCaptcha could not be solved by AI.
+2025-07-10 22:55:03,365 - ERROR - hCaptcha challenge not found after waiting.
+2025-07-10 23:03:41,272 - ERROR - hCaptcha challenge not found after waiting.
+2025-07-10 23:29:25,589 - ERROR - hCaptcha 2Captcha error: Page.wait_for_selector: Timeout 20000ms exceeded.
+Call log:
+  - waiting for locator("iframe[src*=\"hcaptcha.com\"]") to be visible
+    44 × locator resolved to 2 elements. Proceeding with the first one: <iframe aria-hidden="true" data-hcaptcha-response="" data-hcaptcha-widget-id="00m7xz8ry45i" src="https://newassets.hcaptcha.com/captcha/v1/3fa5ceaf57dd86650f2e7a74127378676741b99a/static/hcaptcha.html#frame=checkbox-invisible"></iframe>
+
+2025-07-10 23:36:59,774 - ERROR - hCaptcha widget/modal did not appear.

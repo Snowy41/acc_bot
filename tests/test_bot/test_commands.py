@@ -7,7 +7,7 @@ from discord.ext import commands
 from bot.commands import CredentialCommands
 
 @pytest.mark.asyncio
-@patch("bot.client.CredentialStore")
+@patch("discord_bot.client.CredentialStore")
 async def test_nextcred_command_success_and_dm(mock_cred_store_class):
     # Setup mock CredentialStore with a fake credential
     fake_credential = {
@@ -23,12 +23,12 @@ async def test_nextcred_command_success_and_dm(mock_cred_store_class):
     mock_store.mark_credential_used.return_value = None
     mock_cred_store_class.return_value = mock_store
 
-    # Create a bot instance with mocked CredentialStore
+    # Create a discord_bot instance with mocked CredentialStore
     intents = discord.Intents.default()
     bot = commands.Bot(command_prefix="!", intents=intents)
     bot.credential_store = mock_store
 
-    # Add the CredentialCommands cog to the bot
+    # Add the CredentialCommands cog to the discord_bot
     cog = CredentialCommands(bot)
     await bot.add_cog(cog)
 
@@ -60,7 +60,7 @@ async def test_nextcred_command_success_and_dm(mock_cred_store_class):
     assert "@user" in public_msg
 
 @pytest.mark.asyncio
-@patch("bot.client.CredentialStore")
+@patch("discord_bot.client.CredentialStore")
 async def test_nextcred_command_no_pending(mock_cred_store_class):
     # No pending credential returned
     mock_store = AsyncMock()
@@ -81,7 +81,7 @@ async def test_nextcred_command_no_pending(mock_cred_store_class):
     mock_ctx.send.assert_awaited_once_with("No pending credentials available.")
 
 @pytest.mark.asyncio
-@patch("bot.client.CredentialStore")
+@patch("discord_bot.client.CredentialStore")
 async def test_nextcred_command_dm_blocked(mock_cred_store_class):
     fake_credential = {
         "id": 1,

@@ -1,0 +1,17 @@
+2025-07-10 15:45:57,248 - INFO - Listed all credentials.
+2025-07-10 15:45:57,248 - INFO - Listed all credentials.
+2025-07-10 15:46:09,841 - INFO - Added credential: test@example.com1
+2025-07-10 15:46:09,841 - INFO - Added credential: test@example.com1
+2025-07-10 15:46:09,841 - WARNING - Added credential: test@example.com1
+2025-07-10 16:19:06,610 - ERROR - Credential 4 (test@example.com) claimed by minecraftbeziehung [1134566087200100495]
+2025-07-10 16:19:06,610 - INFO - Credential 4 (test@example.com) claimed by minecraftbeziehung [1134566087200100495]
+2025-07-10 16:26:34,129 - INFO - Credential 5 (test@example.com1) claimed by collectedbands [1134584861718478898]
+2025-07-10 16:26:34,129 - INFO - Credential 5 (test@example.com1) claimed by collectedbands [1134584861718478898]
+2025-07-10 19:22:18,248 - INFO - Credential 2 (email@test.com) claimed by minecraftbeziehung [1134566087200100495]
+2025-07-10 19:22:18,248 - INFO - Credential 2 (email@test.com) claimed by minecraftbeziehung [1134566087200100495]
+2025-07-10 21:59:14,329 - INFO - Credential 1 (test@gmail.com) claimed by minecraftbeziehung [1134566087200100495]
+2025-07-10 21:59:14,329 - INFO - Credential 1 (test@gmail.com) claimed by minecraftbeziehung [1134566087200100495]
+2025-07-10 22:03:32,036 - INFO - Credential 2 (email@test.com) claimed by minecraftbeziehung [1134566087200100495]
+2025-07-10 22:03:32,036 - INFO - Credential 2 (email@test.com) claimed by minecraftbeziehung [1134566087200100495]
+2025-07-10 22:33:23,332 - INFO - Credential 2 (email@test.com) claimed by minecraftbeziehung [1134566087200100495]
+2025-07-10 22:33:23,332 - INFO - Credential 2 (email@test.com) claimed by minecraftbeziehung [1134566087200100495]

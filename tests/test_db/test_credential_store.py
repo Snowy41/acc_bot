@@ -52,3 +52,17 @@ async def test_add_and_get_credential():
     cred_used = await store.get_credential_by_id(cred["id"])
     assert cred_used["status"] == "used"
     await store.close()
+
+@pytest.mark.asyncio
+async def test_add_duplicate_and_invalidate(tmp_path):
+    db_path = tmp_path / "creds.db"
+    store = CredentialStore(str(db_path))
+    await store.initialize()
+    await store.add_credential("e1@mail.com", "user1", "pass", "123")
+    with pytest.raises(ValueError):
+        await store.add_credential("e1@mail.com", "user2", "pass2", "456")
+    cred = await store.get_next_pending_credential()
+    await store.mark_credential_invalid(cred["id"])
+    cred2 = await store.get_credential_by_id(cred["id"])
+    assert cred2["status"] == "invalid"
+    await store.close()
