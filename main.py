@@ -228,6 +228,9 @@ def update_user(usertag):
         # Optional: merge or overwrite social links.
         user["social"] = data["social"]
 
+    if "tags" in data and isinstance(data["tags"], list):
+        user["tags"] = data["tags"]
+
     users[usertag.lower()] = user
     with open(USERS_FILE, "w") as f:
         json.dump(users, f, indent=2)
@@ -249,6 +252,10 @@ def rename_user(username):
     session["username"] = new_username
     return jsonify({"success": True, "new_username": new_username})
 
+@app.route("/webhook", methods=["POST"])
+def github_webhook():
+    os.system("/opt/whitebot/update.sh")
+    return "Updated", 200
 
 # Web route to get the list of .log files
 @app.route("/api/logs/list", methods=["GET"])
