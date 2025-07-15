@@ -9,9 +9,10 @@ interface ProfilePanelProps {
   setUser: (user: string) => void;
   userColor: string;
   displayName: string;
+  userAvatar: string;
 }
 
-export default function ProfilePanel({ loggedIn, setLoggedIn, user, setUser, userColor, displayName }: ProfilePanelProps) {
+export default function ProfilePanel({ loggedIn, setLoggedIn, user, setUser, userColor, displayName, userAvatar }: ProfilePanelProps) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
@@ -58,8 +59,19 @@ export default function ProfilePanel({ loggedIn, setLoggedIn, user, setUser, use
         tabIndex={0}
         style={{ boxShadow: "0 6px 16px #13e0f544" }}
       >
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-aqua to-cyan-500 flex items-center justify-center font-bold text-lg text-midnight shadow-inner border-2 border-aqua/80">
-          <span>{displayName[0]?.toUpperCase() || "👤"}</span>
+        <div className="w-9 h-9 rounded-full overflow-hidden shadow-inner border-2 border-aqua/80 bg-midnight flex items-center justify-center">
+          {userAvatar && userAvatar !== "" ? (
+            <img
+              src={userAvatar}
+              alt="avatar"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          ) : (
+            <span className="font-bold text-lg text-aqua">{displayName[0]?.toUpperCase() || "👤"}</span>
+          )}
         </div>
         <span className="font-semibold hidden sm:block" style={{ color: userColor }}>
           {displayName}

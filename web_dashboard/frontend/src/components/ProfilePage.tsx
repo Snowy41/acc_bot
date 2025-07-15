@@ -15,6 +15,7 @@ interface Profile {
   banner?: string;
   isOnline?: boolean;
   social?: { github?: string; discord?: string; twitter?: string };
+  avatar?: string;     // URL to avatar image
 }
 
 export default function ProfilePage() {
@@ -65,9 +66,26 @@ export default function ProfilePage() {
                     borderImage: "linear-gradient(90deg, #f00, #0ff, #f0f, #0f0, #ff0, #f00) 1"
                   }
                 : undefined
+
+
             }
           >
-            {profile.username[0]?.toUpperCase() ?? "?"}
+            {profile.avatar && profile.avatar !== "" ? (
+              <div className="w-[92%] h-[92%] rounded-full overflow-hidden">
+                <img
+                  src={profile.avatar}
+                  alt="avatar"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-midnight">
+                {profile.username[0]?.toUpperCase() ?? "?"}
+              </div>
+            )}
           </div>
 
           {/* DISPLAY NAME + BADGES */}
@@ -81,12 +99,7 @@ export default function ProfilePage() {
                   : ""
                 )
               }
-              style={
-                (["owner", "rainbow"].includes((profile.frame || "").toLowerCase()) ||
-                 profile.tags?.some(t => t.toLowerCase() === "owner" || t.toLowerCase() === "premium"))
-                  ? {}
-                  : { color: profile.color || "#fff" }
-              }
+              style={{ color: profile.color || "#fff" }}
             >
               {profile.username}
             </h1>
@@ -246,7 +259,17 @@ export default function ProfilePage() {
         </div>
       </div>
       {/* Animations for tags/badges... */}
-      <style>{`/* (keep your CSS from previous versions here) */`}</style>
+      <style>{`
+      @keyframes glowPulse {
+          0% { box-shadow: 0 0 4px #00ffff88, 0 0 8px #00ffff44; }
+          50% { box-shadow: 0 0 12px #00ffffaa, 0 0 24px #00ffff77; }
+          100% { box-shadow: 0 0 4px #00ffff88, 0 0 8px #00ffff44; }
+        }
+        
+        .animate-glow {
+          animation: glowPulse 2s ease-in-out infinite;
+          }
+      `}</style>
     </div>
   );
 }

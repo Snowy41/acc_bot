@@ -82,6 +82,41 @@ export default function EditProfile() {
               onChange={e => setSocial({ ...social, twitter: e.target.value })}
             />
           </div>
+          {/* Avatar Upload */}
+          <div className="mb-10">
+            <label className="block text-cyan-300 mb-2 font-semibold">Profile Picture (PNG, JPG, GIF*)</label>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/gif"
+              className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+
+                const formData = new FormData();
+                formData.append("avatar", file);
+
+                fetch("/api/upload/avatar", {
+                  method: "POST",
+                  body: formData,
+                  credentials: "include",
+                })
+                  .then((res) => res.json())
+                  .then((data) => {
+                    if (data.success) {
+                      alert("Avatar uploaded successfully!");
+                    } else {
+                      alert(data.error || "Failed to upload avatar");
+                    }
+                  })
+                  .catch(() => {
+                    alert("Upload failed");
+                  });
+              }}
+            />
+            <p className="text-xs text-cyan-400 mt-2">* Only admins can upload GIFs</p>
+          </div>
+
           <button
             type="submit"
             className="bg-aqua text-midnight px-4 py-2 rounded-lg font-bold shadow hover:bg-cyan-400 transition mt-2 w-full text-lg"

@@ -13,6 +13,7 @@ import AdminPanel from "./components/AdminPanel";
 import ForumCategories from "./components/ForumCategories";
 import ForumCategoryView from "./components/ForumCategoryView";
 import ForumPostView from "./components/ForumPostView";
+import SearchBar from "./components/SearchBar";
 
 function App() {
   const [active, setActive] = useState("home");
@@ -21,6 +22,7 @@ function App() {
   const [displayName, setDisplayName] = useState(""); // display username
   const [userColor, setUserColor] = useState("#fff");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userAvatar, setUserAvatar] = useState("");
 
   // Modal state for register
   const [showRegister, setShowRegister] = useState(false);
@@ -37,6 +39,8 @@ function App() {
         setDisplayName(data.username || "");
         setUserColor(data.color || "#fff");
         setIsAdmin(data.isAdmin || false);
+        setUserAvatar(data.avatar || "");
+        console.log("Final Avatar URL:", data.avatar, userAvatar);
       });
   }, []);
 
@@ -61,6 +65,7 @@ function App() {
           setDisplayName(data.username || "");
           setUserColor(data.color || "#fff");
           setIsAdmin(data.isAdmin || false);
+          setUserAvatar(data.avatar ? `${window.location.origin}${data.avatar}` : "");
         });
       alert(data.message);
     } else {
@@ -95,6 +100,7 @@ function App() {
     <Router>
       <div className="flex min-h-screen relative z-10 bg-midnight">
         <Sidebar active={active} setActive={setActive} isAdmin={isAdmin} />
+        <SearchBar />
         <ProfilePanel
           loggedIn={loggedIn}
           setLoggedIn={setLoggedIn}
@@ -102,6 +108,7 @@ function App() {
           setUser={setUsertag}
           userColor={userColor}
           displayName={displayName}
+          userAvatar={userAvatar}
         />
         <main className="flex-1 p-10 flex flex-col items-center justify-center text-white transition relative">
           <Routes>

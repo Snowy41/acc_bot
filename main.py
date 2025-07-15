@@ -6,12 +6,14 @@ import subprocess
 import time
 import uuid
 
-from flask import Flask, jsonify, request, session
+from flask import Flask, jsonify, request, session, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from dotenv import load_dotenv
 import threading
 import discord
+from werkzeug.utils import secure_filename
+
 from discord_bot.client import SnapDiscordBot
 from discord_bot.commands import CredentialCommands
 from stealth.knuddels_login import knuddels_api
@@ -34,6 +36,13 @@ CORS(app)  # ✅ enable CORS for WebSocket connections
 
 socketio = SocketIO(app, cors_allowed_origins="*", logger=True, engineio_logger=True, async_mode="threading")
 running_processes = {}
+
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "avatars")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Path to the users.json file
 USERS_FILE = os.path.join(os.path.dirname(__file__), "users.json")
@@ -125,10 +134,49 @@ def status():
         "username": user.get("username", "") if user else "",  # Display name!
         "isAdmin": is_admin,
         "color": user.get("color", "#fff") if user else "#fff",
-        "uid": user.get("uid", 0)
+        "uid": user.get("uid", 0),
+        "avatar": request.host_url.rstrip("/") + user.get("avatar", "")
+
     })
 
+@app.route("/api/upload/avatar", methods=["POST"])
+def upload_avatar():
+    usertag = session.get("username")
+    if not usertag:
+        return jsonify({"error": "Not logged in"}), 401
 
+    users = load_users()
+    user = users.get(usertag)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    file = request.files.get("avatar")
+    if not file or not allowed_file(file.filename):
+        return jsonify({"error": "Invalid file"}), 400
+
+    ext = file.filename.rsplit('.', 1)[1].lower()
+    if ext == "gif" and not user.get("is_admin", False):
+        return jsonify({"error": "Only admins can upload GIFs"}), 403
+
+    for ext in ALLOWED_EXTENSIONS:
+        old_path = os.path.join(UPLOAD_FOLDER, f"{usertag}.{ext}")
+        if os.path.exists(old_path):
+            os.remove(old_path)
+
+    filename = secure_filename(f"{usertag}.{ext}")
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(filepath)
+
+    user["avatar"] = request.host_url.rstrip("/") + f"/avatars/{filename}"
+    with open(USERS_FILE, "w") as f:
+        json.dump(users, f, indent=2)
+
+    return jsonify({"success": True, "avatar": user["avatar"]})
+
+
+@app.route("/avatars/<filename>")
+def serve_avatar(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 # API route to get the users info/list
 @app.route("/api/users", methods=["GET"])
@@ -196,6 +244,11 @@ def get_user(usertag):
             "frame": user.get("frame", ""),
             "banner": user.get("banner", ""),
             "uid": user.get("uid", 0),
+            "avatar": (
+                user["avatar"]
+                if user["avatar"].startswith("http")
+                else request.host_url.rstrip("/") + user.get("avatar", "")
+            )
         }
         return jsonify(profile)
     return jsonify({"error": "User not found"}), 404
@@ -297,6 +350,46 @@ def login_required(f):
         return f(*args, **kwargs)
     wrapper.__name__ = f.__name__
     return wrapper
+@app.route("/api/search")
+def search():
+    q = request.args.get("q", "").lower()
+    users = load_users()
+    forum = load_forum()
+    results = []
+
+    # Search users by tag, username, or usertag
+    for tag, info in users.items():
+        if (
+            q in tag.lower()
+            or q in info.get("username", "").lower()
+            or any(q in t.lower() for t in info.get("tags", []))
+        ):
+            results.append({
+                "type": "user",
+                "usertag": tag,
+                "label": info.get("username", f"@{tag}"),
+                "description": f"User profile — @{tag}",
+                "meta": ", ".join(info.get("tags", []))
+            })
+
+    # Search forum posts
+    for post in forum:
+        if (
+            q in post["title"].lower()
+            or q in post["content"].lower()
+            or q in post.get("category", "").lower()
+        ):
+            results.append({
+                "type": "post",
+                "id": post["id"],
+                "category": post["category"],
+                "label": post["title"],
+                "description": f"Forum post by {post['username']}",
+                "meta": f"Category: {post['category']}"
+            })
+
+    return jsonify({"results": results})
+
 
 # API route to list available bots
 @app.route("/api/bots", methods=["GET"])
@@ -478,9 +571,9 @@ async def run_bot():
 # Run Flask and Discord bot concurrently using threading
 if __name__ == "__main__":
     # Start Discord bot in background
-    discord_thread = threading.Thread(target=lambda: asyncio.run(run_bot()))
-    discord_thread.daemon = True
-    discord_thread.start()
+    #discord_thread = threading.Thread(target=lambda: asyncio.run(run_bot()))
+    #discord_thread.daemon = True
+   # discord_thread.start()
 
     # Run Flask-SocketIO in the main thread
     run_flask()
