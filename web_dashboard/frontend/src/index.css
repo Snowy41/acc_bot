@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes pulse-owner {
+  0%, 100% { box-shadow: 0 0 12px 2px #12fff1cc, 0 0 2px #ff3b82cc; }
+  50% { box-shadow: 0 0 24px 6px #ff3b82cc, 0 0 8px #12fff1cc; }
+}
+.animate-pulse-owner {
+  animation: pulse-owner 1.8s infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.7; transform: scale(1) rotate(0deg);}
+  50% { opacity: 1; transform: scale(1.2) rotate(20deg);}
+}
+.animate-sparkle {
+  animation: sparkle 1.4s infinite linear;
+}
+
+@keyframes sparkle2 {
+  0%, 100% { opacity: 0.7; transform: scale(1);}
+  50% { opacity: 1; transform: scale(1.5);}
+}
+.animate-sparkle2 {
+  animation: sparkle2 2.2s infinite linear;
+}
+
+
+

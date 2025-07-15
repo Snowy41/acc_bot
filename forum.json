@@ -1,0 +1,38 @@
+[
+  {
+    "id": "777da109-6c1d-4292-b84f-b34c635b7d1f",
+    "category": "announcement",
+    "title": "announcement",
+    "content": "test",
+    "usertag": "1",
+    "username": "Professor",
+    "comments": [
+      {
+        "usertag": "1",
+        "username": "Professor",
+        "text": "awdasd",
+        "timestamp": 1752546083181
+      }
+    ],
+    "timestamp": 1752545644879
+  },
+  {
+    "id": "e72b251b-4ff4-4479-8d48-e93110f17a1f",
+    "category": "announcement",
+    "title": "test",
+    "content": "ewawd",
+    "usertag": "1",
+    "username": "Professor",
+    "comments": [],
+    "timestamp": 1752545135823
+  },
+  {
+    "id": "ad8fe1aa-ff6d-4165-9114-3ae05545349a",
+    "usertag": "1",
+    "username": "Professor",
+    "title": "test",
+    "content": "123\n",
+    "comments": [],
+    "timestamp": 1752544111794
+  }
+]
