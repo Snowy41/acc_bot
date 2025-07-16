@@ -7,6 +7,7 @@ import subprocess
 import time
 import traceback
 import uuid
+import requests
 
 from flask import Flask, jsonify, request, session, send_from_directory
 from flask_cors import CORS
@@ -27,6 +28,8 @@ token = os.getenv("DISCORD_TOKEN")
 if not token:
     raise ValueError("DISCORD_TOKEN environment variable not set!")
 
+
+DISCORD_CHANNEL_ID = 1395076252645462167
 FORUM_FILE = "forum.json"
 online_users = set()
 
@@ -182,6 +185,36 @@ def schedule_cleanup():
                 print("[Cleanup] Done.")
             except Exception as e:
                 print("[Cleanup] Failed:", e)
+
+def send_discord_message(content):
+    url = f"https://discord.com/api/v9/channels/{DISCORD_CHANNEL_ID}/messages"
+    headers = {
+        "Authorization": f"Bot {token}",
+        "Content-Type": "application/json"
+    }
+    data = {"content": content}
+    response = requests.post(url, json=data, headers=headers)
+    if not response.ok:
+        print("Failed to send Discord message:", response.text)
+    return response
+
+@app.route("/webhook", methods=["POST"])
+def github_webhook():
+    payload = request.json
+    # Only handle push events (ignore others)
+    if "commits" in payload:
+        repo = payload["repository"]["full_name"]
+        pusher = payload["pusher"]["name"]
+        branch = payload["ref"].split("/")[-1]
+        commits = payload["commits"]
+        for commit in commits:
+            msg = (
+                f"**[{repo}]** `{branch}`\n"
+                f"🔄 **{pusher}** pushed: [{commit['id'][:7]}] {commit['message']}\n"
+                f"<{commit['url']}>"
+            )
+            send_discord_message(msg)
+    return "OK", 200
 
 @app.errorhandler(Exception)
 def handle_all_errors(e):
