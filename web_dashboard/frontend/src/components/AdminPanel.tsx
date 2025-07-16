@@ -7,11 +7,11 @@ interface User {
   usertag: string;
   uid?: number;
   bio?: string;
-  is_admin?: boolean;
   is_banned?: boolean;
   is_muted?: boolean;
   color?: string;
   tags?: string[];
+  role?: "admin" | "user" | string;
 }
 
 export default function AdminPanel() {
@@ -267,7 +267,7 @@ export default function AdminPanel() {
                             style={{ background: user.color || "#fff" }}
                           ></span>
                         </td>
-                        <td className="px-4 py-2 text-center">{user.is_admin ? "✔️" : ""}</td>
+                        <td className="px-4 py-2 text-center">{user.role === "admin" ? "✔️" : ""}</td>
                         <td className="px-4 py-2 text-center">
                           <button
                             className="px-3 py-1 rounded bg-aqua/60 text-midnight font-bold hover:bg-aqua/90 transition"
