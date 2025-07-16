@@ -27,10 +27,6 @@ from web_dashboard.backend.api.auth.connect_account import connect_api
 
 # Load environment variables
 load_dotenv()
-token = os.getenv("DISCORD_TOKEN")
-if not token:
-    raise ValueError("DISCORD_TOKEN environment variable not set!")
-
 
 DISCORD_CHANNEL_ID = 1395076252645462167
 online_users = set()
@@ -1061,19 +1057,6 @@ def run_flask():
 
     socketio.run(app, port=5000, debug=False, use_reloader=False)
 
-# Function to run Discord bot asynchronously
-async def run_bot():
-    print("Initializing CredentialStore...")
-    await bot.credential_store.initialize()
-    print("CredentialStore initialized!")
-
-    print("Adding cog...")
-    await bot.add_cog(CredentialCommands(bot))
-    print("Cog added!")
-
-    print("Starting discord_bot...")
-    await bot.start(token)
-
 @atexit.register
 def shutdown():
     try:
@@ -1088,17 +1071,6 @@ eventlet.monkey_patch()
 
 # Background task
 threading.Thread(target=schedule_cleanup, daemon=True).start()
-
-# Start Discord bot in separate event loop
-def start_discord_bot():
-    try:
-        new_loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(new_loop)
-        new_loop.run_until_complete(run_bot())
-    except Exception as e:
-        print("[Discord Bot] Failed to start:", e)
-
-threading.Thread(target=start_discord_bot, daemon=True).start()
 
 # Export WSGI app for Gunicorn
 application = app
