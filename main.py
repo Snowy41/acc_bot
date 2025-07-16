@@ -2,8 +2,10 @@ import asyncio
 import json
 import hashlib
 import os
+import sqlite3
 import subprocess
 import time
+import traceback
 import uuid
 
 from flask import Flask, jsonify, request, session, send_from_directory
@@ -49,13 +51,51 @@ def allowed_file(filename):
 
 # Path to the users.json file
 USERS_FILE = os.path.join(os.path.dirname(__file__), "users.json")
+DB_PATH = os.path.join(os.path.dirname(__file__), "users.db")
+
 stream_started = 0
-# Function to load users from users.json
-def load_users():
-    if not os.path.exists(USERS_FILE):
-        return {}
-    with open(USERS_FILE, "r") as f:
-        return json.load(f)
+
+def get_user_by_usertag(usertag):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT * FROM users WHERE usertag=?", (usertag,))
+    row = c.fetchone()
+    conn.close()
+    if not row:
+        return None
+    fields = ["usertag", "username", "password", "is_admin", "is_banned", "is_muted", "color", "bio", "tags", "social", "avatar", "uid"]
+    user = dict(zip(fields, row))
+    import json
+    user["tags"] = json.loads(user.get("tags") or "[]")
+    user["social"] = json.loads(user.get("social") or "{}")
+    user["is_admin"] = bool(user["is_admin"])
+    user["is_banned"] = bool(user["is_banned"])
+    user["is_muted"] = bool(user["is_muted"])
+    return user
+
+def save_user(user):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    import json
+    c.execute("""
+    INSERT OR REPLACE INTO users (usertag, username, password, is_admin, is_banned, is_muted, color, bio, tags, social, avatar, uid)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        user["usertag"],
+        user.get("username"),
+        user.get("password"),
+        int(user.get("is_admin", False)),
+        int(user.get("is_banned", False)),
+        int(user.get("is_muted", False)),
+        user.get("color", "#fff"),
+        user.get("bio", ""),
+        json.dumps(user.get("tags", [])),
+        json.dumps(user.get("social", {})),
+        user.get("avatar", ""),
+        user.get("uid", 0)
+    ))
+    conn.commit()
+    conn.close()
 def load_forum():
     try:
         with open(FORUM_FILE, "r") as f:
@@ -78,6 +118,24 @@ def load_messages():
         print("[ERROR] Failed to load messages.json:", e)
         return {}
 
+def get_all_users():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT * FROM users")
+    rows = c.fetchall()
+    conn.close()
+    fields = ["usertag", "username", "password", "is_admin", "is_banned", "is_muted", "color", "bio", "tags", "social", "avatar", "uid"]
+    import json
+    result = {}
+    for row in rows:
+        user = dict(zip(fields, row))
+        user["tags"] = json.loads(user.get("tags") or "[]")
+        user["social"] = json.loads(user.get("social") or "{}")
+        user["is_admin"] = bool(user["is_admin"])
+        user["is_banned"] = bool(user["is_banned"])
+        user["is_muted"] = bool(user["is_muted"])
+        result[user["usertag"]] = user
+    return result
 
 def save_messages(data):
     try:
@@ -125,6 +183,15 @@ def schedule_cleanup():
             except Exception as e:
                 print("[Cleanup] Failed:", e)
 
+@app.errorhandler(Exception)
+def handle_all_errors(e):
+    # Log full stack trace for server logs
+    print("ERROR:", str(e))
+    traceback.print_exc()
+    # Always return JSON error to client
+    return jsonify({"error": "Internal server error", "detail": str(e)}), 500
+
+
 @app.route("/api/messages/cleanup", methods=["POST"])
 def cleanup_messages():
     messages = load_messages()
@@ -155,20 +222,18 @@ def login():
     if not username or not password:
         return jsonify({"error": "Missing credentials"}), 400
 
-    with open("users.json") as f:
-        users = json.load(f)
-
-    user = users.get(username)
+    user = get_user_by_usertag(username)
     if not user:
         return jsonify({"error": "Invalid credentials"}), 401
 
-    # Hash the provided password
     password_hash = hashlib.sha256(password.encode()).hexdigest()
     if password_hash != user["password"]:
         return jsonify({"error": "Invalid credentials"}), 401
 
     session["username"] = username
     return jsonify({"success": True})
+
+
 @app.route('/api/start_knuddels_login', methods=['POST'])
 def start_knuddels_login():
     data = request.json
@@ -194,9 +259,8 @@ def logout():
 
 @app.route("/api/auth/status", methods=["GET"])
 def status():
-    users = load_users()
     usertag = session.get("username")
-    user = users.get(usertag) if usertag else None
+    user = get_user_by_usertag(usertag) if usertag else None
 
     return jsonify({
         "loggedIn": bool(usertag),
@@ -211,16 +275,14 @@ def status():
 
 @app.route("/api/notifications/clear", methods=["POST"])
 def clear_notifications():
-    users = load_users()
     usertag = session.get("username")
+    user = get_user_by_usertag(usertag)
 
-    if not usertag or usertag not in users:
+    if not usertag or usertag not in user:
         return jsonify({"error": "Not logged in"}), 401
 
-    users[usertag]["notifications"] = []
-
-    with open(USERS_FILE, "w") as f:
-        json.dump(users, f, indent=2)
+    user["notifications"] = []
+    save_user(user)
 
     return jsonify({"message": "Notifications cleared."})
 
@@ -230,8 +292,7 @@ def upload_avatar():
     if not usertag:
         return jsonify({"error": "Not logged in"}), 401
 
-    users = load_users()
-    user = users.get(usertag)
+    user = get_user_by_usertag(usertag)
     if not user:
         return jsonify({"error": "User not found"}), 404
 
@@ -253,8 +314,7 @@ def upload_avatar():
     file.save(filepath)
 
     user["avatar"] = request.host_url.rstrip("/") + f"/avatars/{filename}"
-    with open(USERS_FILE, "w") as f:
-        json.dump(users, f, indent=2)
+    save_user(user)
 
     return jsonify({"success": True, "avatar": user["avatar"]})
 
@@ -266,21 +326,34 @@ def serve_avatar(filename):
 # API route to get the users info/list
 @app.route("/api/users", methods=["GET"])
 def list_users():
-    users = load_users()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT * FROM users")
+    rows = c.fetchall()
+    conn.close()
+    fields = ["usertag", "username", "password", "is_admin", "is_banned", "is_muted", "color", "bio", "tags", "social", "avatar", "uid"]
     user_list = []
-    for usertag, info in users.items():
+    import json
+    for row in rows:
+        user = dict(zip(fields, row))
+        user["tags"] = json.loads(user.get("tags") or "[]")
+        user["social"] = json.loads(user.get("social") or "{}")
+        user["is_admin"] = bool(user.get("is_admin"))
+        user["is_banned"] = bool(user.get("is_banned"))
+        user["is_muted"] = bool(user.get("is_muted"))
         user_list.append({
-            "usertag": usertag,
-            "username": info.get("username", ""),
-            "uid": info.get("uid", None),
-            "bio": info.get("bio", ""),
-            "is_admin": info.get("is_admin", False),
-            "is_banned": info.get("is_banned", False),
-            "is_muted": info.get("is_muted", False),
-            "color": info.get("color", "#fff"),
-            "tags": info.get("tags", []),
+            "usertag": user["usertag"],
+            "username": user.get("username", ""),
+            "uid": user.get("uid", None),
+            "bio": user.get("bio", ""),
+            "is_admin": user.get("is_admin", False),
+            "is_banned": user.get("is_banned", False),
+            "is_muted": user.get("is_muted", False),
+            "color": user.get("color", "#fff"),
+            "tags": user.get("tags", []),
         })
     return jsonify({"users": user_list})
+
 @app.route("/api/auth/register", methods=["POST"])
 def register():
     data = request.json
@@ -290,16 +363,13 @@ def register():
     if not usertag or not username or not password:
         return jsonify({"error": "Missing fields"}), 400
 
-    users = load_users()
-    if usertag in users:
+    if get_user_by_usertag(usertag):
         return jsonify({"error": "Usertag already exists"}), 409
 
-    uid = max([user.get("uid", 0) for user in users.values()], default=0) + 1
     password_hash = hash_pw(password)
-    users[usertag] = {
-        "uid": uid,
-        "username": username,
+    user = {
         "usertag": usertag,
+        "username": username,
         "password": password_hash,
         "tags": [],
         "bio": "",
@@ -307,14 +377,16 @@ def register():
         "is_banned": False,
         "is_muted": False,
         "color": "#fff",
+        "avatar": "",
+        "social": {},
+        "uid": int(time.time()),
     }
-    with open(USERS_FILE, "w") as f:
-        json.dump(users, f, indent=2)
+    save_user(user)
     return jsonify({"success": True})
+
 @app.route("/api/users/<usertag>", methods=["GET"])
 def get_user(usertag):
-    users = load_users()
-    user = users.get(usertag) or users.get(usertag.lower())
+    user = get_user_by_usertag(usertag) or get_user_by_usertag(usertag.lower())
     if user:
         profile = {
             "username": user.get("username", ""),
@@ -329,22 +401,19 @@ def get_user(usertag):
             "frame": user.get("frame", ""),
             "banner": user.get("banner", ""),
             "uid": user.get("uid", 0),
-            "avatar": (
-                user["avatar"]
-                if user["avatar"].startswith("http")
-                else request.host_url.rstrip("/") + user.get("avatar", "")
-            )
+            "avatar": user.get("avatar", ""),
         }
         return jsonify(profile)
     return jsonify({"error": "User not found"}), 404
+
 @app.route("/api/users/<usertag>", methods=["PATCH"])
 def update_user(usertag):
-    users = load_users()
-    user = users.get(usertag.lower())
+    user = get_user_by_usertag(usertag.lower())
+
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    is_admin = users.get(session.get("username", ""), {}).get("is_admin", False)
+    is_admin = get_user_by_usertag(session.get("username"), {}).get("is_admin", False)
     # Only allow updating your own profile, or if admin
     if session.get("username") != usertag.lower() and not is_admin:
         return jsonify({"error": "Permission denied"}), 403
@@ -369,9 +438,7 @@ def update_user(usertag):
     if "tags" in data and isinstance(data["tags"], list):
         user["tags"] = data["tags"]
 
-    users[usertag.lower()] = user
-    with open(USERS_FILE, "w") as f:
-        json.dump(users, f, indent=2)
+    save_user(user)
     return jsonify({"success": True, "user": user})
 
 @app.route("/api/messages/<friend_tag>", methods=["GET"])
@@ -424,19 +491,19 @@ def send_message(friend_tag):
 
 @app.route("/api/users/<usertag>/rename", methods=["POST"])
 def rename_user(username):
-    users = load_users()
     old_username = username.lower()
     new_username = request.json.get("new_username", "").lower()
     if session.get("username") != old_username:
         return jsonify({"error": "Permission denied"}), 403
-    user = users.pop(old_username, None)
+    user = get_user_by_usertag(old_username)
     if not user:
         return jsonify({"error": "User not found"}), 404
-    users[new_username] = user
-    with open(USERS_FILE, "w") as f:
-        json.dump(users, f, indent=2)
+    user["usertag"] = new_username
+    save_user(user)
+    # Optionally: Delete the old user (hard to do in SQLite unless you want to)
     session["username"] = new_username
     return jsonify({"success": True, "new_username": new_username})
+
 
 @app.route("/webhook", methods=["POST"])
 def github_webhook():
@@ -486,7 +553,7 @@ def login_required(f):
 @app.route("/api/search")
 def search():
     q = request.args.get("q", "").lower()
-    users = load_users()
+    users = get_all_users()
     forum = load_forum()
     results = []
 
@@ -675,7 +742,6 @@ def add_comment(post_id):
 
 @app.route("/api/friends/add", methods=["POST"])
 def send_friend_request():
-    users = load_users()
     current_user = session.get("username")
     data = request.json
     friend_tag = data.get("friendTag")
@@ -683,11 +749,10 @@ def send_friend_request():
     if not current_user or not friend_tag or friend_tag == current_user:
         return jsonify({"error": "Invalid request"}), 400
 
-    if current_user not in users or friend_tag not in users:
+    sender = get_user_by_usertag(current_user)
+    receiver = get_user_by_usertag(friend_tag)
+    if not sender or not receiver:
         return jsonify({"error": "User not found"}), 404
-
-    sender = users[current_user]
-    receiver = users[friend_tag]
 
     sender.setdefault("friends", [])
     receiver.setdefault("friends", [])
@@ -711,14 +776,14 @@ def send_friend_request():
         "to": friend_tag,
         "from": current_user
     })
-    with open(USERS_FILE, "w") as f:
-        json.dump(users, f, indent=2)
+    save_user(sender)
+    save_user(receiver)
 
     return jsonify({"message": f"Friend request sent to {friend_tag}."})
 
+
 @app.route("/api/friends/accept", methods=["POST"])
 def accept_friend_request():
-    users = load_users()
     current_user = session.get("username")
     data = request.json
     requester_tag = data.get("requesterTag")
@@ -726,11 +791,10 @@ def accept_friend_request():
     if not current_user or not requester_tag:
         return jsonify({"error": "Invalid request"}), 400
 
-    if requester_tag not in users or current_user not in users:
+    me = get_user_by_usertag(current_user)
+    requester = get_user_by_usertag(requester_tag)
+    if not me or not requester:
         return jsonify({"error": "User not found"}), 404
-
-    me = users[current_user]
-    requester = users[requester_tag]
 
     me.setdefault("friends", [])
     me.setdefault("friendRequests", [])
@@ -746,14 +810,14 @@ def accept_friend_request():
     requester["friends"].append(current_user)
     me["friendRequests"].remove(requester_tag)
 
-    with open(USERS_FILE, "w") as f:
-        json.dump(users, f, indent=2)
+    save_user(me)
+    save_user(requester)
 
     return jsonify({"message": f"You and {requester_tag} are now friends!"})
 
+
 @app.route("/api/friends/remove", methods=["POST"])
 def remove_friend():
-    users = load_users()
     current_user = session.get("username")
     data = request.json
     friend_tag = data.get("friendTag")
@@ -761,11 +825,10 @@ def remove_friend():
     if not current_user or not friend_tag:
         return jsonify({"error": "Invalid request"}), 400
 
-    if current_user not in users or friend_tag not in users:
+    me = get_user_by_usertag(current_user)
+    friend = get_user_by_usertag(friend_tag)
+    if not me or not friend:
         return jsonify({"error": "User not found"}), 404
-
-    me = users[current_user]
-    friend = users[friend_tag]
 
     me.setdefault("friends", [])
     friend.setdefault("friends", [])
@@ -776,15 +839,16 @@ def remove_friend():
     if current_user in friend["friends"]:
         friend["friends"].remove(current_user)
 
-    with open(USERS_FILE, "w") as f:
-        json.dump(users, f, indent=2)
+    save_user(me)
+    save_user(friend)
 
     return jsonify({"message": f"Removed {friend_tag} from your friend list."})
+
 
 @app.route("/api/admin/chats", methods=["GET"])
 def admin_view_chats():
     current_user = session.get("username")
-    users = load_users()
+    users = get_all_users()
     if not current_user or not users.get(current_user, {}).get("is_admin"):
         return jsonify({"error": "Admin only"}), 403
 
@@ -793,18 +857,19 @@ def admin_view_chats():
 
 @app.route("/api/friends/requests", methods=["GET"])
 def list_friend_requests():
-    users = load_users()
     current_user = session.get("username")
-    if not current_user:
+    user = get_user_by_usertag(current_user)
+    if not current_user or not user:
         return jsonify({"error": "Not logged in"}), 401
 
-    friend_requests = users.get(current_user, {}).get("friendRequests", [])
+    friend_requests = user.get("friendRequests", [])
     return jsonify({"requests": friend_requests})
+
 
 @app.route("/api/admin/stats", methods=["GET"])
 def get_admin_stats():
     current_user = session.get("username")
-    users = load_users()
+    users = get_all_users()
 
     if not current_user or not users.get(current_user, {}).get("is_admin"):
         return jsonify({"error": "Admin only"}), 403
@@ -823,12 +888,12 @@ def get_admin_stats():
 
 @app.route("/api/friends/list", methods=["GET"])
 def list_friends():
-    users = load_users()
     current_user = session.get("username")
-    if not current_user or current_user not in users:
+    user = get_user_by_usertag(current_user)
+    if not current_user or not user:
         return jsonify({"error": "Not logged in"}), 401
 
-    friends = users[current_user].get("friends", [])
+    friends = user.get("friends", [])
     return jsonify({"friends": friends})
 
 

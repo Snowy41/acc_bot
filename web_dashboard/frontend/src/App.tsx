@@ -18,6 +18,9 @@ import { socket } from "./socket";
 import SystemMessage from "./components/SystemMessage";
 import NotificationBell from "./components/NotificationBell";
 import type {UserNotification} from "./components/NotificationBell"
+import { ToastContainer, toast } from "react-toastify";
+
+
 function App() {
   const [active, setActive] = useState("home");
   const [loggedIn, setLoggedIn] = useState(false);
@@ -57,6 +60,7 @@ function App() {
   }, []);
 
   const handleLogin = async (enteredUsertag: string, password: string) => {
+  try {
     const response = await fetch('/api/knuddels/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -78,11 +82,14 @@ function App() {
             setNotifications(data.notifications);
           }
         });
-      alert(data.message);
+      toast.success(data.message);
     } else {
-      alert(data.message);
+      toast.error(data.message);
     }
-  };
+  } catch (err) {
+    toast.error("Network/server error");
+  }
+};
 useEffect(() => {
   socket.emit("connect_user", { usertag });
   fetch("/api/online-users").then(res => res.json()).then(data => {
@@ -102,6 +109,7 @@ useEffect(() => {
     socket.off("user_offline");
   };
 }, [usertag]);
+
  useEffect(() => {
   const handleSystemMessage = (msg: { text: string }) => {
     setSystemMessage(msg.text);
@@ -303,6 +311,7 @@ useEffect(() => {
             <Route path="*" element={<div>Page not found!</div>} />
           </Routes>
         </main>
+        <ToastContainer position="top-center" autoClose={3000} aria-label="Notification center"/>
       </div>
     </Router>
   );
