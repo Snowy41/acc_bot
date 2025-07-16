@@ -1,10 +1,9 @@
 import asyncio
+import os
 from discord_bot.client import SnapDiscordBot
 from discord_bot.commands import CredentialCommands
-import os
+import discord
 from dotenv import load_dotenv
-
-
 
 load_dotenv()
 
@@ -14,7 +13,16 @@ if not token:
 
 async def run_bot():
     print("[Discord Bot] Starting...")
-    bot = SnapDiscordBot(db_path="dev.db", command_prefix="!")
+
+    intents = discord.Intents.default()
+    intents.message_content = True  # Enable if your bot needs to read messages
+
+    bot = SnapDiscordBot(
+        db_path="dev.db",
+        command_prefix="!",
+        intents=intents,
+    )
+
     await bot.credential_store.initialize()
     await bot.add_cog(CredentialCommands(bot))
     await bot.start(token)

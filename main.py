@@ -1,5 +1,3 @@
-import asyncio
-import atexit
 import json
 import hashlib
 import os
@@ -9,7 +7,6 @@ import time
 import traceback
 import uuid
 import requests
-import eventlet
 import eventlet.wsgi
 
 from flask import Flask, jsonify, request, session, send_from_directory
@@ -21,7 +18,6 @@ import discord
 from werkzeug.utils import secure_filename
 
 from discord_bot.client import SnapDiscordBot
-from discord_bot.commands import CredentialCommands
 from stealth.knuddels_login import knuddels_api
 from web_dashboard.backend.api.auth.connect_account import connect_api
 
