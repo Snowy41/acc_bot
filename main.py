@@ -37,6 +37,10 @@ CORS(app)  # ✅ enable CORS for WebSocket connections
 socketio = SocketIO(app, cors_allowed_origins="*", logger=True, engineio_logger=True, async_mode="threading")
 running_processes = {}
 
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"  # or "None" if using different domains with HTTPS
+app.config["SESSION_COOKIE_SECURE"] = True     # if using HTTPS
+
+
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "avatars")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
