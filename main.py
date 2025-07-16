@@ -420,29 +420,28 @@ def list_users():
     rows = c.fetchall()
     conn.close()
     fields = [
-        "usertag", "username", "password", "is_admin", "is_banned", "is_muted",
-        "color", "bio", "tags", "social", "avatar", "uid", "friends", "friendRequests", "role"
+        "usertag", "username", "password", "is_admin", "is_banned", "is_muted", "color", "bio", "tags", "social",
+        "avatar", "uid", "friends", "friendRequests", "role"
     ]
     user_list = []
-    import json
     for row in rows:
         user = dict(zip(fields, row))
         user["tags"] = json.loads(user.get("tags") or "[]")
         user["social"] = json.loads(user.get("social") or "{}")
-        user["is_admin"] = bool(user.get("is_admin"))
-        user["is_banned"] = bool(user.get("is_banned"))
-        user["is_muted"] = bool(user.get("is_muted"))
         user_list.append({
             "usertag": user["usertag"],
             "username": user.get("username", ""),
             "uid": user.get("uid", None),
             "bio": user.get("bio", ""),
-            user.get("role", "user") == "admin"
-            "is_banned": user.get("is_banned", False),
-            "is_muted": user.get("is_muted", False),
+            "role": user.get("role", "user"),
             "color": user.get("color", "#fff"),
             "tags": user.get("tags", []),
+            "is_banned": bool(user.get("is_banned", False)),
+            "is_muted": bool(user.get("is_muted", False)),
+            # Optionally for backward compatibility:
+            "is_admin": user.get("role", "user") == "admin"
         })
+
     return jsonify({"users": user_list})
 
 @app.route("/api/auth/register", methods=["POST"])
