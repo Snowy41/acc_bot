@@ -1049,23 +1049,6 @@ def handle_dm(data):
         "timestamp": timestamp
     })
 
-
-# Function to run Flask in a separate thread
-def run_flask():
-    print("Starting Flask app with WebSocket...")
-    eventlet.monkey_patch()  # add this at the top
-
-    socketio.run(app, port=5000, debug=False, use_reloader=False)
-
-@atexit.register
-def shutdown():
-    try:
-        print("[SYSTEM] Shutting down Discord bot...")
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(bot.close())
-    except Exception:
-        pass
-
 # Gunicorn-compatible setup
 eventlet.monkey_patch()
 
