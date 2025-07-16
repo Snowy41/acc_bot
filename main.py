@@ -354,12 +354,12 @@ def status():
     user = get_user_by_usertag(usertag) if usertag else None
 
     avatar = user.get("avatar", "")
-    if avatar.startswith("http://") or avatar.startswith("https://"):
-        avatar_url = avatar
+    if avatar.startswith("http://vanish.rip"):
+        avatar = avatar.replace("http://", "https://")
     elif avatar.startswith("/"):
-        avatar_url = request.host_url.rstrip("/") + avatar
+        avatar = "https://vanish.rip" + avatar
     else:
-        avatar_url = ""
+        avatar = ""
 
     return jsonify({
         "loggedIn": bool(usertag),
@@ -368,7 +368,7 @@ def status():
         "isAdmin": user.get("role") == "admin" if user else False,
         "color": user.get("color", "#fff") if user else "#fff",
         "uid": user.get("uid", 0) if user else 0,
-        "avatar": avatar_url,
+        "avatar": avatar,
         "role": user.get("role", "user") if user else "user",
         "notifications": user.get("notifications", []) if user else [],
     })

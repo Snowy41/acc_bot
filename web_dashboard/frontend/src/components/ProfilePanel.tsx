@@ -62,19 +62,18 @@ export default function ProfilePanel({ loggedIn, setLoggedIn, user, setUser, use
       >
         <div className="w-9 h-9 rounded-full overflow-hidden shadow-inner border-2 border-aqua/80 bg-midnight flex items-center justify-center">
           {userAvatar && userAvatar !== "" ? (
-            <img
-              src={userAvatar}
-              alt="avatar"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = "/avatars/default.png"; // or a static asset
-              }}
-            />
-          ) : (
-            <span className="font-bold text-lg text-aqua">
-              {(displayName?.[0] || "👤").toUpperCase()}
-            </span>          )}
+          <img
+            src={userAvatar}
+            alt="avatar"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              console.warn("Broken avatar src:", e.currentTarget.src);
+              e.currentTarget.style.display = "none";
+            }}
+          />
+        ) : (
+          <span className="font-bold text-lg text-aqua">👤</span>
+          )}
         </div>
         <span className="font-semibold hidden sm:block" style={{ color: userColor }}>
           {displayName}
