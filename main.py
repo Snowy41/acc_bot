@@ -1073,16 +1073,18 @@ async def run_bot():
     print("Starting discord_bot...")
     await bot.start(token)
 
-def run():
-    eventlet.monkey_patch()
+
+eventlet.monkey_patch()
 
     # Start background cleanup thread
-    threading.Thread(target=schedule_cleanup, daemon=True).start()
+threading.Thread(target=schedule_cleanup, daemon=True).start()
 
     # Start Discord bot thread
-    threading.Thread(target=lambda: asyncio.run(run_bot()), daemon=True).start()
+threading.Thread(target=lambda: asyncio.run(run_bot()), daemon=True).start()
 
-    # Start the Flask app
-    socketio.run(app, port=5000, debug=False, use_reloader=False)
+# expose the socketio.run(app) as a callable for gunicorn
+def app_factory():
+    return app  # gunicorn -k eventlet needs this to return a WSGI-compatible app
 
-
+# assign it directly so gunicorn can find it
+application = app_factory()
