@@ -321,7 +321,14 @@ def upload_avatar():
 
 @app.route("/avatars/<filename>")
 def serve_avatar(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
+    avatar_path = os.path.join(UPLOAD_FOLDER, filename)
+    if os.path.exists(avatar_path):
+        return send_from_directory(UPLOAD_FOLDER, filename)
+    # Fallback to default.png in your static/public folder
+    return send_from_directory(
+        "/opt/whitebot/web_dashboard/frontend/public", "default.png"
+    )
+
 
 # API route to get the users info/list
 @app.route("/api/users", methods=["GET"])
@@ -907,7 +914,7 @@ def handle_connect_user(data):
     if not usertag:
         return
     online_users.add(usertag)
-    socketio.emit("user_online", {"usertag": usertag}, broadcast=True)
+    socketio.emit("user_online", {"usertag": usertag})
 
 @app.route("/api/online-users", methods=["GET"])
 def get_online_users():
@@ -917,7 +924,7 @@ def get_online_users():
 def handle_disconnect():
     for usertag in list(online_users):
         online_users.remove(usertag)
-        socketio.emit("user_offline", {"usertag": usertag}, broadcast=True)
+        socketio.emit("user_offline", {"usertag": usertag})
 
 
 @socketio.on("system_message")
