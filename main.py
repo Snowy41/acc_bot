@@ -349,6 +349,14 @@ def status():
     usertag = session.get("username")
     user = get_user_by_usertag(usertag) if usertag else None
 
+    avatar_raw = user.get("avatar", "")
+
+    # Only prepend if it's a relative path
+    if avatar_raw.startswith("/"):
+        avatar_url = request.host_url.rstrip("/") + avatar_raw
+    else:
+        avatar_url = avatar_raw
+
     return jsonify({
         "loggedIn": bool(usertag),
         "usertag": usertag,
@@ -356,7 +364,7 @@ def status():
         "isAdmin": user.get("role") == "admin" if user else False,
         "color": user.get("color", "#fff") if user else "#fff",
         "uid": user.get("uid", 0) if user else 0,
-        "avatar": request.host_url.rstrip("/") + user.get("avatar", "") if user else "",
+        "avatar": avatar_url,
         "role": user.get("role", "user") if user else "user",
         "notifications": user.get("notifications", []) if user else [],
     })

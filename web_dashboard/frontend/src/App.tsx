@@ -85,6 +85,7 @@ function App() {
           setRole(data.role || "user");
           setIsAdmin(data.role === "admin");
           setIsPremium(data.role === "admin" || data.role === "premium");
+          console.log("avatar value from backend:", data.avatar);
           setUserAvatar(data.avatar || "");
           if (Array.isArray(data.notifications)) {
             setNotifications(data.notifications);
