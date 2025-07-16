@@ -1083,23 +1083,23 @@ def shutdown():
     except Exception:
         pass
 
-def start_discord_bot():
-    try:
-        asyncio.run(run_bot())
-    except Exception as e:
-        print("[DISCORD] Bot crashed:", e)
-
+# Gunicorn-compatible setup
 eventlet.monkey_patch()
 
-    # Start background cleanup thread
+# Background task
 threading.Thread(target=schedule_cleanup, daemon=True).start()
 
-    # Start Discord bot thread
+# Start Discord bot in separate event loop
+def start_discord_bot():
+    try:
+        new_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(new_loop)
+        new_loop.run_until_complete(run_bot())
+    except Exception as e:
+        print("[Discord Bot] Failed to start:", e)
+
 threading.Thread(target=start_discord_bot, daemon=True).start()
 
-# expose the socketio.run(app) as a callable for gunicorn
-def app_factory():
-    return app  # gunicorn -k eventlet needs this to return a WSGI-compatible app
+# Export WSGI app for Gunicorn
+application = app
 
-# assign it directly so gunicorn can find it
-application = app_factory()
