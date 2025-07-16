@@ -987,9 +987,9 @@ async def run_bot():
 # Run Flask and Discord bot concurrently using threading
 if __name__ == "__main__":
     # Start Discord bot in background
-    #discord_thread = threading.Thread(target=lambda: asyncio.run(run_bot()))
-    #discord_thread.daemon = True
-   # discord_thread.start()
+    discord_thread = threading.Thread(target=lambda: asyncio.run(run_bot()))
+    discord_thread.daemon = True
+    discord_thread.start()
 
     # Run Flask-SocketIO in the main thread
     threading.Thread(target=schedule_cleanup, daemon=True).start()
