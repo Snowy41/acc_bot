@@ -30,7 +30,6 @@ if not token:
 
 
 DISCORD_CHANNEL_ID = 1395076252645462167
-FORUM_FILE = "forum.json"
 online_users = set()
 
 # Initialize Flask and SocketIO
@@ -42,10 +41,8 @@ CORS(app)  # ✅ enable CORS for WebSocket connections
 
 socketio = SocketIO(app, cors_allowed_origins="*", logger=True, engineio_logger=True, async_mode="threading")
 running_processes = {}
-MESSAGES_FILE = os.path.join(os.path.dirname(__file__), "messages.json")
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "avatars")
-print("UPLOAD_FOLDER resolved to:", UPLOAD_FOLDER)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
@@ -53,8 +50,9 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Path to the users.json file
-USERS_FILE = os.path.join(os.path.dirname(__file__), "users.json")
 DB_PATH = os.path.join(os.path.dirname(__file__), "users.db")
+FORUM_DB_PATH = os.path.join(os.path.dirname(__file__), "forum.db")
+MESSAGES_DB_PATH = os.path.join(os.path.dirname(__file__), "messages.db")
 
 stream_started = 0
 
@@ -113,27 +111,80 @@ def save_user(user):
     conn.commit()
     conn.close()
 
-def load_forum():
-    try:
-        with open(FORUM_FILE, "r") as f:
-            return json.load(f)
-    except Exception:
-        return []
+def load_forum(category=None):
+    conn = sqlite3.connect(FORUM_DB_PATH)
+    c = conn.cursor()
+    if category:
+        c.execute("SELECT * FROM forum_posts WHERE category=? ORDER BY timestamp DESC", (category,))
+    else:
+        c.execute("SELECT * FROM forum_posts ORDER BY timestamp DESC")
+    rows = c.fetchall()
+    conn.close()
+    posts = []
+    fields = ["id", "category", "title", "content", "usertag", "username", "comments", "timestamp"]
+    for row in rows:
+        post = dict(zip(fields, row))
+        post["comments"] = json.loads(post["comments"] or "[]")
+        posts.append(post)
+    return posts
 
-def save_forum(posts):
-    with open(FORUM_FILE, "w") as f:
-        json.dump(posts, f, indent=2)
+def save_forum_post(post):
+    conn = sqlite3.connect(FORUM_DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+        INSERT OR REPLACE INTO forum_posts
+        (id, category, title, content, usertag, username, comments, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        post["id"],
+        post["category"],
+        post["title"],
+        post["content"],
+        post["usertag"],
+        post["username"],
+        json.dumps(post.get("comments", [])),
+        post["timestamp"],
+    ))
+    conn.commit()
+    conn.close()
 
-def load_messages():
-    if not os.path.exists(MESSAGES_FILE):
-        return {}
+def add_forum_comment(post_id, comment):
+    conn = sqlite3.connect(FORUM_DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT comments FROM forum_posts WHERE id=?", (post_id,))
+    row = c.fetchone()
+    comments = json.loads(row[0] or "[]") if row else []
+    comments.append(comment)
+    c.execute("UPDATE forum_posts SET comments=? WHERE id=?", (json.dumps(comments), post_id))
+    conn.commit()
+    conn.close()
 
-    try:
-        with open(MESSAGES_FILE, "r") as f:
-            return json.load(f)
-    except Exception as e:
-        print("[ERROR] Failed to load messages.json:", e)
-        return {}
+
+def get_chat_messages(user1, user2):
+    chatkey = chat_key(user1, user2)
+    conn = sqlite3.connect(MESSAGES_DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT sender, recipient, text, timestamp FROM chat_messages WHERE chat_key=? ORDER BY timestamp ASC", (chatkey,))
+    messages = [
+        {"from": row[0], "to": row[1], "text": row[2], "timestamp": row[3]}
+        for row in c.fetchall()
+    ]
+    conn.close()
+    return messages
+
+def save_chat_message(user1, user2, sender, text, timestamp):
+    chatkey = chat_key(user1, user2)
+    recipient = user2 if sender == user1 else user1
+    conn = sqlite3.connect(MESSAGES_DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+        INSERT INTO chat_messages (chat_key, sender, recipient, text, timestamp)
+        VALUES (?, ?, ?, ?, ?)
+    """, (chatkey, sender, recipient, text, timestamp))
+    conn.commit()
+    conn.close()
+
+
 
 def get_all_users():
     conn = sqlite3.connect(DB_PATH)
@@ -154,17 +205,17 @@ def get_all_users():
         result[user["usertag"]] = user
     return result
 
-def save_messages(data):
-    try:
-        with open(MESSAGES_FILE, "w") as f:
-            json.dump(data, f, indent=2)
-    except Exception as e:
-        print("[ERROR] Failed to save messages.json:", e)
 
-def prune_old(messages):
+def prune_old_messages_sql():
     cutoff = int(time.time() * 1000) - (24 * 60 * 60 * 1000)
-    for key in messages:
-        messages[key] = [msg for msg in messages[key] if msg["timestamp"] > cutoff]
+    conn = sqlite3.connect(MESSAGES_DB_PATH)
+    c = conn.cursor()
+    c.execute("DELETE FROM chat_messages WHERE timestamp < ?", (cutoff,))
+    deleted = c.rowcount
+    conn.commit()
+    conn.close()
+    print(f"[Cleanup] Deleted {deleted} old chat messages from messages.db.")
+
 
 
 def chat_key(user1, user2):
@@ -185,20 +236,8 @@ bot = SnapDiscordBot(
 )
 def schedule_cleanup():
     while True:
-        time.sleep(600)  # every 10 min
-        print("[Cleanup] Running scheduled message pruning...")
-        with app.app_context():
-            try:
-                messages = load_messages()
-                cutoff = int(time.time() * 1000) - (24 * 60 * 60 * 1000)
-                for key in list(messages.keys()):
-                    messages[key] = [msg for msg in messages[key] if msg["timestamp"] > cutoff]
-                    if not messages[key]:
-                        del messages[key]
-                save_messages(messages)
-                print("[Cleanup] Done.")
-            except Exception as e:
-                print("[Cleanup] Failed:", e)
+        time.sleep(600)
+        prune_old_messages_sql()
 
 def send_discord_message(content):
     url = f"https://discord.com/api/v9/channels/{DISCORD_CHANNEL_ID}/messages"
@@ -241,23 +280,15 @@ def handle_all_errors(e):
 
 @app.route("/api/messages/cleanup", methods=["POST"])
 def cleanup_messages():
-    messages = load_messages()
-
     cutoff = int(time.time() * 1000) - (24 * 60 * 60 * 1000)  # 24 hours ago
-    total_deleted = 0
+    conn = sqlite3.connect(MESSAGES_DB_PATH)
+    c = conn.cursor()
+    c.execute("DELETE FROM chat_messages WHERE timestamp < ?", (cutoff,))
+    deleted = c.rowcount
+    conn.commit()
+    conn.close()
+    return jsonify({"deleted": deleted})
 
-    for key in list(messages.keys()):
-        old_len = len(messages[key])
-        messages[key] = [msg for msg in messages[key] if msg["timestamp"] > cutoff]
-        deleted = old_len - len(messages[key])
-        total_deleted += deleted
-
-        # Optionally: remove empty threads
-        if not messages[key]:
-            del messages[key]
-
-    save_messages(messages)
-    return jsonify({"deleted": total_deleted})
 
 
 # Flask routes for authentication
@@ -502,9 +533,8 @@ def get_messages(friend_tag):
     if not current_user:
         return jsonify({"error": "Not logged in"}), 401
 
-    key = chat_key(current_user, friend_tag)
-    messages = load_messages()
-    return jsonify({"messages": messages.get(key, [])})
+    messages = get_chat_messages(current_user, friend_tag)
+    return jsonify({"messages": messages})
 
 @app.route("/api/messages/<friend_tag>", methods=["POST"])
 def send_message(friend_tag):
@@ -523,22 +553,14 @@ def send_message(friend_tag):
         return jsonify({"error": "Message is empty"}), 400
 
     print(f"[MESSAGE] {current_user} → {friend_tag}: {text}")
-    messages = load_messages()
-    key = chat_key(current_user, friend_tag)
+    timestamp = int(time.time() * 1000)
+    save_chat_message(current_user, friend_tag, current_user, text, timestamp)
 
-    messages.setdefault(key, []).append({
-        "from": current_user,
-        "to": friend_tag,
-        "text": text,
-        "timestamp": int(time.time() * 1000)
-    })
-
-    save_messages(messages)
     socketio.emit("chat_message", {
         "to": friend_tag,
         "from": current_user,
         "text": text,
-        "timestamp": int(time.time() * 1000)
+        "timestamp": timestamp
     })
     return jsonify({"success": True})
 
@@ -739,26 +761,29 @@ def start_bot():
 @app.route("/api/forum/posts", methods=["GET"])
 def get_forum_posts():
     category = request.args.get("category")
-    posts = load_forum()
-    if category:
-        posts = [p for p in posts if p.get("category") == category]
+    posts = load_forum(category)
     return jsonify({"posts": posts})
 
 @app.route("/api/forum/posts/<post_id>", methods=["GET"])
 def get_single_post(post_id):
-    posts = load_forum()
-    for post in posts:
-        if post["id"] == post_id:
-            return jsonify({"post": post})
-    return jsonify({"error": "Post not found"}), 404
+    conn = sqlite3.connect(FORUM_DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT * FROM forum_posts WHERE id=?", (post_id,))
+    row = c.fetchone()
+    conn.close()
+    if not row:
+        return jsonify({"error": "Post not found"}), 404
+    fields = ["id", "category", "title", "content", "usertag", "username", "comments", "timestamp"]
+    post = dict(zip(fields, row))
+    post["comments"] = json.loads(post["comments"] or "[]")
+    return jsonify({"post": post})
+
 @app.route("/api/forum/posts", methods=["POST"])
 def create_forum_post():
     data = request.json
-    # Validate required fields
     required_fields = ["category", "title", "content", "usertag", "username"]
     if not all(data.get(field) for field in required_fields):
         return jsonify({"error": "Missing fields"}), 400
-    posts = load_forum()
     post = {
         "id": str(uuid.uuid4()),
         "category": data["category"],
@@ -769,25 +794,20 @@ def create_forum_post():
         "comments": [],
         "timestamp": int(time.time() * 1000)
     }
-    posts.insert(0, post)
-    save_forum(posts)
+    save_forum_post(post)
     return jsonify({"success": True})
 
 @app.route("/api/forum/posts/<post_id>/comments", methods=["POST"])
 def add_comment(post_id):
     data = request.json
-    posts = load_forum()
-    for post in posts:
-        if post["id"] == post_id:
-            post["comments"].append({
-                "usertag": data["usertag"],
-                "username": data["username"],
-                "text": data["text"],
-                "timestamp": int(time.time() * 1000)
-            })
-            save_forum(posts)
-            return jsonify({"success": True})
-    return jsonify({"error": "Post not found"}), 404
+    comment = {
+        "usertag": data["usertag"],
+        "username": data["username"],
+        "text": data["text"],
+        "timestamp": int(time.time() * 1000)
+    }
+    add_forum_comment(post_id, comment)
+    return jsonify({"success": True})
 
 @app.route("/api/friends/add", methods=["POST"])
 def send_friend_request():
@@ -901,8 +921,17 @@ def admin_view_chats():
     if not current_user or not users.get(current_user, {}).get("is_admin"):
         return jsonify({"error": "Admin only"}), 403
 
-    messages = load_messages()
-    return jsonify({"chats": messages})
+    conn = sqlite3.connect(MESSAGES_DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT chat_key, sender, recipient, text, timestamp FROM chat_messages ORDER BY chat_key, timestamp ASC")
+    chats = {}
+    for row in c.fetchall():
+        chat_key = row[0]
+        msg = {"from": row[1], "to": row[2], "text": row[3], "timestamp": row[4]}
+        chats.setdefault(chat_key, []).append(msg)
+    conn.close()
+    return jsonify({"chats": chats})
+
 
 @app.route("/api/friends/requests", methods=["GET"])
 def list_friend_requests():
@@ -919,13 +948,16 @@ def list_friend_requests():
 def get_admin_stats():
     current_user = session.get("username")
     users = get_all_users()
-
     if not current_user or not users.get(current_user, {}).get("is_admin"):
         return jsonify({"error": "Admin only"}), 403
 
-    messages = load_messages()
-    total_messages = sum(len(msgs) for msgs in messages.values())
-    chat_threads = len(messages)
+    conn = sqlite3.connect(MESSAGES_DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM chat_messages")
+    total_messages = c.fetchone()[0]
+    c.execute("SELECT COUNT(DISTINCT chat_key) FROM chat_messages")
+    chat_threads = c.fetchone()[0]
+    conn.close()
     online = list(online_users) if 'online_users' in globals() else []
 
     return jsonify({
@@ -934,6 +966,7 @@ def get_admin_stats():
         "chatThreads": chat_threads,
         "totalMessages": total_messages
     })
+
 
 @app.route("/api/friends/list", methods=["GET"])
 def list_friends():
@@ -989,23 +1022,16 @@ def handle_dm(data):
     if not sender or not to or not text:
         return
 
-    # Save message server-side
-    messages = load_messages()
-    key = chat_key(sender, to)
-    messages.setdefault(key, []).append({
-        "from": sender,
-        "to": to,
-        "text": text,
-        "timestamp": int(time.time() * 1000)
-    })
-    save_messages(messages)
+    timestamp = int(time.time() * 1000)
+    save_chat_message(sender, to, sender, text, timestamp)
 
     socketio.emit("dm", {
         "from": sender,
         "to": to,
         "text": text,
-        "timestamp": int(time.time() * 1000)
+        "timestamp": timestamp
     })
+
 
 # Function to run Flask in a separate thread
 def run_flask():
