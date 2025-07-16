@@ -46,6 +46,7 @@ function App() {
     fetch("/api/auth/status", { credentials: "include" })
       .then(res => res.json())
       .then(data => {
+        console.log("🧪 AUTH STATUS DATA:", data); // <--- add this
         setLoggedIn(!!data.loggedIn);
         setUsertag(data.usertag || "");
         setDisplayName(data.username || "");
