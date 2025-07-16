@@ -67,8 +67,7 @@ def get_user_by_usertag(usertag):
         return None
     fields = [
         "usertag", "username", "password", "is_admin", "is_banned", "is_muted",
-        "color", "bio", "tags", "social", "avatar", "uid",
-        "friends", "friendRequests"
+        "color", "bio", "tags", "social", "avatar", "uid", "friends", "friendRequests", "role"
     ]
     user = dict(zip(fields, row))
     user["tags"] = json.loads(user.get("tags") or "[]")
@@ -96,7 +95,7 @@ def save_user(user):
         user["usertag"],
         user.get("username"),
         user.get("password"),
-        int(user.get("is_admin", False)),
+        user.get("role", "user") == "admin",
         int(user.get("is_banned", False)),
         int(user.get("is_muted", False)),
         user.get("color", "#fff"),
@@ -121,7 +120,7 @@ def load_forum(category=None):
     rows = c.fetchall()
     conn.close()
     posts = []
-    fields = ["id", "category", "title", "content", "usertag", "username", "comments", "timestamp"]
+    fields = ["id", "category", "title", "content", "usertag", "username", "comments", "timestamp", "role"]
     for row in rows:
         post = dict(zip(fields, row))
         post["comments"] = json.loads(post["comments"] or "[]")
@@ -192,7 +191,10 @@ def get_all_users():
     c.execute("SELECT * FROM users")
     rows = c.fetchall()
     conn.close()
-    fields = ["usertag", "username", "password", "is_admin", "is_banned", "is_muted", "color", "bio", "tags", "social", "avatar", "uid"]
+    fields = [
+        "usertag", "username", "password", "is_admin", "is_banned", "is_muted",
+        "color", "bio", "tags", "social", "avatar", "uid", "friends", "friendRequests", "role"
+    ]
     import json
     result = {}
     for row in rows:
@@ -344,10 +346,11 @@ def status():
         "loggedIn": bool(usertag),
         "usertag": usertag,
         "username": user.get("username", "") if user else "",
-        "isAdmin": user.get("is_admin", False) if user else False,
+        "isAdmin": user.get("role", "user") == "admin" if user else False,
         "color": user.get("color", "#fff") if user else "#fff",
         "uid": user.get("uid", 0) if user else 0,
         "avatar": request.host_url.rstrip("/") + user.get("avatar", "") if user else "",
+        "role": user.get("role", "user") if user else "user",
         "notifications": user.get("notifications", []) if user else [],
     })
 
@@ -379,7 +382,7 @@ def upload_avatar():
         return jsonify({"error": "Invalid file"}), 400
 
     ext = file.filename.rsplit('.', 1)[1].lower()
-    if ext == "gif" and not user.get("is_admin", False):
+    if ext == "gif" and not user.get("role", "user") == "admin":
         return jsonify({"error": "Only admins can upload GIFs"}), 403
 
     for ext in ALLOWED_EXTENSIONS:
@@ -416,7 +419,10 @@ def list_users():
     c.execute("SELECT * FROM users")
     rows = c.fetchall()
     conn.close()
-    fields = ["usertag", "username", "password", "is_admin", "is_banned", "is_muted", "color", "bio", "tags", "social", "avatar", "uid"]
+    fields = [
+        "usertag", "username", "password", "is_admin", "is_banned", "is_muted",
+        "color", "bio", "tags", "social", "avatar", "uid", "friends", "friendRequests", "role"
+    ]
     user_list = []
     import json
     for row in rows:
@@ -431,7 +437,7 @@ def list_users():
             "username": user.get("username", ""),
             "uid": user.get("uid", None),
             "bio": user.get("bio", ""),
-            "is_admin": user.get("is_admin", False),
+            user.get("role", "user") == "admin"
             "is_banned": user.get("is_banned", False),
             "is_muted": user.get("is_muted", False),
             "color": user.get("color", "#fff"),
@@ -458,7 +464,7 @@ def register():
         "password": password_hash,
         "tags": [],
         "bio": "",
-        "is_admin": False,
+        "role": "user",
         "is_banned": False,
         "is_muted": False,
         "color": "#fff",
@@ -476,7 +482,7 @@ def get_user(usertag):
         profile = {
             "username": user.get("username", ""),
             "usertag": user.get("usertag", usertag),
-            "isAdmin": user.get("is_admin", False),
+            user.get("role", "user") == "admin"
             "isBanned": user.get("is_banned", False),
             "isMuted": user.get("is_muted", False),
             "bio": user.get("bio", ""),
@@ -499,13 +505,14 @@ def update_user(usertag):
         return jsonify({"error": "User not found"}), 404
 
     session_user = get_user_by_usertag(session.get("username"))
-    is_admin = session_user.get("is_admin", False) if session_user else False
+    is_admin = user.get("role", "user") == "admin" if session_user else False
     # Only allow updating your own profile, or if admin
     if session.get("username") != usertag.lower() and not is_admin:
         return jsonify({"error": "Permission denied"}), 403
 
     data = request.json
-
+    if "role" in data and is_admin:
+        user["role"] = data["role"]
     # Editable fields:
     if "bio" in data:
         user["bio"] = data["bio"]
@@ -773,7 +780,7 @@ def get_single_post(post_id):
     conn.close()
     if not row:
         return jsonify({"error": "Post not found"}), 404
-    fields = ["id", "category", "title", "content", "usertag", "username", "comments", "timestamp"]
+    fields = ["id", "category", "title", "content", "usertag", "username", "comments", "timestamp", "role"]
     post = dict(zip(fields, row))
     post["comments"] = json.loads(post["comments"] or "[]")
     return jsonify({"post": post})
@@ -781,7 +788,7 @@ def get_single_post(post_id):
 @app.route("/api/forum/posts", methods=["POST"])
 def create_forum_post():
     data = request.json
-    required_fields = ["category", "title", "content", "usertag", "username"]
+    required_fields = ["category", "title", "content", "usertag", "username", "role"]
     if not all(data.get(field) for field in required_fields):
         return jsonify({"error": "Missing fields"}), 400
     post = {

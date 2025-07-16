@@ -33,7 +33,8 @@ function App() {
   const [notifications, setNotifications] = useState<UserNotification[]>([]);
   const [showFriends, setShowFriends] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
-
+  const [isPremium, setIsPremium] = useState(false);
+  const [role, setRole] = useState("user");
 
   // Modal state for register
   const [showRegister, setShowRegister] = useState(false);
@@ -49,11 +50,16 @@ function App() {
         setUsertag(data.usertag || "");
         setDisplayName(data.username || "");
         setUserColor(data.color || "#fff");
-        setIsAdmin(data.isAdmin || false);
         setUserAvatar(data.avatar || "");
-        console.log("Final Avatar URL:", data.avatar, userAvatar);
+        setRole(data.role || "user");
+        setIsAdmin(data.role === "admin");
+        setIsPremium(data.role === "premium" || data.role === "admin");
+        if (Array.isArray(data.notifications)) {
+          setNotifications(data.notifications);
+        }
       });
   }, []);
+
 
   useEffect(() => {
     setTimeout(() => setShowGetStarted(true), 3000);
@@ -76,7 +82,9 @@ function App() {
           setUsertag(data.usertag || "");
           setDisplayName(data.username || "");
           setUserColor(data.color || "#fff");
-          setIsAdmin(data.isAdmin || false);
+          setRole(data.role || "user");
+          setIsAdmin(data.role === "admin");
+          setIsPremium(data.role === "admin" || data.role === "premium");
           setUserAvatar(data.avatar ? `${window.location.origin}${data.avatar}` : "");
           if (Array.isArray(data.notifications)) {
             setNotifications(data.notifications);

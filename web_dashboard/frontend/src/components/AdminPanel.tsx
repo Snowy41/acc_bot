@@ -26,12 +26,16 @@ export default function AdminPanel() {
   const [selectedChatKey, setSelectedChatKey] = useState<string | null>(null);
   const [showChats, setShowChats] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [role, setRole] = useState("user");
+  const [isPremium, setIsPremium] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/status", { credentials: "include" })
       .then(res => res.json())
       .then(data => {
-        setIsAdmin(data.isAdmin || false);
+        setRole(data.role || "user");
+        setIsAdmin(data.role === "admin");
+        setIsPremium(data.role === "admin" || data.role === "premium");
         if (data.isAdmin) {
           fetch("/api/users", { credentials: "include" })
             .then(res => res.json())
