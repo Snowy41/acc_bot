@@ -349,13 +349,13 @@ def status():
     usertag = session.get("username")
     user = get_user_by_usertag(usertag) if usertag else None
 
-    avatar_raw = user.get("avatar", "")
-
-    # Only prepend if it's a relative path
-    if avatar_raw.startswith("/"):
-        avatar_url = request.host_url.rstrip("/") + avatar_raw
+    avatar = user.get("avatar", "")
+    if avatar.startswith("http://") or avatar.startswith("https://"):
+        avatar_url = avatar
+    elif avatar.startswith("/"):
+        avatar_url = request.host_url.rstrip("/") + avatar
     else:
-        avatar_url = avatar_raw
+        avatar_url = ""
 
     return jsonify({
         "loggedIn": bool(usertag),
