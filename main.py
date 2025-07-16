@@ -26,6 +26,7 @@ if not token:
     raise ValueError("DISCORD_TOKEN environment variable not set!")
 
 FORUM_FILE = "forum.json"
+online_users = set()
 
 # Initialize Flask and SocketIO
 app = Flask(__name__)
@@ -36,7 +37,7 @@ CORS(app)  # ✅ enable CORS for WebSocket connections
 
 socketio = SocketIO(app, cors_allowed_origins="*", logger=True, engineio_logger=True, async_mode="threading")
 running_processes = {}
-
+MESSAGES_FILE = os.path.join(os.path.dirname(__file__), "messages.json")
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "avatars")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
@@ -63,6 +64,35 @@ def load_forum():
 def save_forum(posts):
     with open(FORUM_FILE, "w") as f:
         json.dump(posts, f, indent=2)
+
+def load_messages():
+    if not os.path.exists(MESSAGES_FILE):
+        return {}
+
+    try:
+        with open(MESSAGES_FILE, "r") as f:
+            return json.load(f)
+    except Exception as e:
+        print("[ERROR] Failed to load messages.json:", e)
+        return {}
+
+
+def save_messages(data):
+    try:
+        with open(MESSAGES_FILE, "w") as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print("[ERROR] Failed to save messages.json:", e)
+
+def prune_old(messages):
+    cutoff = int(time.time() * 1000) - (24 * 60 * 60 * 1000)
+    for key in messages:
+        messages[key] = [msg for msg in messages[key] if msg["timestamp"] > cutoff]
+
+
+def chat_key(user1, user2):
+    return "_".join(sorted([user1, user2]))
+
 # Function to hash passwords (SHA-256)
 def hash_pw(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
@@ -76,6 +106,43 @@ bot = SnapDiscordBot(
     command_prefix="!",
     intents=intents
 )
+def schedule_cleanup():
+    while True:
+        time.sleep(600)  # every 10 min
+        print("[Cleanup] Running scheduled message pruning...")
+        with app.app_context():
+            try:
+                messages = load_messages()
+                cutoff = int(time.time() * 1000) - (24 * 60 * 60 * 1000)
+                for key in list(messages.keys()):
+                    messages[key] = [msg for msg in messages[key] if msg["timestamp"] > cutoff]
+                    if not messages[key]:
+                        del messages[key]
+                save_messages(messages)
+                print("[Cleanup] Done.")
+            except Exception as e:
+                print("[Cleanup] Failed:", e)
+
+@app.route("/api/messages/cleanup", methods=["POST"])
+def cleanup_messages():
+    messages = load_messages()
+
+    cutoff = int(time.time() * 1000) - (24 * 60 * 60 * 1000)  # 24 hours ago
+    total_deleted = 0
+
+    for key in list(messages.keys()):
+        old_len = len(messages[key])
+        messages[key] = [msg for msg in messages[key] if msg["timestamp"] > cutoff]
+        deleted = old_len - len(messages[key])
+        total_deleted += deleted
+
+        # Optionally: remove empty threads
+        if not messages[key]:
+            del messages[key]
+
+    save_messages(messages)
+    return jsonify({"deleted": total_deleted})
+
 
 # Flask routes for authentication
 @app.route("/api/auth/login", methods=["POST"])
@@ -122,6 +189,7 @@ def start_knuddels_login():
 def logout():
     session.pop("username", None)
     return jsonify({"success": True})
+
 @app.route("/api/auth/status", methods=["GET"])
 def status():
     users = load_users()
@@ -135,9 +203,24 @@ def status():
         "isAdmin": is_admin,
         "color": user.get("color", "#fff") if user else "#fff",
         "uid": user.get("uid", 0),
-        "avatar": request.host_url.rstrip("/") + user.get("avatar", "")
+        "avatar": request.host_url.rstrip("/") + user.get("avatar", ""),
+        "notifications": user.get("notifications", []) if user else []
 
     })
+@app.route("/api/notifications/clear", methods=["POST"])
+def clear_notifications():
+    users = load_users()
+    usertag = session.get("username")
+
+    if not usertag or usertag not in users:
+        return jsonify({"error": "Not logged in"}), 401
+
+    users[usertag]["notifications"] = []
+
+    with open(USERS_FILE, "w") as f:
+        json.dump(users, f, indent=2)
+
+    return jsonify({"message": "Notifications cleared."})
 
 @app.route("/api/upload/avatar", methods=["POST"])
 def upload_avatar():
@@ -289,6 +372,54 @@ def update_user(usertag):
         json.dump(users, f, indent=2)
     return jsonify({"success": True, "user": user})
 
+@app.route("/api/messages/<friend_tag>", methods=["GET"])
+def get_messages(friend_tag):
+    current_user = session.get("username")
+    if not current_user:
+        return jsonify({"error": "Not logged in"}), 401
+
+    key = chat_key(current_user, friend_tag)
+    messages = load_messages()
+    return jsonify({"messages": messages.get(key, [])})
+
+@app.route("/api/messages/<friend_tag>", methods=["POST"])
+def send_message(friend_tag):
+    current_user = session.get("username")
+    if not current_user:
+        return jsonify({"error": "Not logged in"}), 401
+
+    try:
+        data = request.get_json(force=True)
+        text = data.get("text", "").strip()
+    except Exception as e:
+        print("[ERROR] Failed to parse message payload:", e)
+        return jsonify({"error": "Invalid message payload"}), 400
+
+    if not text:
+        return jsonify({"error": "Message is empty"}), 400
+
+    print(f"[MESSAGE] {current_user} → {friend_tag}: {text}")
+    messages = load_messages()
+    key = chat_key(current_user, friend_tag)
+
+    messages.setdefault(key, []).append({
+        "from": current_user,
+        "to": friend_tag,
+        "text": text,
+        "timestamp": int(time.time() * 1000)
+    })
+
+    save_messages(messages)
+    socketio.emit("chat_message", {
+        "to": friend_tag,
+        "from": current_user,
+        "text": text,
+        "timestamp": int(time.time() * 1000)
+    })
+    return jsonify({"success": True})
+
+
+
 @app.route("/api/users/<usertag>/rename", methods=["POST"])
 def rename_user(username):
     users = load_users()
@@ -402,7 +533,6 @@ def list_bots():
             bots.append(filename)
         if filename.endswith("_login.py"):  # List only *_creator.py scripts
             bots.append(filename)
-    print(f"Available bots: {bots}")  # Debug print to check if knuddels_login.py is included
     return jsonify({"bots": bots})
 
 @app.route("/api/stop_bot", methods=["POST"])
@@ -421,7 +551,6 @@ def stop_bot():
             return jsonify({"message": f"{bot_name} was not running."})
 
     except Exception as e:
-        print("Stop error:", str(e))
         return jsonify({"error": str(e)}), 500
 @app.route("/api/start_bot", methods=["POST"])
 @login_required
@@ -542,13 +671,225 @@ def add_comment(post_id):
             return jsonify({"success": True})
     return jsonify({"error": "Post not found"}), 404
 
+@app.route("/api/friends/add", methods=["POST"])
+def send_friend_request():
+    users = load_users()
+    current_user = session.get("username")
+    data = request.json
+    friend_tag = data.get("friendTag")
+
+    if not current_user or not friend_tag or friend_tag == current_user:
+        return jsonify({"error": "Invalid request"}), 400
+
+    if current_user not in users or friend_tag not in users:
+        return jsonify({"error": "User not found"}), 404
+
+    sender = users[current_user]
+    receiver = users[friend_tag]
+
+    sender.setdefault("friends", [])
+    receiver.setdefault("friends", [])
+    receiver.setdefault("friendRequests", [])
+
+    if friend_tag in sender["friends"]:
+        return jsonify({"message": "Already friends"})
+
+    if current_user in receiver["friendRequests"]:
+        return jsonify({"message": "Request already sent"})
+
+    receiver["friendRequests"].append(current_user)
+    receiver.setdefault("notifications", [])
+    receiver["notifications"].insert(0, {
+        "id": str(uuid.uuid4()),
+        "type": "friend",
+        "message": f"👥 Friend request from @{current_user}",
+        "timestamp": int(time.time() * 1000)
+    })
+    socketio.emit("friend_request", {
+        "to": friend_tag,
+        "from": current_user
+    })
+    with open(USERS_FILE, "w") as f:
+        json.dump(users, f, indent=2)
+
+    return jsonify({"message": f"Friend request sent to {friend_tag}."})
+
+@app.route("/api/friends/accept", methods=["POST"])
+def accept_friend_request():
+    users = load_users()
+    current_user = session.get("username")
+    data = request.json
+    requester_tag = data.get("requesterTag")
+
+    if not current_user or not requester_tag:
+        return jsonify({"error": "Invalid request"}), 400
+
+    if requester_tag not in users or current_user not in users:
+        return jsonify({"error": "User not found"}), 404
+
+    me = users[current_user]
+    requester = users[requester_tag]
+
+    me.setdefault("friends", [])
+    me.setdefault("friendRequests", [])
+    requester.setdefault("friends", [])
+
+    if requester_tag in me["friends"]:
+        return jsonify({"message": "Already friends"})
+
+    if requester_tag not in me["friendRequests"]:
+        return jsonify({"message": "No request from this user"}), 400
+
+    me["friends"].append(requester_tag)
+    requester["friends"].append(current_user)
+    me["friendRequests"].remove(requester_tag)
+
+    with open(USERS_FILE, "w") as f:
+        json.dump(users, f, indent=2)
+
+    return jsonify({"message": f"You and {requester_tag} are now friends!"})
+
+@app.route("/api/friends/remove", methods=["POST"])
+def remove_friend():
+    users = load_users()
+    current_user = session.get("username")
+    data = request.json
+    friend_tag = data.get("friendTag")
+
+    if not current_user or not friend_tag:
+        return jsonify({"error": "Invalid request"}), 400
+
+    if current_user not in users or friend_tag not in users:
+        return jsonify({"error": "User not found"}), 404
+
+    me = users[current_user]
+    friend = users[friend_tag]
+
+    me.setdefault("friends", [])
+    friend.setdefault("friends", [])
+
+    if friend_tag in me["friends"]:
+        me["friends"].remove(friend_tag)
+
+    if current_user in friend["friends"]:
+        friend["friends"].remove(current_user)
+
+    with open(USERS_FILE, "w") as f:
+        json.dump(users, f, indent=2)
+
+    return jsonify({"message": f"Removed {friend_tag} from your friend list."})
+
+@app.route("/api/admin/chats", methods=["GET"])
+def admin_view_chats():
+    current_user = session.get("username")
+    users = load_users()
+    if not current_user or not users.get(current_user, {}).get("is_admin"):
+        return jsonify({"error": "Admin only"}), 403
+
+    messages = load_messages()
+    return jsonify({"chats": messages})
+
+@app.route("/api/friends/requests", methods=["GET"])
+def list_friend_requests():
+    users = load_users()
+    current_user = session.get("username")
+    if not current_user:
+        return jsonify({"error": "Not logged in"}), 401
+
+    friend_requests = users.get(current_user, {}).get("friendRequests", [])
+    return jsonify({"requests": friend_requests})
+
+@app.route("/api/admin/stats", methods=["GET"])
+def get_admin_stats():
+    current_user = session.get("username")
+    users = load_users()
+
+    if not current_user or not users.get(current_user, {}).get("is_admin"):
+        return jsonify({"error": "Admin only"}), 403
+
+    messages = load_messages()
+    total_messages = sum(len(msgs) for msgs in messages.values())
+    chat_threads = len(messages)
+    online = list(online_users) if 'online_users' in globals() else []
+
+    return jsonify({
+        "totalUsers": len(users),
+        "onlineUsers": len(online),
+        "chatThreads": chat_threads,
+        "totalMessages": total_messages
+    })
+
+@app.route("/api/friends/list", methods=["GET"])
+def list_friends():
+    users = load_users()
+    current_user = session.get("username")
+    if not current_user or current_user not in users:
+        return jsonify({"error": "Not logged in"}), 401
+
+    friends = users[current_user].get("friends", [])
+    return jsonify({"friends": friends})
+
 
 @socketio.on("connect")
 def handle_connect():
-    print("🔌 A WebSocket client connected")
     socketio.emit("bot_log", {"script": "knuddels_creator.py", "output": "🔥 From connect handler!"})
 
+@socketio.on("connect_user")
+def handle_connect_user(data):
+    usertag = data.get("usertag")
+    if not usertag:
+        return
+    online_users.add(usertag)
+    socketio.emit("user_online", {"usertag": usertag}, broadcast=True)
 
+@app.route("/api/online-users", methods=["GET"])
+def get_online_users():
+    return jsonify({"online": list(online_users)})
+
+@socketio.on("disconnect")
+def handle_disconnect():
+    for usertag in list(online_users):
+        online_users.remove(usertag)
+        socketio.emit("user_offline", {"usertag": usertag}, broadcast=True)
+
+
+@socketio.on("system_message")
+def handle_admin_broadcast(data):
+    text = data.get("text")
+    if text:
+        socketio.emit("system_message", {"text": f"{text}"}, namespace='/', to=None, include_self=True)
+
+
+@socketio.on("message")
+def catch_message(msg):
+    print(f"[DEBUG] Received message event: {msg}")
+
+@socketio.on("dm")
+def handle_dm(data):
+    sender = session.get("username")
+    to = data.get("to")
+    text = data.get("text", "").strip()
+
+    if not sender or not to or not text:
+        return
+
+    # Save message server-side
+    messages = load_messages()
+    key = chat_key(sender, to)
+    messages.setdefault(key, []).append({
+        "from": sender,
+        "to": to,
+        "text": text,
+        "timestamp": int(time.time() * 1000)
+    })
+    save_messages(messages)
+
+    socketio.emit("dm", {
+        "from": sender,
+        "to": to,
+        "text": text,
+        "timestamp": int(time.time() * 1000)
+    })
 
 # Function to run Flask in a separate thread
 def run_flask():
@@ -576,5 +917,7 @@ if __name__ == "__main__":
    # discord_thread.start()
 
     # Run Flask-SocketIO in the main thread
+    threading.Thread(target=schedule_cleanup, daemon=True).start()
     run_flask()
+
 

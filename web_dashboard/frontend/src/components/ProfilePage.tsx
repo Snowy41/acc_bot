@@ -24,26 +24,38 @@ export default function ProfilePage() {
   const [notFound, setNotFound] = useState(false);
   const [currentUser, setCurrentUser] = useState("");
   const navigate = useNavigate();
+    const [isFriend, setIsFriend] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/users/${usertag}`)
-      .then(res => {
-        if (res.status === 404) {
-          setNotFound(true);
-          return null;
+      fetch(`/api/users/${usertag}`)
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      return res.json();
+    })
+    .then(data => {
+      if (data) setProfile(data);
+    })
+    .catch((err) => {
+      console.error("Profile fetch error:", err);
+      setNotFound(true);
+    });
+fetch("/api/auth/status", { credentials: "include" })
+  .then(res => res.json())
+  .then(data => {
+    setCurrentUser(data.usertag || "");
+        // ✅ check if they are friends
+      if (data.usertag && data.usertag !== usertag) {
+          fetch("/api/friends/list", { credentials: "include" })
+            .then(res => res.json())
+            .then(friendData => {
+              if (Array.isArray(friendData.friends) && friendData.friends.includes(usertag)) {
+                setIsFriend(true);
+              }
+            });
         }
-        return res.json();
-      })
-      .then(data => {
-        if (data) setProfile(data);
-      })
-      .catch((err) => {
-        console.error("Profile fetch error:", err);
-        setNotFound(true);
-      });
-    fetch("/api/auth/status", { credentials: "include" })
-      .then(res => res.json())
-      .then(data => setCurrentUser(data.usertag || ""));
+    });
   }, [usertag]);
 
   if (notFound) return <div className="p-12 text-red-400 text-center">User not found</div>;
@@ -249,6 +261,40 @@ export default function ProfilePage() {
                   </a>
                 )}
               </div>
+            )}
+            {currentUser && currentUser !== profile.usertag && (
+              isFriend ? (
+                <button
+                  className="mt-4 px-5 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition"
+                  onClick={async () => {
+                    await fetch("/api/friends/remove", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      credentials: "include",
+                      body: JSON.stringify({ friendTag: profile.usertag }),
+                    });
+                    setIsFriend(false);
+                  }}
+                >
+                  Remove Friend
+                </button>
+              ) : (
+                <button
+                  className="mt-4 px-5 py-2 bg-aqua text-midnight rounded-lg font-semibold hover:bg-cyan-400 transition"
+                  onClick={async () => {
+                    const res = await fetch("/api/friends/add", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      credentials: "include",
+                      body: JSON.stringify({ friendTag: profile.usertag }),
+                    });
+                    const data = await res.json();
+                    alert(data.message || "Friend request sent!");
+                  }}
+                >
+                  Add Friend
+                </button>
+              )
             )}
 
           {/* EDIT BUTTON */}

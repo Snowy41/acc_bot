@@ -28,7 +28,7 @@ export default function ProfilePanel({ loggedIn, setLoggedIn, user, setUser, use
   if (!loggedIn) {
     return (
       <>
-        <div className="fixed top-0 right-0 z-30 flex items-center gap-4 p-4">
+        <div className="flex items-center gap-4 select-none">
           <button
             className="bg-gradient-to-tr from-aqua to-cyan-400 text-midnight px-5 py-2 rounded-full shadow-xl font-bold hover:from-cyan-300 hover:to-aqua transition border-2 border-cyan-400/60"
             onClick={() => setShowLoginModal(true)}
@@ -52,7 +52,7 @@ export default function ProfilePanel({ loggedIn, setLoggedIn, user, setUser, use
   }
 
   return (
-    <div className="fixed top-0 right-0 z-30 flex items-center gap-4 p-4 select-none">
+    <div className="flex items-center gap-4 p-4 select-none -top-1">
       <div
         className="relative flex items-center gap-2 bg-white/10 border border-cyan-900/40 backdrop-blur-xl rounded-full px-4 py-2 shadow-xl cursor-pointer hover:bg-cyan-900/20 transition"
         onClick={() => setDropdownOpen((v) => !v)}
