@@ -420,7 +420,8 @@ def update_user(usertag):
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    is_admin = get_user_by_usertag(session.get("username"), {}).get("is_admin", False)
+    session_user = get_user_by_usertag(session.get("username"))
+    is_admin = session_user.get("is_admin", False) if session_user else False
     # Only allow updating your own profile, or if admin
     if session.get("username") != usertag.lower() and not is_admin:
         return jsonify({"error": "Permission denied"}), 403
