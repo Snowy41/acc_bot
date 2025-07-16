@@ -256,20 +256,32 @@ def send_discord_message(content):
 @app.route("/webhook", methods=["POST"])
 def github_webhook():
     payload = request.json
-    # Only handle push events (ignore others)
-    if "commits" in payload:
-        repo = payload["repository"]["full_name"]
-        pusher = payload["pusher"]["name"]
-        branch = payload["ref"].split("/")[-1]
-        commits = payload["commits"]
-        for commit in commits:
-            msg = (
-                f"**[{repo}]** `{branch}`\n"
-                f"🔄 **{pusher}** pushed: [{commit['id'][:7]}] {commit['message']}\n"
-                f"<{commit['url']}>"
-            )
-            send_discord_message(msg)
+    if not payload or "commits" not in payload:
+        return "Ignored", 204
+
+    repo = payload["repository"]["full_name"]
+    pusher = payload["pusher"]["name"]
+    branch = payload["ref"].split("/")[-1]
+    commits = payload["commits"]
+
+    commit_count = len(commits)
+    header = f"📦 **{repo}** received {commit_count} update{'s' if commit_count > 1 else ''} on `{branch}` by **{pusher}**:\n"
+
+    lines = []
+    for commit in commits[:5]:  # cap to 5 for brevity
+        sha = commit["id"][:7]
+        msg = commit["message"].split("\n")[0]
+        url = commit["url"]
+        author = commit.get("author", {}).get("name", "Unknown")
+        lines.append(f"- [`{sha}`]({url}) by **{author}**: {msg}")
+
+    if len(commits) > 5:
+        lines.append(f"...and {len(commits) - 5} more commit(s).")
+
+    final_message = header + "\n".join(lines)
+    send_discord_message(final_message)
     return "OK", 200
+
 
 @app.errorhandler(Exception)
 def handle_all_errors(e):
@@ -346,7 +358,7 @@ def status():
         "loggedIn": bool(usertag),
         "usertag": usertag,
         "username": user.get("username", "") if user else "",
-        "isAdmin": user.get("role", "user") == "admin" if user else False,
+        "isAdmin": user.get("role") == "admin" if user else False,
         "color": user.get("color", "#fff") if user else "#fff",
         "uid": user.get("uid", 0) if user else 0,
         "avatar": request.host_url.rstrip("/") + user.get("avatar", "") if user else "",
@@ -439,7 +451,7 @@ def list_users():
             "is_banned": bool(user.get("is_banned", False)),
             "is_muted": bool(user.get("is_muted", False)),
             # Optionally for backward compatibility:
-            "is_admin": user.get("role", "user") == "admin"
+            "is_admin": user.get("role") == "admin"
         })
 
     return jsonify({"users": user_list})
