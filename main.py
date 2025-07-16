@@ -61,28 +61,39 @@ stream_started = 0
 def get_user_by_usertag(usertag):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
+    # Add 'friends' and 'friendRequests' to the fields:
     c.execute("SELECT * FROM users WHERE usertag=?", (usertag,))
     row = c.fetchone()
     conn.close()
     if not row:
         return None
-    fields = ["usertag", "username", "password", "is_admin", "is_banned", "is_muted", "color", "bio", "tags", "social", "avatar", "uid"]
+    fields = [
+        "usertag", "username", "password", "is_admin", "is_banned", "is_muted",
+        "color", "bio", "tags", "social", "avatar", "uid",
+        "friends", "friendRequests"
+    ]
     user = dict(zip(fields, row))
-    import json
     user["tags"] = json.loads(user.get("tags") or "[]")
     user["social"] = json.loads(user.get("social") or "{}")
     user["is_admin"] = bool(user["is_admin"])
     user["is_banned"] = bool(user["is_banned"])
     user["is_muted"] = bool(user["is_muted"])
+    # Add these two lines:
+    user["friends"] = json.loads(user.get("friends") or "[]")
+    user["friendRequests"] = json.loads(user.get("friendRequests") or "[]")
     return user
+
 
 def save_user(user):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     import json
     c.execute("""
-    INSERT OR REPLACE INTO users (usertag, username, password, is_admin, is_banned, is_muted, color, bio, tags, social, avatar, uid)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT OR REPLACE INTO users (
+        usertag, username, password, is_admin, is_banned, is_muted,
+        color, bio, tags, social, avatar, uid, friends, friendRequests
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         user["usertag"],
         user.get("username"),
@@ -95,10 +106,13 @@ def save_user(user):
         json.dumps(user.get("tags", [])),
         json.dumps(user.get("social", {})),
         user.get("avatar", ""),
-        user.get("uid", 0)
+        user.get("uid", 0),
+        json.dumps(user.get("friends", [])),        # <-- add this
+        json.dumps(user.get("friendRequests", [])), # <-- add this
     ))
     conn.commit()
     conn.close()
+
 def load_forum():
     try:
         with open(FORUM_FILE, "r") as f:
