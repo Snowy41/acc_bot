@@ -193,20 +193,20 @@ def logout():
 @app.route("/api/auth/status", methods=["GET"])
 def status():
     users = load_users()
-    usertag = session.get("username")  # session always stores the usertag!
+    usertag = session.get("username")
     user = users.get(usertag) if usertag else None
-    is_admin = user.get("is_admin", False) if user else False
+
     return jsonify({
         "loggedIn": bool(usertag),
         "usertag": usertag,
-        "username": user.get("username", "") if user else "",  # Display name!
-        "isAdmin": is_admin,
+        "username": user.get("username", "") if user else "",
+        "isAdmin": user.get("is_admin", False) if user else False,
         "color": user.get("color", "#fff") if user else "#fff",
-        "uid": user.get("uid", 0),
-        "avatar": request.host_url.rstrip("/") + user.get("avatar", ""),
-        "notifications": user.get("notifications", []) if user else []
-
+        "uid": user.get("uid", 0) if user else 0,
+        "avatar": request.host_url.rstrip("/") + user.get("avatar", "") if user else "",
+        "notifications": user.get("notifications", []) if user else [],
     })
+
 @app.route("/api/notifications/clear", methods=["POST"])
 def clear_notifications():
     users = load_users()
