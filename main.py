@@ -1,4 +1,5 @@
 import asyncio
+import atexit
 import json
 import hashlib
 import os
@@ -1073,6 +1074,20 @@ async def run_bot():
     print("Starting discord_bot...")
     await bot.start(token)
 
+@atexit.register
+def shutdown():
+    try:
+        print("[SYSTEM] Shutting down Discord bot...")
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(bot.close())
+    except Exception:
+        pass
+
+def start_discord_bot():
+    try:
+        asyncio.run(run_bot())
+    except Exception as e:
+        print("[DISCORD] Bot crashed:", e)
 
 eventlet.monkey_patch()
 
@@ -1080,7 +1095,7 @@ eventlet.monkey_patch()
 threading.Thread(target=schedule_cleanup, daemon=True).start()
 
     # Start Discord bot thread
-threading.Thread(target=lambda: asyncio.run(run_bot()), daemon=True).start()
+threading.Thread(target=start_discord_bot, daemon=True).start()
 
 # expose the socketio.run(app) as a callable for gunicorn
 def app_factory():
