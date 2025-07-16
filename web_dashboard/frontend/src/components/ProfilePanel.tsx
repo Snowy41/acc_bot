@@ -66,7 +66,8 @@ export default function ProfilePanel({ loggedIn, setLoggedIn, user, setUser, use
               alt="avatar"
               className="w-full h-full object-cover"
               onError={(e) => {
-                e.currentTarget.style.display = "none";
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = "/avatars/default.png"; // or a static asset
               }}
             />
           ) : (

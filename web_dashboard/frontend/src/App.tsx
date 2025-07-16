@@ -85,7 +85,7 @@ function App() {
           setRole(data.role || "user");
           setIsAdmin(data.role === "admin");
           setIsPremium(data.role === "admin" || data.role === "premium");
-          setUserAvatar(data.avatar ? `${window.location.origin}${data.avatar}` : "");
+          setUserAvatar(data.avatar || "");
           if (Array.isArray(data.notifications)) {
             setNotifications(data.notifications);
           }
