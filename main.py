@@ -559,12 +559,6 @@ def rename_user(username):
     session["username"] = new_username
     return jsonify({"success": True, "new_username": new_username})
 
-
-@app.route("/webhook", methods=["POST"])
-def github_webhook():
-    os.system("/opt/whitebot/update.sh")
-    return "Updated", 200
-
 # Web route to get the list of .log files
 @app.route("/api/logs/list", methods=["GET"])
 def list_logs():
