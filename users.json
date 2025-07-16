@@ -6,18 +6,21 @@
     "password": "0c15d483d7512efc82be42aef0b53d082cad625aa53e979f9771961e28f8d2a5",
     "bio": "Test",
     "social": {
-      "github": "https://github.com/Snowy41",
       "discord": "minecraftbeziehung",
+      "github": "https://github.com/Snowy41",
       "twitter": "https://twitter.com/SnowyXds"
     },
     "is_admin": true,
+    "avatar": "/avatars/1.gif",
     "color": "#f14936",
     "tags": [
       "Founder",
       "Owner",
       "$"
     ],
-    "frame": "aqua-glow"
+    "frame": "aqua-glow",
+    "notifications": [],
+    "friends": []
   },
   "test": {
     "uid": 2,
@@ -31,9 +34,81 @@
       "discord": "YourName#1234",
       "twitter": "https://twitter.com/yourname"
     },
+    "avatar": "/avatars/1.gif",
     "is_admin": false,
     "is_banned": false,
     "is_muted": false,
     "color": "#fff"
+  },
+  "net": {
+    "uid": 3,
+    "username": "n",
+    "is_admin": true,
+    "usertag": "net",
+    "password": "5096469faf2ae3b69f2d8781a3437fb170d18ce9c54a5d0b891b2789bd2520ef",
+    "tags": [
+      "Owner"
+    ],
+    "avatar": "http://vanish.rip/avatars/net.png",
+    "bio": "Owner @vanish",
+    "is_banned": false,
+    "is_muted": false,
+    "color": "#e31c1c",
+    "social": {
+      "discord": "networktrace"
+    },
+    "friends": [],
+    "friendRequests": [
+      "1"
+    ],
+    "notifications": [
+      {
+        "id": "6b82743e-0b47-40e8-8a45-56062f3ca84c",
+        "type": "friend",
+        "message": "\ud83d\udc65 Friend request from @1",
+        "timestamp": 1752637619563
+      }
+    ]
+  },
+  "OG_Kush": {
+    "uid": 4,
+    "username": "Jay",
+    "usertag": "OG_Kush",
+    "avatar": "/avatars/1.gif",
+    "password": "0388b42ac6a39349189fd0bcfbfe32d6cf5449bc365be1010471e5ba8f63396c",
+    "tags": [],
+    "bio": "",
+    "is_admin": false,
+    "is_banned": false,
+    "is_muted": false,
+    "color": "#fff"
+  },
+  "silent": {
+    "uid": 5,
+    "username": "silent",
+    "usertag": "silent",
+    "avatar": "http://vanish.rip/avatars/silent.png",
+    "password": "d31505e0f69e4b53760721dbd80fef65637a7c0970af9c5dc2a306717009b22a",
+    "tags": [],
+    "bio": "444",
+    "is_admin": false,
+    "is_banned": false,
+    "is_muted": false,
+    "color": "#fff",
+    "social": {}
+  },
+  "sam-manyak": {
+    "uid": 6,
+    "username": "sam-manyak",
+    "usertag": "sam-manyak",
+    "avatar": "http://vanish.rip/avatars/sam-manyak.png",
+    "password": "aa7b28b37025e1f1ceb489b1494a922b48873466b70ffdd8ae3cf8f5db4fcb79",
+    "tags": [],
+    "bio": "",
+    "is_admin": false,
+    "is_banned": false,
+    "is_muted": false,
+    "color": "#fff",
+    "social": {}
   }
 }

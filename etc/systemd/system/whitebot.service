@@ -1,0 +1,13 @@
+[Unit]
+Description=WhiteBot Gunicorn Service
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/whitebot/web_dashboard/backend
+ExecStart=/opt/whitebot/web_dashboard/backend/venv/bin/python main.py
+Restart=always
+
+
+[Install]
+WantedBy=multi-user.target

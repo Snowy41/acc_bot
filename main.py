@@ -38,7 +38,9 @@ CORS(app)  # ✅ enable CORS for WebSocket connections
 socketio = SocketIO(app, cors_allowed_origins="*", logger=True, engineio_logger=True, async_mode="threading")
 running_processes = {}
 MESSAGES_FILE = os.path.join(os.path.dirname(__file__), "messages.json")
+
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "avatars")
+print("UPLOAD_FOLDER resolved to:", UPLOAD_FOLDER)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 

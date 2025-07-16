@@ -1,16 +1,20 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ],
   "compilerOptions": {
-    "strict": true,
-    "jsx": "react-jsx",  // Ensure JSX is set to react-jsx
-    "esModuleInterop": true
+    "target": "esnext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx"
   },
- "include": [
-    "src/**/*",  // Ensure all your files in src are included
-    "src/components/**/*"  // Specifically include components folder if it's separate
-  ]
+  "include": ["src"]
 }
+
