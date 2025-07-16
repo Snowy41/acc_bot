@@ -8,6 +8,8 @@ import time
 import traceback
 import uuid
 import requests
+import eventlet
+import eventlet.wsgi
 
 from flask import Flask, jsonify, request, session, send_from_directory
 from flask_cors import CORS
@@ -1054,7 +1056,9 @@ def handle_dm(data):
 # Function to run Flask in a separate thread
 def run_flask():
     print("Starting Flask app with WebSocket...")
-    socketio.run(app, port=5000, debug=False, use_reloader=False, allow_unsafe_werkzeug=True)  # Disable reloader to avoid signal issues
+    eventlet.monkey_patch()  # add this at the top
+
+    socketio.run(app, port=5000, debug=False, use_reloader=False)
 
 # Function to run Discord bot asynchronously
 async def run_bot():
