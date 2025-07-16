@@ -493,7 +493,7 @@ def get_user(usertag):
         profile = {
             "username": user.get("username", ""),
             "usertag": user.get("usertag", usertag),
-            user.get("role", "user") == "admin"
+            "isAdmin": user.get("role") == "admin",
             "isBanned": user.get("is_banned", False),
             "isMuted": user.get("is_muted", False),
             "bio": user.get("bio", ""),
