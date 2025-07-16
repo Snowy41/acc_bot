@@ -50,6 +50,7 @@ export default function ProfilePanel({ loggedIn, setLoggedIn, user, setUser, use
       </>
     );
   }
+  displayName = displayName || "";
 
   return (
     <div className="flex items-center gap-4 p-4 select-none -top-1">
@@ -71,8 +72,9 @@ export default function ProfilePanel({ loggedIn, setLoggedIn, user, setUser, use
               }}
             />
           ) : (
-            <span className="font-bold text-lg text-aqua">{displayName[0]?.toUpperCase() || "👤"}</span>
-          )}
+            <span className="font-bold text-lg text-aqua">
+              {(displayName?.[0] || "👤").toUpperCase()}
+            </span>          )}
         </div>
         <span className="font-semibold hidden sm:block" style={{ color: userColor }}>
           {displayName}
