@@ -143,14 +143,9 @@ useEffect(() => {
     }
   };
 
-  const handleChatMessage = (data: { to: string; from: string; text: string; timestamp: number }) => {
-    if (data.to === usertag) {
-      setNotifications(prev => [{
-        id: crypto.randomUUID(),
-        type: "chat",
-        message: `💬 Message from @${data.from}`,
-        timestamp: data.timestamp,
-      }, ...prev]);
+  const handleChatMessage = (data: { to: string; from: string; text: string; timestamp: number; notification?: UserNotification }) => {
+    if (data.to === usertag && data.notification) {
+      setNotifications(prev => [data.notification, ...prev]);
     }
   };
 

@@ -589,25 +589,30 @@ def send_message(friend_tag):
     timestamp = int(time.time() * 1000)
     save_chat_message(current_user, friend_tag, current_user, text, timestamp)
 
-    socketio.emit("chat_message", {
-        "to": friend_tag,
-        "from": current_user,
-        "text": text,
-        "timestamp": timestamp
-    })
-
-    # --- Add notification for recipient ---
+    notif_id = str(uuid.uuid4())
     recipient = get_user_by_usertag(friend_tag)
     if recipient:
         recipient.setdefault("notifications", [])
         recipient["notifications"].insert(0, {
-            "id": str(uuid.uuid4()),
+            "id": notif_id,
             "type": "chat",
             "message": f"💬 Message from @{current_user}",
             "timestamp": timestamp,
         })
         save_user(recipient)
 
+    socketio.emit("chat_message", {
+        "to": friend_tag,
+        "from": current_user,
+        "text": text,
+        "timestamp": timestamp,
+        "notification": {
+            "id": notif_id,
+            "type": "chat",
+            "message": f"💬 Message from @{current_user}",
+            "timestamp": timestamp,
+        }
+    })
 
     return jsonify({"success": True})
 
