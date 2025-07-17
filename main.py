@@ -521,34 +521,31 @@ def get_user(usertag):
 @app.route("/api/users/<usertag>", methods=["PATCH"])
 def update_user(usertag):
     user = get_user_by_usertag(usertag.lower())
-
     if not user:
         return jsonify({"error": "User not found"}), 404
 
     session_user = get_user_by_usertag(session.get("username"))
     is_admin = str(session_user.get("role", "")) == "admin" if session_user else False
-    # Only allow updating your own profile, or if current user is admin
+
+    # Only allow updating your own profile, or if admin
     if session.get("username") != usertag.lower() and not is_admin:
         return jsonify({"error": "Permission denied"}), 403
 
     data = request.json
-    if "role" in data and is_admin:
-        user["role"] = data["role"]
+
+    # Always preserve current role if not present in PATCH
+    if "role" not in user:
+        user["role"] = user.get("role", "user")
+
     # Editable fields:
     if "bio" in data:
         user["bio"] = data["bio"]
-    if "color" in data and is_admin:
+    if "color" in data:
         user["color"] = data["color"]
     if "username" in data:
         user["username"] = data["username"]
-
-    # PATCH for social links (Github, Discord, Twitter, etc)
-    if "social" in data:
-        if not isinstance(data["social"], dict):
-            return jsonify({"error": "Social must be an object"}), 400
-        # Optional: merge or overwrite social links.
+    if "social" in data and isinstance(data["social"], dict):
         user["social"] = data["social"]
-
     if "tags" in data and isinstance(data["tags"], list):
         user["tags"] = data["tags"]
 
