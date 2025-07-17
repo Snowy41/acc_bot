@@ -533,8 +533,11 @@ def update_user(usertag):
 
     data = request.json
 
-    # Always preserve current role if not present in PATCH
-    if "role" not in user:
+    # Preserve current role unless admin explicitly sets a new one
+    if "role" in data and is_admin:
+        user["role"] = data["role"]
+    # If role isn't being updated, preserve existing role (this is the FIX)
+    else:
         user["role"] = user.get("role", "user")
 
     # Editable fields:
@@ -551,6 +554,7 @@ def update_user(usertag):
 
     save_user(user)
     return jsonify({"success": True, "user": user})
+
 
 @app.route("/api/messages/<friend_tag>", methods=["GET"])
 def get_messages(friend_tag):
