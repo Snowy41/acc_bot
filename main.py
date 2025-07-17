@@ -535,7 +535,7 @@ def update_user(usertag):
     data = request.json
 
     # Only update role if admin and it's present in the PATCH
-    if "role" in data and is_admin:
+    if "role" in data and is_admin and data["role"]:
         user["role"] = data["role"]
 
     # Update only fields that are present
