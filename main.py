@@ -420,15 +420,15 @@ def upload_avatar():
 @app.route("/avatars/<filename>")
 def serve_avatar(filename):
     avatar_path = os.path.join(UPLOAD_FOLDER, filename)
-    print("[AVATAR DEBUG] Attempting to serve:", avatar_path)
     if os.path.exists(avatar_path):
-        print("[AVATAR DEBUG] Found!")
         return send_from_directory(UPLOAD_FOLDER, filename)
-    print("[AVATAR DEBUG] Not found, trying default.png")
-    # Fallback to default.png in your static/public folder
-    return send_from_directory(
-        "/opt/whitebot/web_dashboard/frontend/public", "default.png"
-    )
+    # Fallback to default.png
+    default_path = os.path.join("/opt/whitebot/web_dashboard/frontend/public", "default.png")
+    if os.path.exists(default_path):
+        return send_from_directory("/opt/whitebot/web_dashboard/frontend/public", "default.png")
+    from flask import abort
+    abort(404)
+
 
 
 # API route to get the users info/list
