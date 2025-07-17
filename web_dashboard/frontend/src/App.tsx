@@ -373,7 +373,7 @@ function FriendList({
           </li>
         ))}
       </ul>
-      {chatTarget && <ChatModal friend={chatTarget} onClose={() => setChatTarget(null)} />}
+      {chatTarget && <ChatModal friend={chatTarget} onClose={() => setChatTarget(null)} currentUserTag={usertag} />}
     </>
   );
 }
@@ -426,9 +426,12 @@ function PendingRequests() {
 function ChatModal({
   friend,
   onClose,
+  currentUserTag,     // <-- ADD THIS
 }: {
   friend: string;
   onClose: () => void;
+  currentUserTag: string;
+
 }) {
   const [messages, setMessages] = useState<{ from: string; text: string; timestamp: number }[]>([]);
   const [input, setInput] = useState("");
@@ -497,7 +500,7 @@ function ChatModal({
         {/* Chat body */}
         <div className="flex-1 p-4 overflow-y-auto bg-[#18222f] space-y-3">
           {messages.map((msg, i) => {
-            const isMe = msg.from === currentUser.current;
+            const isMe = msg.from === currentUserTag;
             return (
               <div key={i} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[75%] p-3 rounded-xl text-sm shadow ${
