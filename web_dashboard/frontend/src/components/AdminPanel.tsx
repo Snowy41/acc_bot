@@ -95,6 +95,7 @@ export default function AdminPanel() {
         color: edit.color,
         tags: edit.tags,
         bio: edit.bio,
+        role: edit.role || selected.role || "user",  // <-- always include the current role!
       }),
     });
     setSuccessMsg("Profile updated!");
