@@ -87,9 +87,9 @@ def save_user(user):
     c.execute("""
     INSERT OR REPLACE INTO users (
         usertag, username, password, is_admin, is_banned, is_muted,
-        color, bio, tags, social, avatar, uid, friends, friendRequests
+        color, bio, tags, social, avatar, uid, friends, friendRequests, role
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         user["usertag"],
         user.get("username"),
@@ -103,9 +103,11 @@ def save_user(user):
         json.dumps(user.get("social", {})),
         user.get("avatar", ""),
         user.get("uid", 0),
-        json.dumps(user.get("friends", [])),        # <-- add this
-        json.dumps(user.get("friendRequests", [])), # <-- add this
+        json.dumps(user.get("friends", [])),
+        json.dumps(user.get("friendRequests", [])),
+        user.get("role", "user"),  # <--- ACTUALLY SAVE THE ROLE!
     ))
+
     conn.commit()
     conn.close()
 
