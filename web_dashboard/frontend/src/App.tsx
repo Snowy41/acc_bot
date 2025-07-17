@@ -227,6 +227,7 @@ useEffect(() => {
                 <FriendList
                   onClose={() => setShowFriends(false)}
                   onlineUsers={onlineUsers}
+                  usertag={usertag}
                 />
                 <PendingRequests />
               </div>
@@ -331,10 +332,12 @@ export default App;
 
 function FriendList({
   onClose,
-  onlineUsers
+  onlineUsers,
+  usertag
 }: {
   onClose: () => void;
   onlineUsers: string[];
+  usertag: string;
 }) {
   const [friends, setFriends] = useState<string[]>([]);
   const [chatTarget, setChatTarget] = useState<string | null>(null);
