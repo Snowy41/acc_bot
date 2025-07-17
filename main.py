@@ -595,6 +595,20 @@ def send_message(friend_tag):
         "text": text,
         "timestamp": timestamp
     })
+
+    # --- Add notification for recipient ---
+    recipient = get_user_by_usertag(friend_tag)
+    if recipient:
+        recipient.setdefault("notifications", [])
+        recipient["notifications"].insert(0, {
+            "id": str(uuid.uuid4()),
+            "type": "chat",
+            "message": f"💬 Message from @{current_user}",
+            "timestamp": timestamp,
+        })
+        save_user(recipient)
+
+
     return jsonify({"success": True})
 
 
