@@ -28,7 +28,11 @@ export default function AdminPanel() {
   const [showStats, setShowStats] = useState(false);
   const [role, setRole] = useState("user");
   const [isPremium, setIsPremium] = useState(false);
-
+  const sortedChatKeys = Object.keys(allChats).sort((a, b) => {
+    const lastA = allChats[a]?.[allChats[a].length - 1]?.timestamp || 0;
+    const lastB = allChats[b]?.[allChats[b].length - 1]?.timestamp || 0;
+    return lastB - lastA; // most recent first
+  });
   useEffect(() => {
     fetch("/api/auth/status", { credentials: "include" })
       .then(res => res.json())
@@ -144,7 +148,7 @@ export default function AdminPanel() {
               <div className="w-full md:w-1/3">
                 <h3 className="text-cyan-300 font-semibold mb-2">Chat Threads</h3>
                 <ul className="space-y-2 bg-[#1b2435] border border-cyan-900/40 p-4 rounded-xl max-h-80 overflow-y-auto">
-                  {Object.keys(allChats).map((key) => (
+                  {sortedChatKeys.map((key) => (
                     <li
                       key={key}
                       onClick={() => setSelectedChatKey(key)}

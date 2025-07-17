@@ -41,7 +41,7 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"  # or "None" if using different do
 app.config["SESSION_COOKIE_SECURE"] = True     # if using HTTPS
 
 
-UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "avatars")
+UPLOAD_FOLDER = "/opt/whitebot/avatars"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
