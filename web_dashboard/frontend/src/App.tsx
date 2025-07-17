@@ -144,6 +144,7 @@ useEffect(() => {
   };
 
   const handleChatMessage = (data: { to: string; from: string; text: string; timestamp: number; notification?: UserNotification }) => {
+    console.log("[Socket] chat_message received:", data); // <--- ADD THIS
     if (data.to === usertag && data.notification) {
       setNotifications(prev => [data.notification, ...prev]);
     }

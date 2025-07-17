@@ -30,6 +30,7 @@ export default function NotificationBell({
       (n) => !lastNotificationIds.current.includes(n.id)
     );
     if (newOnes.length > 0) {
+      console.log("[Bell] New notifications to pop:", newOnes); // <--- ADD THIS
       setPopNotifications((prev) => [...prev, ...newOnes]);
       lastNotificationIds.current = notifications.map((n) => n.id);
       // Remove from pop after 3 seconds
