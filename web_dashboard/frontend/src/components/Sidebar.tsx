@@ -13,7 +13,8 @@ export default function Sidebar({
   active,
   setActive,
   isAdmin,
-}: { active: string, setActive: (k: string) => void, isAdmin?: boolean }) {
+  isPremium,   // ← ADD THIS
+}: { active: string, setActive: (k: string) => void, isAdmin?: boolean, isPremium?: boolean }) {
   const [open, setOpen] = useState(true);
   const location = useLocation();
 
@@ -70,21 +71,30 @@ export default function Sidebar({
         )}
 
         {/* Render the rest of the nav */}
-        {nav.slice(1).map((item) => (
-          <Link
-            key={item.key}
-            to={item.path}
-            className={`group flex items-center gap-3 px-4 py-3 mx-1 rounded-xl transition
-              ${active === item.key ? "bg-gradient-to-tr from-aqua to-cyan-800 text-midnight shadow-md" : "hover:bg-cyan-900/30 hover:text-aqua"}
-              ${open ? "justify-start" : "justify-center"}
-            `}
-            onClick={() => setActive(item.key)}
-            style={active === item.key ? { boxShadow: "0 0 14px #12fff188" } : {}}
-          >
-            <item.icon className={`h-6 w-6 ${active === item.key ? "text-midnight" : "text-cyan-400 group-hover:text-aqua"}`} />
-            {open && <span className={`font-bold ${active === item.key ? "text-midnight" : "text-white"}`}>{item.name}</span>}
-          </Link>
-        ))}
+        {nav.slice(1).map((item) => {
+          // Only show "Logs" and "Bot Selection" if isPremium
+          if (
+            (item.key === "logs" || item.key === "botSelection") &&
+            !isPremium
+          ) {
+            return null;
+          }
+          return (
+            <Link
+              key={item.key}
+              to={item.path}
+              className={`group flex items-center gap-3 px-4 py-3 mx-1 rounded-xl transition
+                ${active === item.key ? "bg-gradient-to-tr from-aqua to-cyan-800 text-midnight shadow-md" : "hover:bg-cyan-900/30 hover:text-aqua"}
+                ${open ? "justify-start" : "justify-center"}
+              `}
+              onClick={() => setActive(item.key)}
+              style={active === item.key ? { boxShadow: "0 0 14px #12fff188" } : {}}
+            >
+              <item.icon className={`h-6 w-6 ${active === item.key ? "text-midnight" : "text-cyan-400 group-hover:text-aqua"}`} />
+              {open && <span className={`font-bold ${active === item.key ? "text-midnight" : "text-white"}`}>{item.name}</span>}
+            </Link>
+          );
+        })}
       </nav>
     </div>
   );
