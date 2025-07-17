@@ -358,8 +358,6 @@ def status():
         avatar = avatar.replace("http://", "https://")
     elif avatar.startswith("/"):
         avatar = "https://vanish.rip" + avatar
-    else:
-        avatar = ""
 
     return jsonify({
         "loggedIn": bool(usertag),
