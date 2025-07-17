@@ -10,7 +10,11 @@ const MonitorPage = () => {
   const [logs, setLogs] = useState<string[]>([]);
 
   // Create a WebSocket connection to the backend
-  const socket = io("http://localhost:5000"); // Adjust backend URL if needed
+  const socket = io({
+    path: "/socket.io/",
+    transports: ["websocket"],
+    withCredentials: true,
+  });
 
   useEffect(() => {
     socket.on("bot_output", (data: string) => {
