@@ -304,14 +304,30 @@ export default function AdminPanel() {
                   onChange={(e) => setEdit({ ...edit, username: e.target.value })}
                 />
               </div>
-              <div className="mb-5">
-                <label className="block text-cyan-300 mb-1">Color</label>
-                <input
-                  className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white mb-2 border border-cyan-800"
-                  value={edit.color || ""}
-                  onChange={(e) => setEdit({ ...edit, color: e.target.value })}
-                />
-              </div>
+                <div className="mb-5">
+                  <label className="block text-cyan-300 mb-1">Color</label>
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="color"
+                      className="w-10 h-10 rounded border-2 border-cyan-800 bg-[#232e43] cursor-pointer"
+                      value={edit.color || "#ffffff"}
+                      onChange={(e) => setEdit({ ...edit, color: e.target.value })}
+                      style={{ minWidth: "2.5rem", minHeight: "2.5rem" }}
+                    />
+                    <input
+                      className="px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800 w-36"
+                      value={edit.color || ""}
+                      onChange={(e) => setEdit({ ...edit, color: e.target.value })}
+                      placeholder="#RRGGBB"
+                      maxLength={9}
+                    />
+                    {/* Show a small preview swatch */}
+                    <span
+                      className="w-8 h-8 rounded-full border border-cyan-900 shadow"
+                      style={{ background: edit.color || "#fff", display: "inline-block" }}
+                    ></span>
+                  </div>
+                </div>
               <div className="mb-5">
                 <label className="block text-cyan-300 mb-1">Tags</label>
                 <div className="flex flex-wrap gap-2 mb-2">
