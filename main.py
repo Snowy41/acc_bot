@@ -422,8 +422,11 @@ def upload_avatar():
 @app.route("/avatars/<filename>")
 def serve_avatar(filename):
     avatar_path = os.path.join(UPLOAD_FOLDER, filename)
+    print("[AVATAR DEBUG] Attempting to serve:", avatar_path)
     if os.path.exists(avatar_path):
+        print("[AVATAR DEBUG] Found!")
         return send_from_directory(UPLOAD_FOLDER, filename)
+    print("[AVATAR DEBUG] Not found, trying default.png")
     # Fallback to default.png in your static/public folder
     return send_from_directory(
         "/opt/whitebot/web_dashboard/frontend/public", "default.png"
