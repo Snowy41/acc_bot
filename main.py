@@ -600,7 +600,13 @@ def send_message(friend_tag):
             "timestamp": timestamp,
         })
         save_user(recipient)
-
+    print("[SOCKET EMIT] chat_message to:", friend_tag, "payload:", {
+        "to": friend_tag,
+        "from": current_user,
+        "text": text,
+        "timestamp": timestamp,
+        "notification": notification,
+    })
     socketio.emit("chat_message", {
         "to": friend_tag,
         "from": current_user,

@@ -148,6 +148,10 @@ useEffect(() => {
     if (data.to === usertag && data.notification) {
       setNotifications(prev => [data.notification, ...prev]);
     }
+    socket.on("chat_message", handleChatMessage);
+    return () => {
+      socket.off("chat_message", handleChatMessage);
+  };
   };
 
   socket.on("system_message", handleSystemMessage);
