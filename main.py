@@ -520,6 +520,7 @@ def get_user(usertag):
 
 @app.route("/api/users/<usertag>", methods=["PATCH"])
 def update_user(usertag):
+    # Always get the real user from DB, not just a blank dict
     user = get_user_by_usertag(usertag.lower())
     if not user:
         return jsonify({"error": "User not found"}), 404
@@ -533,14 +534,11 @@ def update_user(usertag):
 
     data = request.json
 
-    # Preserve current role unless admin explicitly sets a new one
+    # Only update role if admin and it's present in the PATCH
     if "role" in data and is_admin:
         user["role"] = data["role"]
-    # If role isn't being updated, preserve existing role (this is the FIX)
-    else:
-        user["role"] = user.get("role", "user")
 
-    # Editable fields:
+    # Update only fields that are present
     if "bio" in data:
         user["bio"] = data["bio"]
     if "color" in data:
@@ -551,6 +549,10 @@ def update_user(usertag):
         user["social"] = data["social"]
     if "tags" in data and isinstance(data["tags"], list):
         user["tags"] = data["tags"]
+
+    # Never let role disappear!
+    if "role" not in user or not user["role"]:
+        user["role"] = "user"
 
     save_user(user)
     return jsonify({"success": True, "user": user})
