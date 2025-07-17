@@ -399,8 +399,10 @@ def upload_avatar():
         return jsonify({"error": "Invalid file"}), 400
 
     ext = file.filename.rsplit('.', 1)[1].lower()
-    if ext == "gif" and not user.get("role", "user") == "admin":
+    # Allow GIFs only if the user has role == "admin"
+    if ext == "gif" and str(user.get("role", "")).lower() not in ["admin"]:
         return jsonify({"error": "Only admins can upload GIFs"}), 403
+
 
     for ext in ALLOWED_EXTENSIONS:
         old_path = os.path.join(UPLOAD_FOLDER, f"{usertag}.{ext}")
@@ -524,8 +526,8 @@ def update_user(usertag):
         return jsonify({"error": "User not found"}), 404
 
     session_user = get_user_by_usertag(session.get("username"))
-    is_admin = user.get("role", "user") == "admin" if session_user else False
-    # Only allow updating your own profile, or if admin
+    is_admin = str(session_user.get("role", "")) == "admin" if session_user else False
+    # Only allow updating your own profile, or if current user is admin
     if session.get("username") != usertag.lower() and not is_admin:
         return jsonify({"error": "Permission denied"}), 403
 
