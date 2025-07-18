@@ -245,7 +245,6 @@ useEffect(() => {
                   usertag={usertag}
                   onlineUsers={onlineUsers}
                 />
-                <PendingRequests />
               </div>
             </div>
           </div>
@@ -341,4 +340,3 @@ useEffect(() => {
 }
 
 export default App;
-
