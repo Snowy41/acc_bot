@@ -193,7 +193,6 @@ useEffect(() => {
 
   return (
     <Router>
-      <AnimatedCursor />
       <div className="flex min-h-screen relative z-10 bg-midnight">
         <Sidebar active={active} setActive={setActive} isAdmin={isAdmin} isPremium={isPremium}/>
         <SearchBar />
@@ -324,6 +323,7 @@ useEffect(() => {
           </Routes>
         </main>
         <ToastContainer position="top-center" autoClose={3000} aria-label="Notification center"/>
+        <AnimatedCursor />
       </div>
     </Router>
   );

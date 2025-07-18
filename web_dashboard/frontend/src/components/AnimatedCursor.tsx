@@ -1,58 +1,37 @@
 import React, { useEffect, useRef } from "react";
 
-const AnimatedCursor: React.FC = () => {
-  const ringRef = useRef<HTMLDivElement>(null);
-
-  // For trailing effect (delay the ring a bit)
-  const mouse = useRef({ x: 0, y: 0 });
-  const ring = useRef({ x: 0, y: 0 });
+const AnimatedCursorGlow: React.FC = () => {
+  const glowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const move = (e: MouseEvent) => {
-      mouse.current.x = e.clientX;
-      mouse.current.y = e.clientY;
+      if (glowRef.current) {
+        glowRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+      }
     };
     document.addEventListener("mousemove", move);
-
-    // Animate: smoothly interpolate the ring toward the mouse
-    let animationId: number;
-    const animate = () => {
-      ring.current.x += (mouse.current.x - ring.current.x) * 0.22;
-      ring.current.y += (mouse.current.y - ring.current.y) * 0.22;
-      if (ringRef.current) {
-        ringRef.current.style.transform = `translate3d(${ring.current.x}px, ${ring.current.y}px, 0)`;
-      }
-      animationId = requestAnimationFrame(animate);
-    };
-    animate();
-
-    return () => {
-      document.removeEventListener("mousemove", move);
-      cancelAnimationFrame(animationId);
-    };
+    return () => document.removeEventListener("mousemove", move);
   }, []);
 
   return (
     <div
-      ref={ringRef}
+      ref={glowRef}
       className="pointer-events-none fixed z-[9999] left-0 top-0"
       style={{
-        width: 52,
-        height: 52,
-        marginLeft: -26,
-        marginTop: -26,
+        width: 38,
+        height: 38,
+        marginLeft: -19,
+        marginTop: -19,
         borderRadius: "50%",
-        border: "2px solid #15f8dbcc",
-        boxShadow: "0 0 22px 4px #15f8db99, 0 0 64px 8px #15f8db44",
-        background: "rgba(21, 248, 219, 0.09)",
-        opacity: 0.8,
-        transition: "border-color 0.2s",
-        pointerEvents: "none",
-        willChange: "transform",
+        background: "radial-gradient(circle, #1cfcd4cc 0%, #15f8db33 70%, transparent 100%)",
+        boxShadow: "0 0 16px 8px #15f8db77, 0 0 48px 12px #15f8db44",
+        opacity: 0.85,
+        animation: "cursor-pulse 1.4s infinite cubic-bezier(.4,0,.6,1)",
+        willChange: "transform, opacity",
         mixBlendMode: "lighten",
       }}
     />
   );
 };
 
-export default AnimatedCursor;
+export default AnimatedCursorGlow;
