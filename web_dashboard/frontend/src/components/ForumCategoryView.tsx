@@ -90,7 +90,6 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
   return (
     <div className="w-full max-w-5xl mx-auto mt-8 relative">
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[70vw] h-[24vh] bg-gradient-to-tr from-aqua/30 to-cyan-500/15 blur-3xl rounded-full" />
         <div className="absolute bottom-0 right-0 w-[36vw] h-[22vh] bg-gradient-to-tl from-cyan-400/30 to-fuchsia-500/10 blur-2xl rounded-full" />
       </div>
       <div className="relative z-10">
