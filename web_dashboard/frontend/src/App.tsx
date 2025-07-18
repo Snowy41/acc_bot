@@ -70,7 +70,9 @@ function App() {
   useEffect(() => {
     setTimeout(() => setShowGetStarted(true), 3000);
   }, []);
-
+  const safeColors = typeof animatedColors === "string"
+    ? JSON.parse(animatedColors)
+    : animatedColors;
   const handleLogin = async (enteredUsertag: string, password: string) => {
   try {
     const response = await fetch('/api/knuddels/login', {
@@ -216,7 +218,7 @@ useEffect(() => {
             displayName={displayName}
             userAvatar={userAvatar}
             userRole={role}
-            animatedColors={animatedColors}
+            animatedColors={safeColors}
           />
         </div>
 
