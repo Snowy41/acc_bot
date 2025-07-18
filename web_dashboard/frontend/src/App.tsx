@@ -195,7 +195,7 @@ useEffect(() => {
   return (
     <Router>
       <ParticleBackground />
-      <div className="flex min-h-screen relative z-10 bg-midnight">
+      <div className="flex min-h-screen relative z-10">
         <Sidebar active={active} setActive={setActive} isAdmin={isAdmin} isPremium={isPremium}/>
         <SearchBar />
         <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
