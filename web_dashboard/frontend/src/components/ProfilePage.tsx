@@ -29,10 +29,19 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const [isFriend, setIsFriend] = useState(false);
 
-  const animatedColors =
-  typeof profile.animatedColors === "string"
-    ? JSON.parse(profile.animatedColors)
-    : profile.animatedColors || [];
+    let parsedColors: string[] = [];
+
+    try {
+      parsedColors =
+        typeof profile.animatedColors === "string"
+          ? JSON.parse(profile.animatedColors)
+          : Array.isArray(profile.animatedColors)
+          ? profile.animatedColors
+          : [];
+    } catch (e) {
+      console.warn("Invalid animatedColors in ProfilePage:", profile.animatedColors);
+    }
+
 
 
   useEffect(() => {
@@ -119,10 +128,14 @@ fetch("/api/auth/status", { credentials: "include" })
           {/* DISPLAY NAME + BADGES */}
           <div className="flex items-center gap-3 mb-1">
             <Username
-              animated={animatedColors.length === 2}
-              colors={animatedColors}
+              animated={parsedColors.length === 2}
+              colors={parsedColors}
               className="text-3xl"
-              style={animatedColors.length !== 2 ? { color: profile.color || "#fff" } : undefined}
+              style={
+                parsedColors.length !== 2
+                  ? { color: profile.color || "#fff" }
+                  : undefined
+              }
             >
               {profile.username}
             </Username>
