@@ -89,7 +89,6 @@ export default function ForumPostView({ usertag, displayName }: ForumPostViewPro
 
   return (
     <div className="w-full max-w-3xl mx-auto mt-10 relative">
-      <div className="absolute inset-0 z-0 pointer-events-none" />
       <div className="relative z-10">
         <Link to={`/forum/${category}`} className="text-cyan-300 hover:text-aqua mb-6 block">&larr; Back to {category}</Link>
         {canDelete && (
