@@ -218,7 +218,7 @@ function ThreadRow({
   role,
   onDelete,
 }: {
-  post: Post;
+  post: any;
   category: string;
   isSticky?: boolean;
   currentUserTag: string;
@@ -232,11 +232,15 @@ function ThreadRow({
   const canDelete = role === "admin" || post.usertag === currentUserTag;
 
   return (
-    <div className={`flex items-center border rounded-xl bg-[#1a2232]/80 px-3 md:px-6 py-4 gap-5 transition group
-      ${isSticky ? "border-yellow-300/50" : "border-cyan-900/40"}
-      hover:border-aqua hover:bg-cyan-900/20 hover:scale-[1.01]"`}>
+    <Link
+      to={`/forum/${category}/${post.id}`}
+      className={`flex items-center border rounded-xl bg-[#1a2232]/60 px-3 md:px-6 py-4 gap-5 transition group
+        ${isSticky ? "border-yellow-300/50" : "border-cyan-900/40"}
+        hover:border-aqua hover:bg-cyan-900/40 hover:scale-[1.01] cursor-pointer relative`}
+      style={{ textDecoration: "none" }}
+    >
       {/* Left meta */}
-      <div className="flex flex-col items-center min-w-[70px]">
+      <div className="flex flex-col items-center min-w-[70px] select-none">
         <Username
           animated={animatedColors.length === 2}
           colors={animatedColors}
@@ -257,12 +261,9 @@ function ThreadRow({
       </div>
       {/* Thread info */}
       <div className="flex-1 min-w-0">
-        <Link
-          to={`/forum/${category}/${post.id}`}
-          className="block font-bold text-lg md:text-xl text-cyan-100 hover:text-aqua transition truncate"
-        >
+        <div className="block font-bold text-lg md:text-xl text-cyan-100 group-hover:text-aqua transition truncate">
           {post.title}
-        </Link>
+        </div>
         <div className="text-cyan-200/80 text-sm line-clamp-2 whitespace-pre-line mt-1">
           {post.content.length > 128 ? post.content.slice(0, 128) + "..." : post.content}
         </div>
@@ -271,14 +272,14 @@ function ThreadRow({
         <span className="text-xs text-cyan-400 font-mono">{post.comments.length} replies</span>
         {canDelete && (
           <button
-            className="px-2 py-1 bg-red-500 text-white text-xs rounded font-bold shadow hover:bg-red-600"
-            onClick={() => onDelete(post.id)}
+            className="px-2 py-1 bg-red-500 text-white text-xs rounded font-bold shadow hover:bg-red-600 absolute top-2 right-3 z-20"
+            onClick={e => { e.preventDefault(); onDelete(post.id); }}
             title="Delete thread"
           >
             Delete
           </button>
         )}
       </div>
-    </div>
+    </Link>
   );
 }
