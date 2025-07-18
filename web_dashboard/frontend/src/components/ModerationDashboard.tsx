@@ -33,11 +33,19 @@ export default function ModerationDashboard() {
             {tickets.map((t: any) => (
               <li key={t.id} className="border border-cyan-900/20 rounded p-4 bg-[#212c3c]">
                 <div className="flex flex-wrap gap-3 items-center mb-1">
-                  <span className="font-bold text-cyan-300">{t.subject}</span>
-                  <span className="text-xs text-cyan-400 font-mono">{t.usertag}</span>
-                  <span className={`px-2 py-0.5 rounded text-xs font-bold ${t.status === "open" ? "bg-yellow-300/30 text-yellow-900" : "bg-green-300/30 text-green-800"}`}>
-                    {t.status}
-                  </span>
+                    <span className="font-bold text-cyan-300">{t.subject}</span>
+                    <span className="text-xs text-cyan-400 font-mono">{t.usertag}</span>
+                    <span
+                      className={`
+                        px-2 py-0.5 rounded text-xs font-bold border
+                        ${t.status === "open"
+                          ? "bg-cyan-500/30 text-cyan-100 border-cyan-400/50"
+                          : "bg-[#212e3c]/80 text-gray-300 border-cyan-900/40"
+                        }
+                      `}
+                    >
+                      {t.status}
+                    </span>
                   {t.assigned_to && (
                     <span className="px-2 py-0.5 rounded text-xs bg-indigo-700/20 text-indigo-200">Assigned: {t.assigned_to}</span>
                   )}
