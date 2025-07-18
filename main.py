@@ -886,6 +886,13 @@ def create_forum_post():
     required_fields = ["category", "title", "content", "usertag", "username", "role"]
     if not all(data.get(field) for field in required_fields):
         return jsonify({"error": "Missing fields"}), 400
+
+    # Only admins may post in "announcement" (case-insensitive)
+    if data["category"].lower() in ["announcement", "announcements"]:
+        user = get_user_by_usertag(session.get("username"))
+        if not user or user.get("role", "user") != "admin":
+            return jsonify({"error": "Only admins can post in Announcements."}), 403
+
     post = {
         "id": str(uuid.uuid4()),
         "category": data["category"],
@@ -898,6 +905,39 @@ def create_forum_post():
     }
     save_forum_post(post)
     return jsonify({"success": True})
+
+@app.route("/api/forum/posts/<post_id>", methods=["DELETE"])
+def delete_forum_post(post_id):
+    current_user = session.get("username")
+    if not current_user:
+        return jsonify({"error": "Not logged in"}), 401
+
+    # Fetch the post from DB
+    conn = sqlite3.connect(FORUM_DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT usertag FROM forum_posts WHERE id=?", (post_id,))
+    row = c.fetchone()
+    conn.close()
+    if not row:
+        return jsonify({"error": "Post not found"}), 404
+    post_author = row[0]
+
+    user = get_user_by_usertag(current_user)
+    is_admin = user and user.get("role") == "admin"
+    is_author = current_user == post_author
+
+    if not (is_admin or is_author):
+        return jsonify({"error": "You do not have permission to delete this post."}), 403
+
+    # Delete the post
+    conn = sqlite3.connect(FORUM_DB_PATH)
+    c = conn.cursor()
+    c.execute("DELETE FROM forum_posts WHERE id=?", (post_id,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"success": True, "message": "Post deleted."})
+
 
 @app.route("/api/forum/posts/<post_id>/comments", methods=["POST"])
 def add_comment(post_id):
