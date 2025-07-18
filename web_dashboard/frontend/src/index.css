@@ -27,7 +27,7 @@
 }
 
 .animated-gradient-text {
-  background: linear-gradient(90deg, var(--color1, #18f0ff), var(--color2, #d275fa));
+  background: linear-gradient(90deg, var(--color1, #18f0ff), var(--color2, #d275fa), var(--color1, #18f0ff));
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -36,10 +36,10 @@
   animation: usernameGradientScroll 2.7s linear infinite;
 }
 @keyframes usernameGradientScroll {
-  to {
-    background-position: 200% center;
-  }
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
 }
+
 
 
 

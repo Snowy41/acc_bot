@@ -382,28 +382,55 @@ export default function AdminPanel() {
                 <label className="block text-cyan-300 mb-1">
                   Animated Username Colors<br />
                   <span className="text-xs text-cyan-200">
-                    Enter two HEX colors, comma separated (e.g. <b>#18f0ff,#d275fa</b>)
+                    Select two HEX colors for the gradient effect.
                   </span>
                 </label>
-                <input
-                  className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800"
-                  value={edit.animatedColors?.join(",") || ""}
-                  onChange={e =>
-                    setEdit({
-                      ...edit,
-                      animatedColors: e.target.value
-                        .split(",")
-                        .map(s => s.trim())
-                        .filter(Boolean)
-                        .slice(0, 2), // only two!
-                    })
-                  }
-                  placeholder="#18f0ff,#d275fa"
-                  maxLength={32}
-                />
-                <div className="mt-2">
+                <div className="flex gap-4 items-center">
+                  <div className="flex flex-col items-center">
+                    <input
+                      type="color"
+                      className="w-10 h-10 rounded border-2 border-cyan-800 bg-[#232e43] cursor-pointer"
+                      value={edit.animatedColors?.[0] || "#18f0ff"}
+                      onChange={e =>
+                        setEdit({
+                          ...edit,
+                          animatedColors: [
+                            e.target.value,
+                            edit.animatedColors?.[1] || "#d275fa"
+                          ]
+                        })
+                      }
+                      style={{ minWidth: "2.5rem", minHeight: "2.5rem" }}
+                    />
+                    <span className="text-xs text-cyan-400 mt-1">{edit.animatedColors?.[0] || "#18f0ff"}</span>
+                  </div>
+                  <span className="text-cyan-300 font-bold px-2">→</span>
+                  <div className="flex flex-col items-center">
+                    <input
+                      type="color"
+                      className="w-10 h-10 rounded border-2 border-cyan-800 bg-[#232e43] cursor-pointer"
+                      value={edit.animatedColors?.[1] || "#d275fa"}
+                      onChange={e =>
+                        setEdit({
+                          ...edit,
+                          animatedColors: [
+                            edit.animatedColors?.[0] || "#18f0ff",
+                            e.target.value
+                          ]
+                        })
+                      }
+                      style={{ minWidth: "2.5rem", minHeight: "2.5rem" }}
+                    />
+                    <span className="text-xs text-cyan-400 mt-1">{edit.animatedColors?.[1] || "#d275fa"}</span>
+                  </div>
+                </div>
+                <div className="mt-3">
                   <Username
-                    animated={!!(edit.animatedColors && edit.animatedColors.length === 2)}
+                    animated={
+                      !!(edit.animatedColors &&
+                      edit.animatedColors[0] &&
+                      edit.animatedColors[1])
+                    }
                     colors={edit.animatedColors}
                     className="text-lg"
                   >
@@ -411,7 +438,6 @@ export default function AdminPanel() {
                   </Username>
                 </div>
               </div>
-
               <button
                 className="bg-aqua text-midnight px-4 py-2 rounded font-bold mt-2 w-full hover:bg-cyan-400 transition"
                 onClick={handleSave}
