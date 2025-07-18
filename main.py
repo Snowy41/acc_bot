@@ -1234,6 +1234,20 @@ def update_ticket(tid):
     conn.close()
     return jsonify({"success": True})
 
+@app.route("/api/tickets/<tid>", methods=["DELETE"])
+def delete_ticket(tid):
+    usertag = session.get("username")
+    user = get_user_by_usertag(usertag)
+    if not user or user.get("role") not in ("admin", "moderator"):
+        return jsonify({"error": "Permission denied"}), 403
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("DELETE FROM tickets WHERE id=?", (tid,))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True})
+
+
 @socketio.on("connect")
 def handle_connect():
     socketio.emit("bot_log", {"script": "knuddels_creator.py", "output": "🔥 From connect handler!"})

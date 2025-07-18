@@ -64,12 +64,14 @@ export default function ModerationDashboard() {
                 </div>
                 <div className="text-white mt-1">{t.body}</div>
                 <div className="flex gap-2 mt-3">
-                  <button
-                    className="bg-indigo-500 text-white rounded px-3 py-1 font-bold hover:bg-indigo-400"
-                    onClick={() => updateTicket(t.id, { assigned_to: "CURRENT_MOD_USERTAG" })}
-                  >
-                    Assign to Me
-                  </button>
+                  {t.assigned_to !== myUsertag && (
+                    <button
+                      className="bg-indigo-500 text-white rounded px-3 py-1 font-bold hover:bg-indigo-400"
+                      onClick={() => updateTicket(t.id, { assigned_to: myUsertag })}
+                    >
+                      Assign to Me
+                    </button>
+                  )}
                   <button
                     className={`rounded px-3 py-1 font-bold
                       ${t.status === "open"
@@ -78,6 +80,19 @@ export default function ModerationDashboard() {
                     onClick={() => updateTicket(t.id, { status: t.status === "open" ? "closed" : "open" })}
                   >
                     {t.status === "open" ? "Close" : "Reopen"}
+                  </button>
+                  <button
+                    className="rounded px-3 py-1 font-bold bg-red-600 text-white hover:bg-red-700"
+                    onClick={async () => {
+                      if (!window.confirm("Delete this ticket? This cannot be undone.")) return;
+                      await fetch(`/api/tickets/${t.id}`, {
+                        method: "DELETE",
+                        credentials: "include",
+                      });
+                      setTickets(tickets => tickets.filter(tt => tt.id !== t.id));
+                    }}
+                  >
+                    Delete
                   </button>
                 </div>
               </li>
