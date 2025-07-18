@@ -103,6 +103,7 @@ export default function EditProfile() {
                 })
                   .then((res) => res.json())
                   .then((data) => {
+                    console.log("UPLOAD RESPONSE:", data); // add this
                     if (data.success) {
                       alert("Avatar uploaded successfully!");
                     } else {
