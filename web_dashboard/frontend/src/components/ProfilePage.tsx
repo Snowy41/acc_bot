@@ -62,7 +62,7 @@ fetch("/api/auth/status", { credentials: "include" })
   if (!profile) return <div className="p-12 text-white text-center">Loading profile...</div>;
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-[#111925] to-[#19283a]">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center min-h-screen">
       <div className="bg-[#19212a] border border-cyan-900/40 rounded-2xl shadow-2xl p-10 max-w-lg w-full">
         <div className="flex flex-col items-center">
 

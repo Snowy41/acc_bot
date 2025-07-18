@@ -12,7 +12,15 @@ interface ProfilePanelProps {
   userAvatar: string;
 }
 
-export default function ProfilePanel({ loggedIn, setLoggedIn, user, setUser, userColor, displayName, userAvatar }: ProfilePanelProps) {
+export default function ProfilePanel({
+  loggedIn,
+  setLoggedIn,
+  user,
+  setUser,
+  userColor,
+  displayName,
+  userAvatar
+}: ProfilePanelProps) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
@@ -50,62 +58,83 @@ export default function ProfilePanel({ loggedIn, setLoggedIn, user, setUser, use
       </>
     );
   }
-  displayName = displayName || "";
 
   return (
-    <div className="flex items-center gap-4 p-4 select-none -top-1">
-      <div
-        className="relative flex items-center gap-2 bg-white/10 border border-cyan-900/40 backdrop-blur-xl rounded-full px-4 py-2 shadow-xl cursor-pointer hover:bg-cyan-900/20 transition"
-        onClick={() => setDropdownOpen((v) => !v)}
+    <div className="relative flex items-center gap-3 select-none z-50">
+      {/* Profile Button */}
+      <button
+        className={`
+          flex items-center gap-3 px-4 py-2 rounded-2xl shadow-lg border border-cyan-300/30
+          bg-gradient-to-tr from-cyan-900/50 via-[#192f44]/80 to-cyan-800/30
+          backdrop-blur-xl transition hover:bg-cyan-800/40 focus:outline-none relative
+          group
+        `}
+        style={{
+          boxShadow: "0 2px 18px #12fff155, 0 1px 5px #13e0f544",
+        }}
+        onClick={() => setDropdownOpen(v => !v)}
         tabIndex={0}
-        style={{ boxShadow: "0 6px 16px #13e0f544" }}
       >
-        <div className="w-9 h-9 rounded-full overflow-hidden shadow-inner border-2 border-aqua/80 bg-midnight flex items-center justify-center">
+        <span className="w-10 h-10 rounded-full overflow-hidden border-2 border-aqua/80 shadow-[0_0_8px_#18f0ff44] bg-midnight flex items-center justify-center">
           {userAvatar && userAvatar !== "" ? (
-          <img
-            src={userAvatar}
-            alt="avatar"
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              console.warn("Broken avatar src:", e.currentTarget.src);
-              e.currentTarget.style.display = "none";
-            }}
-          />
-        ) : (
-          <span className="font-bold text-lg text-aqua">👤</span>
+            <img
+              src={userAvatar}
+              alt="avatar"
+              className="w-full h-full object-cover"
+              onError={e => {
+                e.currentTarget.style.display = "none";
+              }}
+              draggable={false}
+            />
+          ) : (
+            <span className="text-2xl text-aqua font-bold flex items-center justify-center w-full h-full">
+              👤
+            </span>
           )}
-        </div>
-        <span className="font-semibold hidden sm:block" style={{ color: userColor }}>
+        </span>
+        <span
+          className="font-semibold text-cyan-50 max-w-[120px] truncate text-base tracking-wide"
+          style={{
+            color: userColor || "#6ff6ff",
+            textShadow: "0 0 5px #12fff155",
+          }}
+        >
           {displayName}
         </span>
         <svg className="w-4 h-4 ml-1 text-cyan-300 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path d="M19 9l-7 7-7-7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
-        {dropdownOpen && (
-          <div
-            className="absolute right-0 top-14 mt-2 w-48 rounded-xl bg-[#232e43]/95 border border-cyan-900/40 shadow-2xl overflow-hidden z-50 animate-fade-in"
-            onClick={e => e.stopPropagation()}
+      </button>
+      {/* Dropdown */}
+      {dropdownOpen && (
+        <div
+          className="absolute top-14 right-0 w-52 rounded-2xl shadow-2xl border border-cyan-900/40 bg-[#16293d]/90
+                     animate-fade-in p-2 z-50"
+          style={{
+            boxShadow: "0 4px 32px #18f0ff44, 0 0 0 2px #18f0ff22",
+            minWidth: 180,
+          }}
+          onClick={e => e.stopPropagation()}
+        >
+          <Link
+            to={`/profile/${user}`}
+            className="block w-full text-left px-5 py-3 rounded-xl text-aqua font-semibold hover:bg-cyan-900/30 hover:text-cyan-50 transition"
+            onClick={() => setDropdownOpen(false)}
+            tabIndex={0}
           >
-            <Link
-              to={`/profile/${user}`}
-              className="block w-full text-left px-5 py-3 text-cyan-300 hover:bg-cyan-800/30 hover:text-aqua transition"
-              onClick={() => setDropdownOpen(false)}
-              tabIndex={0}
-            >
-              View Profile
-            </Link>
-            <button
-              className="w-full text-left px-5 py-3 text-red-300 hover:bg-red-700/20 hover:text-red-100 border-t border-cyan-900/30 transition"
-              onClick={(e) => {
-                e.stopPropagation();
-                logout();
-              }}
-            >
-              Log out
-            </button>
-          </div>
-        )}
-      </div>
+            View Profile
+          </Link>
+          <button
+            className="w-full text-left px-5 py-3 rounded-xl text-red-300 font-semibold hover:bg-red-700/20 hover:text-red-100 border-t border-cyan-900/20 transition mt-1"
+            onClick={e => {
+              e.stopPropagation();
+              logout();
+            }}
+          >
+            Log out
+          </button>
+        </div>
+      )}
     </div>
   );
 }
