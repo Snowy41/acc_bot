@@ -19,6 +19,7 @@ import SystemMessage from "./components/SystemMessage";
 import NotificationBell from "./components/NotificationBell";
 import type {UserNotification} from "./components/NotificationBell"
 import { ToastContainer, toast } from "react-toastify";
+import AnimatedCursor from "./components/AnimatedCursor";
 
 
 function App() {
@@ -192,6 +193,7 @@ useEffect(() => {
 
   return (
     <Router>
+      <AnimatedCursor />
       <div className="flex min-h-screen relative z-10 bg-midnight">
         <Sidebar active={active} setActive={setActive} isAdmin={isAdmin} isPremium={isPremium}/>
         <SearchBar />
