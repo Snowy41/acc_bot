@@ -53,6 +53,10 @@ export default function ForumPostView({ usertag, displayName }: ForumPostViewPro
   };
 
   if (!post) return <div className="text-white">Loading...</div>;
+  const postColors =
+    typeof post.animatedColors === "string"
+      ? JSON.parse(post.animatedColors)
+      : post.animatedColors || [];
 
   return (
     <div className="w-full max-w-3xl mx-auto mt-10 relative">
@@ -69,11 +73,12 @@ export default function ForumPostView({ usertag, displayName }: ForumPostViewPro
               <h2 className="font-black text-3xl text-aqua mb-2 drop-shadow tracking-tight">{post.title}</h2>
               <div className="flex items-center gap-2 text-cyan-200 text-sm mb-3">
                 <span>by <Username
-                          animated={post.role === "admin" || post.role === "premium" || (post.animatedColors && post.animatedColors.length > 1)}
-                          colors={post.animatedColors}
-                        >
-                          {post.username}
-                        </Username>
+                            animated={postColors.length === 2}
+                            colors={postColors}
+                          >
+                            {post.username}
+                          </Username>
+
                      <span className="font-mono">@{post.usertag}</span>
                 </span>
                 <span className="mx-2">&bull;</span>
@@ -93,27 +98,36 @@ export default function ForumPostView({ usertag, displayName }: ForumPostViewPro
                   No comments yet.
                 </div>
               )}
-              {post.comments.map((cmt, idx) => (
-                <div
-                  key={idx}
-                  className="bg-[#212b38] border border-cyan-900/10 rounded-xl p-4 shadow flex flex-col"
-                  style={{ boxShadow: "0 0 12px #36f1cd11" }}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-mono text-xs text-cyan-400">@{cmt.usertag}</span>
-                    <Username
-                      animated={cmt.role === "admin" || cmt.role === "premium" || (cmt.animatedColors && cmt.animatedColors.length > 1)}
-                      colors={cmt.animatedColors}
-                    >
-                      {cmt.username}
-                    </Username>
+              {post.comments.map((cmt, idx) => {
+                const animatedColors =
+                  typeof cmt.animatedColors === "string"
+                    ? JSON.parse(cmt.animatedColors)
+                    : cmt.animatedColors || [];
 
-
-                    <span className="ml-auto text-xs text-cyan-700">{new Date(cmt.timestamp).toLocaleString()}</span>
+                return (
+                  <div
+                    key={idx}
+                    className="bg-[#212b38] border border-cyan-900/10 rounded-xl p-4 shadow flex flex-col"
+                    style={{ boxShadow: "0 0 12px #36f1cd11" }}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-mono text-xs text-cyan-400">@{cmt.usertag}</span>
+                      <Username
+                        animated={animatedColors.length === 2}
+                        colors={animatedColors}
+                      >
+                        {cmt.username}
+                      </Username>
+                      <span className="ml-auto text-xs text-cyan-700">
+                        {new Date(cmt.timestamp).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="text-white text-base whitespace-pre-wrap">
+                      {cmt.text}
+                    </div>
                   </div>
-                  <div className="text-white text-base whitespace-pre-wrap">{cmt.text}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             {/* Comment input */}
             <div className="flex gap-2 mt-2">

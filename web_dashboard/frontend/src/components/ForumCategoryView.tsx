@@ -62,34 +62,49 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
               <div className="bg-[#1b2435]/95 border border-cyan-900/40 rounded-2xl shadow-2xl p-7">
                 <h3 className="text-xl font-bold text-aqua mb-6">All Posts</h3>
                 <div className="space-y-8">
-                  {posts.map(post => (
-                    <Link
-                      key={post.id}
-                      to={`/forum/${category}/${post.id}`}
-                      className="block bg-gradient-to-tr from-[#223348]/80 to-cyan-800/40 rounded-2xl shadow-lg border-2 border-cyan-900/20 hover:border-aqua hover:shadow-aqua/40 hover:scale-[1.03] transition-all duration-150"
-                      style={{ boxShadow: "0 0 18px #36f1cd33, 0 2px 12px #14d4ff44" }}
-                    >
-                      {/* Title + meta */}
-                      <div className="flex items-center justify-between px-7 pt-6 pb-3 rounded-t-2xl bg-[#162030] border-b border-cyan-900/20">
-                        <span className="font-bold text-2xl text-aqua drop-shadow">{post.title}</span>
-                        <span className="text-xs text-cyan-600">{new Date(post.timestamp).toLocaleString()}</span>
-                      </div>
-                      <div className="flex items-center gap-3 px-7 pb-2 pt-1 text-cyan-300 text-xs">
-                        <span>by <Username
-                                  animated={post.role === "admin" || post.role === "premium" || (post.animatedColors && post.animatedColors.length > 1)}
-                                  colors={post.animatedColors}
-                                >
-                                  {post.username}
-                                </Username>
+                  {posts.map(post => {
+                    const animatedColors =
+                      typeof post.animatedColors === "string"
+                        ? JSON.parse(post.animatedColors)
+                        : post.animatedColors || [];
 
-                        </span>
-                        <span className="font-mono">@{post.usertag}</span>
-                      </div>
-                      <div className="bg-[#232e43]/90 text-white text-base px-7 py-6 rounded-b-2xl border border-cyan-900/10 mx-4 my-3 whitespace-pre-line shadow-inner">
-                        {post.content ? (post.content.length > 300 ? post.content.slice(0, 300) + "..." : post.content) : <span className="italic text-gray-400">No content</span>}
-                      </div>
-                    </Link>
-                  ))}
+                    return (
+                      <Link
+                        key={post.id}
+                        to={`/forum/${category}/${post.id}`}
+                        className="block bg-gradient-to-tr from-[#223348]/80 to-cyan-800/40 rounded-2xl shadow-lg border-2 border-cyan-900/20 hover:border-aqua hover:shadow-aqua/40 hover:scale-[1.03] transition-all duration-150"
+                        style={{ boxShadow: "0 0 18px #36f1cd33, 0 2px 12px #14d4ff44" }}
+                      >
+                        {/* Title + meta */}
+                        <div className="flex items-center justify-between px-7 pt-6 pb-3 rounded-t-2xl bg-[#162030] border-b border-cyan-900/20">
+                          <span className="font-bold text-2xl text-aqua drop-shadow">{post.title}</span>
+                          <span className="text-xs text-cyan-600">{new Date(post.timestamp).toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center gap-3 px-7 pb-2 pt-1 text-cyan-300 text-xs">
+                          <span>
+                            by{" "}
+                            <Username
+                              animated={animatedColors.length === 2}
+                              colors={animatedColors}
+                            >
+                              {post.username}
+                            </Username>
+                          </span>
+                          <span className="font-mono">@{post.usertag}</span>
+                        </div>
+                        <div className="bg-[#232e43]/90 text-white text-base px-7 py-6 rounded-b-2xl border border-cyan-900/10 mx-4 my-3 whitespace-pre-line shadow-inner">
+                          {post.content ? (
+                            post.content.length > 300
+                              ? post.content.slice(0, 300) + "..."
+                              : post.content
+                          ) : (
+                            <span className="italic text-gray-400">No content</span>
+                          )}
+                        </div>
+                      </Link>
+                    );
+                  })}
+
                   {posts.length === 0 && (
                     <div className="text-cyan-300 text-lg my-8 text-center">No posts in this category yet.</div>
                   )}

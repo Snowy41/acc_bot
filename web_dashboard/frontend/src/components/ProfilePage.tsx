@@ -29,6 +29,12 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const [isFriend, setIsFriend] = useState(false);
 
+  const animatedColors =
+  typeof profile.animatedColors === "string"
+    ? JSON.parse(profile.animatedColors)
+    : profile.animatedColors || [];
+
+
   useEffect(() => {
       fetch(`/api/users/${usertag}`)
     .then(res => {
@@ -113,13 +119,14 @@ fetch("/api/auth/status", { credentials: "include" })
           {/* DISPLAY NAME + BADGES */}
           <div className="flex items-center gap-3 mb-1">
             <Username
-              animated={profile.isAdmin || profile.role === "premium" || (profile.animatedColors && profile.animatedColors.length > 1)}
-              colors={profile.animatedColors}
+              animated={animatedColors.length === 2}
+              colors={animatedColors}
               className="text-3xl"
-              style={{ color: profile.color || "#fff" }}
+              style={animatedColors.length !== 2 ? { color: profile.color || "#fff" } : undefined}
             >
               {profile.username}
             </Username>
+
 
             {profile.isAdmin && (
               <span className="text-yellow-300 text-xl" title="Admin">
