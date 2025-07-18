@@ -91,7 +91,9 @@ export default function EditProfile() {
               className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800"
               onChange={(e) => {
                 const file = e.target.files?.[0];
+                console.log("Selected file:", file); // ✅ Should appear
                 if (!file) return;
+                console.log("Uploading avatar...");
 
                 const formData = new FormData();
                 formData.append("avatar", file);
@@ -111,6 +113,7 @@ export default function EditProfile() {
                     }
                   })
                   .catch(() => {
+                    console.error("Upload failed"); // ✅ Must show if server unreachable
                     alert("Upload failed");
                   });
               }}
