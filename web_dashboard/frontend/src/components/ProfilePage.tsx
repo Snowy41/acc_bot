@@ -29,19 +29,6 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const [isFriend, setIsFriend] = useState(false);
 
-    let parsedColors: string[] = [];
-
-    try {
-      parsedColors =
-        typeof profile.animatedColors === "string"
-          ? JSON.parse(profile.animatedColors)
-          : Array.isArray(profile.animatedColors)
-          ? profile.animatedColors
-          : [];
-    } catch (e) {
-      console.warn("Invalid animatedColors in ProfilePage:", profile.animatedColors);
-    }
-
 
 
   useEffect(() => {
@@ -76,8 +63,25 @@ fetch("/api/auth/status", { credentials: "include" })
     });
   }, [usertag]);
 
-  if (notFound) return <div className="p-12 text-red-400 text-center">User not found</div>;
-  if (!profile) return <div className="p-12 text-white text-center">Loading profile...</div>;
+    if (notFound) return <div className="p-12 text-red-400 text-center">User not found</div>;
+    if (!profile) return <div className="p-12 text-white text-center">Loading profile...</div>;
+
+    // ✅ Now it's safe to access profile.animatedColors
+    let parsedColors: string[] = [];
+
+    try {
+      parsedColors =
+        typeof profile.animatedColors === "string"
+          ? JSON.parse(profile.animatedColors)
+          : Array.isArray(profile.animatedColors)
+          ? profile.animatedColors
+          : [];
+    } catch (e) {
+      console.warn("Invalid animatedColors in ProfilePage:", profile.animatedColors);
+      parsedColors = [];
+}
+
+
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center min-h-screen">
