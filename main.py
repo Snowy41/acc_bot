@@ -1141,23 +1141,39 @@ def create_ticket():
         return jsonify({"error": "Not logged in"}), 401
     if not data.get("subject") or not data.get("body"):
         return jsonify({"error": "Missing fields"}), 400
+    now = int(time.time())
     ticket = {
         "id": str(uuid.uuid4()),
         "usertag": session["username"],
         "subject": data["subject"],
         "body": data["body"],
         "status": "open",
-        "created_at": int(time.time()),
-        "updated_at": int(time.time()),
-        "assigned_to": None
+        "created_at": now,
+        "updated_at": now,
+        "assigned_to": None,
+        "messages": json.dumps([
+            {
+                "from": session["username"],
+                "text": data["body"],
+                "timestamp": now
+            }
+        ])
     }
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("INSERT INTO tickets VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-              (ticket["id"], ticket["usertag"], ticket["subject"], ticket["body"], ticket["status"], ticket["created_at"], ticket["updated_at"], ticket["assigned_to"]))
+    c.execute("""
+        INSERT INTO tickets (id, usertag, subject, body, status, created_at, updated_at, assigned_to, messages)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        ticket["id"], ticket["usertag"], ticket["subject"], ticket["body"], ticket["status"],
+        ticket["created_at"], ticket["updated_at"], ticket["assigned_to"], ticket["messages"]
+    ))
     conn.commit()
     conn.close()
+    # Return messages parsed as list
+    ticket["messages"] = json.loads(ticket["messages"])
     return jsonify({"success": True, "ticket": ticket})
+
 
 @app.route("/api/tickets", methods=["GET"])
 def get_tickets():
@@ -1181,10 +1197,12 @@ def get_tickets():
             "created_at": row[5],
             "updated_at": row[6],
             "assigned_to": row[7],
+            "messages": json.loads(row[8] or "[]")
         }
         for row in rows
     ]
     return jsonify({"tickets": tickets})
+
 
 @app.route("/api/tickets/<tid>/reply", methods=["POST"])
 def reply_ticket(tid):
@@ -1195,6 +1213,7 @@ def reply_ticket(tid):
     text = data.get("text", "").strip()
     if not text:
         return jsonify({"error": "Empty reply"}), 400
+    now = int(time.time())
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT messages FROM tickets WHERE id=?", (tid,))
@@ -1203,12 +1222,13 @@ def reply_ticket(tid):
     messages.append({
         "from": usertag,
         "text": text,
-        "timestamp": int(time.time())
+        "timestamp": now
     })
-    c.execute("UPDATE tickets SET messages=?, updated_at=? WHERE id=?", (json.dumps(messages), int(time.time()), tid))
+    c.execute("UPDATE tickets SET messages=?, updated_at=? WHERE id=?", (json.dumps(messages), now, tid))
     conn.commit()
     conn.close()
     return jsonify({"success": True, "messages": messages})
+
 
 @app.route("/api/tickets/<tid>", methods=["PATCH"])
 def update_ticket(tid):
