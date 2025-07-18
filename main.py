@@ -124,17 +124,19 @@ def load_forum(category=None):
     rows = c.fetchall()
     conn.close()
     posts = []
-    fields = ["id", "category", "title", "content", "usertag", "username", "comments", "timestamp", "role",
-              "is_announcement"]
+    fields = ["id", "category", "title", "content", "usertag", "username", "comments", "timestamp", "is_announcement"]
+
     for row in rows:
         post = dict(zip(fields, row))
         post["comments"] = json.loads(post["comments"] or "[]")
+
         # Enrich post author
         author = get_user_by_usertag(post["usertag"])
         post["color"] = author.get("color", "#fff") if author else "#fff"
         post["animatedColors"] = author.get("animatedColors", []) if author else []
         post["role"] = author.get("role", "user") if author else "user"
         post["is_announcement"] = bool(post.get("is_announcement", 0))
+
         # Optionally also enrich comment authors here if you want!
         enriched_comments = []
         for cmt in post["comments"]:
@@ -859,8 +861,8 @@ def get_single_post(post_id):
     conn.close()
     if not row:
         return jsonify({"error": "Post not found"}), 404
-    fields = ["id", "category", "title", "content", "usertag", "username", "comments", "timestamp", "role",
-              "is_announcement"]
+    fields = ["id", "category", "title", "content", "usertag", "username", "comments", "timestamp", "is_announcement"]
+
     post = dict(zip(fields, row))
     post["comments"] = json.loads(post["comments"] or "[]")
 
