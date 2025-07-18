@@ -26,7 +26,8 @@ import ShopItemDetail from "./components/ShopItemDetails";
 import SupportPage from "./components/SupportPage";
 import ModerationDashboard from "./components/ModerationDashboard";
 import MessagesPage from "./components/MessagePage";
-import ChatModal from "./components/ChatModal"; // adjust path if needed
+import ChatModal from "./components/ChatModal";
+import FriendsModal from "./components/FriendsModal"; // adjust path if needed
 
 function App() {
   const [active, setActive] = useState("home");
@@ -238,10 +239,11 @@ useEffect(() => {
               </button>
               <h2 className="text-xl font-bold mb-4 text-aqua">Your Friends</h2>
               <div className="space-y-6">
-                <FriendList
+                <FriendsModal
+                  open={showFriends}
                   onClose={() => setShowFriends(false)}
-                  onlineUsers={onlineUsers}
                   usertag={usertag}
+                  onlineUsers={onlineUsers}
                 />
                 <PendingRequests />
               </div>
@@ -340,97 +342,3 @@ useEffect(() => {
 
 export default App;
 
-function FriendList({
-  onClose,
-  onlineUsers,
-  usertag
-}: {
-  onClose: () => void;
-  onlineUsers: string[];
-  usertag: string;
-}) {
-  const [friends, setFriends] = useState<string[]>([]);
-  const [chatTarget, setChatTarget] = useState<string | null>(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    fetch("/api/friends/list", { credentials: "include" })
-      .then(res => res.json())
-      .then(data => Array.isArray(data.friends) && setFriends(data.friends));
-  }, []);
-
-  const removeFriend = async (friendTag: string) => {
-    if (!confirm(`Remove @${friendTag}?`)) return;
-    await fetch("/api/friends/remove", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ friendTag }),
-    });
-    setFriends(friends => friends.filter(f => f !== friendTag));
-  };
-
-  return (
-    <>
-      <ul className="space-y-2">
-        {friends.map(friend => (
-          <li key={friend} className="flex justify-between items-center bg-cyan-900/30 px-4 py-2 rounded-md cursor-pointer hover:bg-cyan-800" onClick={() => {
-            onClose();
-            navigate(`/profile/${friend}`);
-          }}>
-            <span>@{friend} {onlineUsers.includes(friend) && <span className="text-green-400">●</span>}</span>
-            <div className="flex gap-2">
-              <button onClick={(e) => { e.stopPropagation(); removeFriend(friend); }} className="text-xs bg-red-500 px-2 py-1 rounded text-white">Remove</button>
-              <button onClick={(e) => { e.stopPropagation(); setChatTarget(friend); }} className="text-xs bg-aqua px-2 py-1 rounded text-midnight">💬</button>
-            </div>
-          </li>
-        ))}
-      </ul>
-      {chatTarget && <ChatModal friend={chatTarget} onClose={() => setChatTarget(null)} currentUserTag={usertag} />}
-    </>
-  );
-}
-
-
-
-
-function PendingRequests() {
-  const [requests, setRequests] = useState<string[]>([]);
-
-  useEffect(() => {
-    fetch("/api/friends/requests", { credentials: "include" })
-      .then(res => res.json())
-      .then(data => setRequests(data.requests || []));
-  }, []);
-
-  const acceptRequest = async (requesterTag: string) => {
-    await fetch("/api/friends/accept", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ requesterTag }),
-    });
-    setRequests((prev) => prev.filter((r) => r !== requesterTag));
-  };
-
-  if (requests.length === 0) return null;
-
-  return (
-    <div>
-      <h3 className="text-cyan-300 text-sm font-bold mb-2">Pending Requests</h3>
-      <ul className="space-y-2">
-        {requests.map((r) => (
-          <li key={r} className="flex justify-between items-center bg-cyan-900/30 px-3 py-2 rounded-md">
-            @{r}
-            <button
-              onClick={() => acceptRequest(r)}
-              className="text-sm bg-aqua text-midnight px-3 py-1 rounded hover:bg-cyan-400"
-            >
-              Accept
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
