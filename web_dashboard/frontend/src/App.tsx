@@ -20,6 +20,7 @@ import NotificationBell from "./components/NotificationBell";
 import type {UserNotification} from "./components/NotificationBell"
 import { ToastContainer, toast } from "react-toastify";
 import AnimatedCursor from "./components/AnimatedCursor";
+import ParticleBackground from "./components/ParticleBackground";
 
 
 function App() {
@@ -193,6 +194,7 @@ useEffect(() => {
 
   return (
     <Router>
+      <ParticleBackground />
       <div className="flex min-h-screen relative z-10 bg-midnight">
         <Sidebar active={active} setActive={setActive} isAdmin={isAdmin} isPremium={isPremium}/>
         <SearchBar />
@@ -323,7 +325,6 @@ useEffect(() => {
           </Routes>
         </main>
         <ToastContainer position="top-center" autoClose={3000} aria-label="Notification center"/>
-        <AnimatedCursor />
       </div>
     </Router>
   );
