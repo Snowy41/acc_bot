@@ -30,19 +30,16 @@ export default function Sidebar({
       className={`
         flex flex-col h-screen transition-all duration-300 z-20
         ${open ? "w-60" : "w-20"}
-        bg-gradient-to-br from-[#101829bb] to-[#112233aa]
         border-r border-cyan-800/40
         shadow-[8px_0_28px_0_rgba(21,235,255,0.13)]
         backdrop-blur-2xl
         relative
       `}
       style={{
+        backgroundColor: "rgba(16, 24, 41, 0.8)", // <- TRUE semi-transparent background
         boxShadow:
           "8px 0 24px 0 #19e3f566, 0 4px 40px 0 #18f0ff18, 0 0px 0px 1px #1bd6e811",
-        borderRight: "2.5px solid rgba(18,244,255,0.09)",
-        background:
-          "linear-gradient(135deg,rgba(16,24,41,0.65) 60%,rgba(17,34,51,0.45) 100%)",
-        // Lower alpha for even more background show-through (adjust as you wish)
+        borderRight: "2.5px solid rgba(18,244,255,0.09)"
       }}
     >
       <div className="flex items-center justify-between px-3 pt-3 pb-1">
@@ -82,7 +79,7 @@ export default function Sidebar({
             style={{
               boxShadow: "0 0 18px #ffe97aaa, 0 0 0 2px #ffd30030",
               border: "1.5px solid #ffe97a88",
-              opacity: 1, // Full opacity!
+              opacity: 1, // full opacity for admin panel
             }}
           >
             <span className="h-6 w-6 flex items-center justify-center drop-shadow-[0_0_4px_#ffe97a99]">🛡️</span>
@@ -91,7 +88,6 @@ export default function Sidebar({
           </Link>
         )}
         {nav.slice(1).map((item) => {
-          // Only show "Logs" and "Bot Selection" if isPremium
           if (
             (item.key === "logs" || item.key === "botSelection") &&
             !isPremium
@@ -110,6 +106,8 @@ export default function Sidebar({
     </div>
   );
 }
+
+// --- SidebarItem ---
 
 function SidebarItem({
   item,
@@ -131,7 +129,7 @@ function SidebarItem({
         group flex items-center gap-3 px-4 py-3 mx-1 rounded-xl transition-all duration-150 relative
         ${isActive
           ? "bg-gradient-to-tr from-[#22f0ff] to-[#1257c7] text-midnight shadow-[0_0_16px_#22f0ffcc] opacity-100"
-          : "hover:bg-cyan-900/40 hover:text-aqua/90 bg-white/10 text-white/80 opacity-80"
+          : "bg-transparent hover:bg-white/10 text-white/80 opacity-80"
         }
         ${open ? "justify-start" : "justify-center"}
       `}
