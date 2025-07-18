@@ -100,7 +100,6 @@ export default function AdminPanel() {
         bio: edit.bio,
         role: edit.role || selected.role || "user",  // <-- always include the current role!
         animatedColors: edit.animatedColors, // <-- include this
-
       }),
     });
     setSuccessMsg("Profile updated!");
@@ -257,15 +256,17 @@ export default function AdminPanel() {
                           selected?.usertag === user.usertag ? "bg-cyan-900/30" : "hover:bg-cyan-900/10"
                         }`}
                       >
-                      <td className="px-4 py-2 font-semibold" style={{ color: user.color || "#fff" }}>
-                        <Username
-                          animated={!!(edit.animatedColors && edit.animatedColors.length > 1)}
-                          colors={edit.animatedColors}
-                        >
-                          {edit.username || selected?.username}
-                        </Username>
-
-                      </td>
+                        <td className="px-4 py-2 font-semibold" style={{ color: user.color || "#fff" }}>
+                          <Username
+                            animated={
+                              (user.animatedColors && user.animatedColors.length === 2)
+                              || user.role === "admin"
+                            }
+                            colors={user.animatedColors}
+                          >
+                            {user.username}
+                          </Username>
+                        </td>
                         <td className="px-4 py-2 font-mono">@{user.usertag}</td>
                         <td className="px-4 py-2">
                           {(user.tags || []).map((tag) => (

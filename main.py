@@ -107,7 +107,7 @@ def save_user(user):
         json.dumps(user.get("friends", [])),
         json.dumps(user.get("friendRequests", [])),
         user.get("role", "user"),
-        json.dumps(user.get("animatedColors", [])),  # <-- ADD THIS
+        json.dumps(user.get("animatedColors", []))
     ))
 
     conn.commit()
@@ -162,7 +162,7 @@ def save_forum_post(post):
         post["usertag"],
         post["username"],
         json.dumps(post.get("comments", [])),
-        post["timestamp"],
+        post["timestamp"]
     ))
     conn.commit()
     conn.close()
@@ -465,7 +465,7 @@ def list_users():
     conn.close()
     fields = [
         "usertag", "username", "password", "is_admin", "is_banned", "is_muted", "color", "bio", "tags", "social",
-        "avatar", "uid", "friends", "friendRequests", "role"
+        "avatar", "uid", "friends", "friendRequests", "role", "animatedColors"
     ]
     user_list = []
     for row in rows:
@@ -482,13 +482,11 @@ def list_users():
             "tags": user.get("tags", []),
             "is_banned": bool(user.get("is_banned", False)),
             "is_muted": bool(user.get("is_muted", False)),
-            # Optionally for backward compatibility:
             "is_admin": user.get("role") == "admin",
-            "animatedColors": user.get("animatedColors", []),
-
+            "animatedColors": user.get("animatedColors", []),  # <--- HERE!
         })
-
     return jsonify({"users": user_list})
+
 
 @app.route("/api/auth/register", methods=["POST"])
 def register():
