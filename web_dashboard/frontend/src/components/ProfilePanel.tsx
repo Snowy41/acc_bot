@@ -25,6 +25,8 @@ export default function ProfilePanel({
   displayName,
   userAvatar,
   userRole,
+  animatedColors, // ✅ ADD THIS LINE
+
 }: ProfilePanelProps) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -99,15 +101,21 @@ export default function ProfilePanel({
           )}
         </span>
         <Username
-          animated={userRole === "admin" || userRole === "premium"}
+          animated={Array.isArray(animatedColors) && animatedColors.length === 2}
+          colors={animatedColors}
           className="font-semibold text-cyan-50 max-w-[120px] truncate text-base tracking-wide"
-          style={{
-            color: userColor || "#ffffff",
-            textShadow: "0 0 5px #12fff155",
-          }}
+          style={
+            !animatedColors?.length
+              ? {
+                  color: userColor || "#ffffff",
+                  textShadow: "0 0 5px #12fff155",
+                }
+              : undefined
+          }
         >
           {displayName}
         </Username>
+
         <svg className="w-4 h-4 ml-1 text-cyan-300 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path d="M19 9l-7 7-7-7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
