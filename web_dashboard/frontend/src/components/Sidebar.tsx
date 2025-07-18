@@ -42,11 +42,21 @@ export default function Sidebar({
         borderRight: "2.5px solid rgba(18,244,255,0.09)"
       }}
     >
-    <div className="relative h-[56px] flex items-center">
+    <div className="relative h-[56px] flex items-center px-2">
+      {open && (
+        <img
+          src="/logo_for_website.png"
+          alt="Vanish Logo"
+          className="h-10 w-10 mr-3 rounded-lg drop-shadow"
+          style={{ objectFit: "contain" }}
+          draggable={false}
+        />
+      )}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-cyan-800/20 rounded transition"
+        className={`p-2 hover:bg-cyan-800/20 rounded transition ml-auto ${open ? "" : "mx-auto"} `}
         aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
+        style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
       >
         {open ? (
           <XMarkIcon className="h-7 w-7 text-aqua drop-shadow-[0_0_6px_#18f0ff]" />
