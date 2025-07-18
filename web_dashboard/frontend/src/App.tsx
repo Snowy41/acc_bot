@@ -300,14 +300,6 @@ useEffect(() => {
                       </div>
                     </div>
                   </div>
-                  {/* Get Started Button */}
-                  {showGetStarted && (
-                    <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20 animate__animated animate__fadeIn animate__delay-3s">
-                      <button className="cta-button bg-aqua text-midnight hover:bg-cyan-400 transition py-2 px-6 rounded-full text-lg font-semibold">
-                        Get Started
-                      </button>
-                    </div>
-                  )}
                 </div>
               }
             />

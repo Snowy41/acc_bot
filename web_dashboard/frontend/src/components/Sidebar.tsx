@@ -26,39 +26,77 @@ export default function Sidebar({
   }, [location, setActive]);
 
   return (
-      <div
-        className={`
-          flex flex-col h-screen transition-all duration-300 z-20
-          ${open ? "w-60" : "w-20"}
-          bg-gradient-to-br from-[#101829cc] to-[#112233a6] 
-          border-r border-cyan-800/40
-          shadow-[8px_0_28px_0_rgba(21,235,255,0.13)]
-          backdrop-blur-2xl
-          relative
-        `}
-        style={{
-          boxShadow:
-            "8px 0 24px 0 #19e3f566, 0 4px 40px 0 #18f0ff18, 0 0px 0px 1px #1bd6e811",
-          borderRight: "2.5px solid rgba(18,244,255,0.09)",
-          background:
-            "linear-gradient(135deg,rgba(16,24,41,0.82) 60%,rgba(17,34,51,0.62) 100%)",
-        }}
-      >
-        <div className="flex items-center justify-between px-3 pt-3 pb-1">
-          <button
-            onClick={() => setOpen((o) => !o)}
-            className="p-2 hover:bg-cyan-800/20 rounded transition"
-            aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
+    <div
+      className={`
+        flex flex-col h-screen transition-all duration-300 z-20
+        ${open ? "w-60" : "w-20"}
+        bg-gradient-to-br from-[#101829bb] to-[#112233aa]
+        border-r border-cyan-800/40
+        shadow-[8px_0_28px_0_rgba(21,235,255,0.13)]
+        backdrop-blur-2xl
+        relative
+      `}
+      style={{
+        boxShadow:
+          "8px 0 24px 0 #19e3f566, 0 4px 40px 0 #18f0ff18, 0 0px 0px 1px #1bd6e811",
+        borderRight: "2.5px solid rgba(18,244,255,0.09)",
+        background:
+          "linear-gradient(135deg,rgba(16,24,41,0.65) 60%,rgba(17,34,51,0.45) 100%)",
+        // Lower alpha for even more background show-through (adjust as you wish)
+      }}
+    >
+      <div className="flex items-center justify-between px-3 pt-3 pb-1">
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="p-2 hover:bg-cyan-800/20 rounded transition"
+          aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
+        >
+          {open ? (
+            <XMarkIcon className="h-7 w-7 text-aqua drop-shadow-[0_0_6px_#18f0ff]" />
+          ) : (
+            <Bars3Icon className="h-7 w-7 text-aqua drop-shadow-[0_0_6px_#18f0ff]" />
+          )}
+        </button>
+      </div>
+      <nav className="flex-1 flex flex-col mt-2 gap-2">
+        {nav.slice(0, 1).map((item) => (
+          <SidebarItem
+            key={item.key}
+            item={item}
+            open={open}
+            active={active}
+            setActive={setActive}
+          />
+        ))}
+        {isAdmin && (
+          <Link
+            to="/admin"
+            className={`
+              group flex items-center gap-3 px-4 py-3 mx-1 rounded-xl transition font-bold
+              bg-gradient-to-tr from-[#ffe97a] via-yellow-400 to-[#fff7cc]
+              text-midnight shadow-[0_0_16px_#ffe97a99]
+              border border-yellow-300/50 my-2 relative overflow-hidden
+              ${open ? "justify-start" : "justify-center"}
+            `}
+            onClick={() => setActive("admin-panel")}
+            style={{
+              boxShadow: "0 0 18px #ffe97aaa, 0 0 0 2px #ffd30030",
+              border: "1.5px solid #ffe97a88",
+              opacity: 1, // Full opacity!
+            }}
           >
-            {open ? (
-              <XMarkIcon className="h-7 w-7 text-aqua drop-shadow-[0_0_6px_#18f0ff]" />
-            ) : (
-              <Bars3Icon className="h-7 w-7 text-aqua drop-shadow-[0_0_6px_#18f0ff]" />
-            )}
-          </button>
-        </div>
-        <nav className="flex-1 flex flex-col mt-2 gap-2">
-          {nav.slice(0, 1).map((item) => (
+            <span className="h-6 w-6 flex items-center justify-center drop-shadow-[0_0_4px_#ffe97a99]">🛡️</span>
+            {open && <span className="font-bold">Admin Panel</span>}
+            <span className="absolute top-0 right-0 h-2 w-2 bg-yellow-400 rounded-full shadow-lg animate-pulse"></span>
+          </Link>
+        )}
+        {nav.slice(1).map((item) => {
+          // Only show "Logs" and "Bot Selection" if isPremium
+          if (
+            (item.key === "logs" || item.key === "botSelection") &&
+            !isPremium
+          ) return null;
+          return (
             <SidebarItem
               key={item.key}
               item={item}
@@ -66,46 +104,10 @@ export default function Sidebar({
               active={active}
               setActive={setActive}
             />
-          ))}
-          {isAdmin && (
-            <Link
-              to="/admin"
-              className={`
-                group flex items-center gap-3 px-4 py-3 mx-1 rounded-xl transition font-bold
-                bg-gradient-to-tr from-[#ffe97a] via-yellow-400 to-[#fff7cc]
-                text-midnight shadow-[0_0_16px_#ffe97a99]
-                border border-yellow-300/50 my-2 relative overflow-hidden
-                ${open ? "justify-start" : "justify-center"}
-              `}
-              onClick={() => setActive("admin-panel")}
-              style={{
-                boxShadow: "0 0 18px #ffe97aaa, 0 0 0 2px #ffd30030",
-                border: "1.5px solid #ffe97a88",
-              }}
-            >
-              <span className="h-6 w-6 flex items-center justify-center drop-shadow-[0_0_4px_#ffe97a99]">🛡️</span>
-              {open && <span className="font-bold">Admin Panel</span>}
-              <span className="absolute top-0 right-0 h-2 w-2 bg-yellow-400 rounded-full shadow-lg animate-pulse"></span>
-            </Link>
-          )}
-          {nav.slice(1).map((item) => {
-            // Only show "Logs" and "Bot Selection" if isPremium
-            if (
-              (item.key === "logs" || item.key === "botSelection") &&
-              !isPremium
-            ) return null;
-            return (
-              <SidebarItem
-                key={item.key}
-                item={item}
-                open={open}
-                active={active}
-                setActive={setActive}
-              />
-            );
-          })}
-        </nav>
-      </div>
+          );
+        })}
+      </nav>
+    </div>
   );
 }
 
@@ -121,21 +123,23 @@ function SidebarItem({
   setActive: (k: string) => void;
 }) {
   const isActive = active === item.key;
+
   return (
     <Link
       to={item.path}
-      className={`group flex items-center gap-3 px-4 py-3 mx-1 rounded-xl transition-all duration-150 relative
+      className={`
+        group flex items-center gap-3 px-4 py-3 mx-1 rounded-xl transition-all duration-150 relative
         ${isActive
-          ? "bg-gradient-to-tr from-[#22f0ff] to-[#1257c7] text-midnight shadow-[0_0_16px_#22f0ffcc]"
-          : "hover:bg-cyan-900/40 hover:text-aqua/90 bg-white/5"
+          ? "bg-gradient-to-tr from-[#22f0ff] to-[#1257c7] text-midnight shadow-[0_0_16px_#22f0ffcc] opacity-100"
+          : "hover:bg-cyan-900/40 hover:text-aqua/90 bg-white/10 text-white/80 opacity-80"
         }
         ${open ? "justify-start" : "justify-center"}
-        `}
+      `}
       onClick={() => setActive(item.key)}
       style={
         isActive
-          ? { boxShadow: "0 0 16px #12fff199, 0 1px 6px 1px #0ff7" }
-          : {}
+          ? { boxShadow: "0 0 16px #12fff199, 0 1px 6px 1px #0ff7", opacity: 1 }
+          : { opacity: 0.80 }
       }
     >
       <item.icon
