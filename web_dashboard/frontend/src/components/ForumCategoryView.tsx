@@ -25,23 +25,33 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
   const [posts, setPosts] = useState<Post[]>([]);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
+  const [role, setRole] = useState("user");
 
   useEffect(() => {
     fetch(`/api/forum/posts?category=${category}`)
       .then(res => res.json())
       .then(data => setPosts(data.posts || []));
   }, [category]);
-
+  useEffect(() => {
+    // fetch role when the component mounts
+    fetch("/api/auth/status", { credentials: "include" })
+      .then(res => res.json())
+      .then(data => setRole(data.role || "user"));
+  }, []);
   const handlePost = async () => {
-    if (!newTitle.trim() || !newContent.trim()) return;
     await fetch("/api/forum/posts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ title: newTitle, content: newContent, category, usertag, username: displayName }),
+      body: JSON.stringify({
+        title: newTitle,
+        content: newContent,
+        category,
+        usertag,
+        username: displayName,
+        role, // <-- add this line!
+      }),
     });
-    setNewTitle(""); setNewContent("");
-    fetch(`/api/forum/posts?category=${category}`).then(res => res.json()).then(data => setPosts(data.posts || []));
   };
 
   return (
