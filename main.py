@@ -1186,6 +1186,30 @@ def get_tickets():
     ]
     return jsonify({"tickets": tickets})
 
+@app.route("/api/tickets/<tid>/reply", methods=["POST"])
+def reply_ticket(tid):
+    usertag = session.get("username")
+    if not usertag:
+        return jsonify({"error": "Not logged in"}), 401
+    data = request.json
+    text = data.get("text", "").strip()
+    if not text:
+        return jsonify({"error": "Empty reply"}), 400
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT messages FROM tickets WHERE id=?", (tid,))
+    row = c.fetchone()
+    messages = json.loads(row[0] or "[]") if row else []
+    messages.append({
+        "from": usertag,
+        "text": text,
+        "timestamp": int(time.time())
+    })
+    c.execute("UPDATE tickets SET messages=?, updated_at=? WHERE id=?", (json.dumps(messages), int(time.time()), tid))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "messages": messages})
+
 @app.route("/api/tickets/<tid>", methods=["PATCH"])
 def update_ticket(tid):
     usertag = session.get("username")
