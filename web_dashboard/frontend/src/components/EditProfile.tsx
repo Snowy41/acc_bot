@@ -91,27 +91,15 @@ export default function EditProfile() {
               className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800"
               onChange={(e) => {
                 const file = e.target.files?.[0];
-                console.log("Selected file:", file); // ✅ Should appear
                 if (!file) return;
-                console.log("Uploading avatar...");
-
                 const formData = new FormData();
                 formData.append("avatar", file);
-
                 fetch("/api/upload/avatar", {
                   method: "POST",
                   body: formData,
                   credentials: "include",
                 })
                   .then((res) => res.json())
-                  .then((data) => {
-                    console.log("UPLOAD RESPONSE:", data); // add this
-                    if (data.success) {
-                      alert("Avatar uploaded successfully!");
-                    } else {
-                      alert(data.error || "Failed to upload avatar");
-                    }
-                  })
                   .catch(() => {
                     console.error("Upload failed"); // ✅ Must show if server unreachable
                     alert("Upload failed");

@@ -147,6 +147,15 @@ def load_forum(category=None):
             cmt_copy["role"] = cmt_author.get("role", "user") if cmt_author else "user"
             enriched_comments.append(cmt_copy)
         post["comments"] = enriched_comments
+        if post["category"] == "marketplace":
+            try:
+                data = json.loads(post["content"])
+                post["desc"] = data.get("desc", "")
+                post["price"] = data.get("price", "")
+            except Exception:
+                post["desc"] = post["content"]
+                post["price"] = ""
+
         posts.append(post)
     return posts
 
@@ -889,6 +898,15 @@ def get_single_post(post_id):
         enriched_comments.append(cmt_copy)
     post["comments"] = enriched_comments
 
+    if post["category"] == "marketplace":
+        try:
+            data = json.loads(post["content"])
+            post["desc"] = data.get("desc", "")
+            post["price"] = data.get("price", "")
+        except Exception:
+            post["desc"] = post["content"]
+            post["price"] = ""
+
     return jsonify({"post": post})
 
 
@@ -898,6 +916,14 @@ def create_forum_post():
     required_fields = ["category", "title", "content", "usertag", "username", "role"]
     if not all(data.get(field) for field in required_fields):
         return jsonify({"error": "Missing fields"}), 400
+
+    # Marketplace validation: ensure content is JSON with desc and price
+    if data["category"] == "marketplace":
+        try:
+            parsed = json.loads(data["content"])
+            assert "desc" in parsed and "price" in parsed
+        except Exception:
+            return jsonify({"error": "Invalid content for marketplace post."}), 400
 
     # Only admins may post in "announcement" (case-insensitive)
     is_announcement = False
@@ -920,6 +946,7 @@ def create_forum_post():
         "timestamp": int(time.time() * 1000),
         "is_announcement": is_announcement
     }
+
 
     save_forum_post(post)
     return jsonify({"success": True})

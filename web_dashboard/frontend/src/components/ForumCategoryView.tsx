@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Username from "./Username";
+import MarketplaceCategoryView from "./MarketPlaceCategoryView";
 
 interface Post {
   id: string;
@@ -85,6 +86,12 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
       alert(data.error || "Delete failed");
     }
   };
+
+
+  if (category === "marketplace") {
+    return <MarketplaceCategoryView usertag={usertag} displayName={displayName} />;
+  }
+
 
   return (
     <div className="w-full max-w-5xl mx-auto mt-8 relative">

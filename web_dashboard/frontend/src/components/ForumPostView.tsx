@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Username from "./Username";
+import MarketplacePostView from "./MarketplacePostView";
 
 interface Comment {
   usertag: string;
@@ -86,6 +87,11 @@ export default function ForumPostView({ usertag, displayName }: ForumPostViewPro
     typeof post.animatedColors === "string"
       ? JSON.parse(post.animatedColors)
       : post.animatedColors || [];
+
+  if (category === "marketplace") {
+  return <MarketplacePostView usertag={usertag} displayName={displayName} />;
+  }
+
 
   // ----------- Layout -----------
   return (
