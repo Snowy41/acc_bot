@@ -1,12 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Username from "./Username";
+import ChatModal from "./ChatModal";
 
 export default function MarketplacePostView({ usertag, displayName }) {
   const { postId } = useParams();
   const [post, setPost] = useState(null);
   const [comment, setComment] = useState("");
   const navigate = useNavigate();
+  const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
     fetch(`/api/forum/posts/${postId}`)
@@ -46,13 +48,20 @@ export default function MarketplacePostView({ usertag, displayName }) {
         </div>
         <button
           className="bg-aqua text-midnight px-7 py-2 rounded-full font-bold shadow hover:bg-cyan-400 transition"
-          // onClick={} // For now, maybe open DM with seller or support ticket
+          onClick={() => setShowChat(true)}
         >
           Contact Seller
         </button>
+        {showChat && (
+          <ChatModal
+            friend={post.usertag}
+            onClose={() => setShowChat(false)}
+            currentUserTag={usertag}
+            friendUsername={post.username}
+            initialMessage={`Hi, I'm interested in your "${post.title}" listing!`}
+          />
+        )}
       </div>
-      {/* Comments/Replies Section */}
-      {/* Copy your forum reply code here */}
     </div>
   );
 }

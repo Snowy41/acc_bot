@@ -25,6 +25,7 @@ import ShopCategory from "./components/ShopCategory";
 import ShopItemDetail from "./components/ShopItemDetails";
 import SupportPage from "./components/SupportPage";
 import ModerationDashboard from "./components/ModerationDashboard";
+import MessagesPage from "./components/MessagePage"; // adjust path if needed
 
 function App() {
   const [active, setActive] = useState("home");
@@ -326,6 +327,7 @@ useEffect(() => {
             <Route path="/shop/:category/:item" element={<ShopItemDetail />} />
             <Route path="/support" element={<SupportPage />} />
             <Route path="/moderation" element={<ModerationDashboard />} />
+            <Route path="/messages" element={<MessagesPage usertag={usertag} />}/>
             <Route path="*" element={<div>Page not found!</div>} />
           </Routes>
         </main>

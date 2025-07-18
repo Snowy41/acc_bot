@@ -9,14 +9,17 @@ import {
   ShoppingBagIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
+import {ChatBubbleLeftRightIcon} from "@heroicons/react/16/solid";
 
 const nav = [
   { name: "Home", icon: HomeIcon, key: "home", path: "/" },
   { name: "Forum", icon: UserGroupIcon, key: "forum", path: "/forum" },
+  { name: "Chats", icon: ChatBubbleLeftRightIcon, key: "messages", path: "/messages" }, // <--- ADD HERE
   { name: "Shop", icon: ShoppingBagIcon, key: "shop", path: "/shop" },
   { name: "Logs", icon: ClipboardDocumentListIcon, key: "logs", path: "/logs" },
   { name: "Bot Selection", icon: UserGroupIcon, key: "botSelection", path: "/botSelection" },
   { name: "Support", icon: ClipboardDocumentListIcon, key: "support", path: "/support" },
+
 ];
 
 export default function Sidebar({
@@ -166,11 +169,14 @@ function SidebarItem({
   open,
   active,
   setActive,
+  unread = 0, // <--- add default
 }: {
   item: { name: string; icon: any; key: string; path: string };
   open: boolean;
   active: string;
   setActive: (k: string) => void;
+  unread?: number;
+
 }) {
   const isActive = active === item.key;
 
@@ -212,6 +218,11 @@ function SidebarItem({
       )}
       {isActive && (
         <span className="absolute -left-2 top-1/2 -translate-y-1/2 h-5 w-1 rounded-full bg-aqua shadow-lg blur-[1px]"></span>
+      )}
+            {item.key === "messages" && unread > 0 && (
+        <span className="absolute right-2 top-3 bg-aqua text-midnight text-xs px-2 rounded-full shadow animate-pulse">
+          {unread}
+        </span>
       )}
     </Link>
   );

@@ -337,6 +337,36 @@ def cleanup_messages():
     conn.close()
     return jsonify({"deleted": deleted})
 
+@app.route("/api/messages/list", methods=["GET"])
+def list_conversations():
+    usertag = session.get("username")
+    if not usertag:
+        return jsonify({"error": "Not logged in"}), 401
+    conn = sqlite3.connect(MESSAGES_DB_PATH)
+    c = conn.cursor()
+    # Get all messages involving this user, newest first
+    c.execute("""
+      SELECT sender, recipient, text, timestamp FROM chat_messages
+      WHERE sender=? OR recipient=?
+      ORDER BY timestamp DESC
+    """, (usertag, usertag))
+    conversations = {}
+    for sender, recipient, text, timestamp in c.fetchall():
+        other = recipient if sender == usertag else sender
+        # Only store the most recent message
+        if other not in conversations or timestamp > conversations[other]["lastTimestamp"]:
+            # Optionally, fetch username/avatar from user table
+            user = get_user_by_usertag(other)
+            conversations[other] = {
+                "usertag": other,
+                "username": user.get("username", other) if user else other,
+                "avatar": user.get("avatar", "") if user else "",
+                "lastMessage": text,
+                "lastTimestamp": timestamp,
+                "unread": False  # (Optional: set to True if you add read/unread logic)
+            }
+    conn.close()
+    return jsonify({"conversations": list(conversations.values())})
 
 
 # Flask routes for authentication
