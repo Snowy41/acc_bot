@@ -13,7 +13,7 @@ export default function Sidebar({
   active,
   setActive,
   isAdmin,
-  isPremium,   // ← ADD THIS
+  isPremium,
 }: { active: string, setActive: (k: string) => void, isAdmin?: boolean, isPremium?: boolean }) {
   const [open, setOpen] = useState(true);
   const location = useLocation();
@@ -21,81 +21,141 @@ export default function Sidebar({
   useEffect(() => {
     const currentPath = location.pathname;
     const activeNav = nav.find((item) => item.path === currentPath);
-    if (activeNav) {
-      setActive(activeNav.key);
-    }
+    if (activeNav) setActive(activeNav.key);
     if (currentPath === "/admin") setActive("admin-panel");
   }, [location, setActive]);
 
   return (
-    <div className={`flex flex-col h-screen bg-white/10 border-r border-cyan-800/30 backdrop-blur-2xl shadow-[0_10px_60px_0_rgba(0,255,255,0.06)] transition-all duration-300 z-10 ${open ? "w-56" : "w-16"}`}>
+    <div
+      className={`flex flex-col h-screen transition-all duration-300 z-20
+      ${open ? "w-60" : "w-20"}
+      bg-gradient-to-br from-[#112233dd] to-[#0e1627cc]
+      border-r border-cyan-800/60
+      shadow-[0_8px_60px_0_rgba(18,244,255,0.10)]
+      backdrop-blur-2xl
+      relative`}
+      style={{
+        boxShadow: "0 4px 40px 0 #18f0ff18, 0 0px 0px 1px #1bd6e811",
+        borderRight: "2.5px solid rgba(18,244,255,0.18)",
+      }}
+    >
       <div className="flex items-center justify-between px-3 pt-3 pb-1">
         <button
           onClick={() => setOpen((o) => !o)}
-          className="p-2 hover:bg-midnight/40 rounded transition"
+          className="p-2 hover:bg-cyan-800/20 rounded transition"
           aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
         >
-          {open ? <XMarkIcon className="h-6 w-6 text-aqua" /> : <Bars3Icon className="h-6 w-6 text-aqua" />}
+          {open ? (
+            <XMarkIcon className="h-7 w-7 text-aqua drop-shadow-[0_0_6px_#18f0ff]" />
+          ) : (
+            <Bars3Icon className="h-7 w-7 text-aqua drop-shadow-[0_0_6px_#18f0ff]" />
+          )}
         </button>
       </div>
       <nav className="flex-1 flex flex-col mt-2 gap-2">
         {nav.slice(0, 1).map((item) => (
-          <Link
+          <SidebarItem
             key={item.key}
-            to={item.path}
-            className={`group flex items-center gap-3 px-4 py-3 mx-1 rounded-xl transition
-              ${active === item.key ? "bg-gradient-to-tr from-aqua to-cyan-800 text-midnight shadow-md" : "hover:bg-cyan-900/30 hover:text-aqua"}
-              ${open ? "justify-start" : "justify-center"}
-            `}
-            onClick={() => setActive(item.key)}
-            style={active === item.key ? { boxShadow: "0 0 14px #12fff188" } : {}}
-          >
-            <item.icon className={`h-6 w-6 ${active === item.key ? "text-midnight" : "text-cyan-400 group-hover:text-aqua"}`} />
-            {open && <span className={`font-bold ${active === item.key ? "text-midnight" : "text-white"}`}>{item.name}</span>}
-          </Link>
+            item={item}
+            open={open}
+            active={active}
+            setActive={setActive}
+          />
         ))}
-
-        {/* Admin Panel Button */}
         {isAdmin && (
           <Link
             to="/admin"
-            className={`group flex items-center gap-3 px-4 py-3 mx-1 rounded-xl transition font-bold bg-gradient-to-tr from-yellow-400 to-yellow-300 text-midnight shadow-lg border-2 border-yellow-400 my-2
+            className={`
+              group flex items-center gap-3 px-4 py-3 mx-1 rounded-xl transition font-bold
+              bg-gradient-to-tr from-[#ffe97a] via-yellow-400 to-[#fff7cc]
+              text-midnight shadow-[0_0_16px_#ffe97a99]
+              border border-yellow-300/50 my-2 relative overflow-hidden
               ${open ? "justify-start" : "justify-center"}
             `}
             onClick={() => setActive("admin-panel")}
-            style={{ boxShadow: "0 0 16px #f2d02499" }}
+            style={{
+              boxShadow: "0 0 18px #ffe97aaa, 0 0 0 2px #ffd30030",
+              border: "1.5px solid #ffe97a88",
+            }}
           >
-            <span className="h-6 w-6 flex items-center justify-center">🛡️</span>
+            <span className="h-6 w-6 flex items-center justify-center drop-shadow-[0_0_4px_#ffe97a99]">🛡️</span>
             {open && <span className="font-bold">Admin Panel</span>}
+            <span className="absolute top-0 right-0 h-2 w-2 bg-yellow-400 rounded-full shadow-lg animate-pulse"></span>
           </Link>
         )}
-
-        {/* Render the rest of the nav */}
         {nav.slice(1).map((item) => {
           // Only show "Logs" and "Bot Selection" if isPremium
           if (
             (item.key === "logs" || item.key === "botSelection") &&
             !isPremium
-          ) {
-            return null;
-          }
+          ) return null;
           return (
-            <Link
+            <SidebarItem
               key={item.key}
-              to={item.path}
-              className={`group flex items-center gap-3 px-4 py-3 mx-1 rounded-xl transition
-                ${active === item.key ? "bg-gradient-to-tr from-aqua to-cyan-800 text-midnight shadow-md" : "hover:bg-cyan-900/30 hover:text-aqua"}
-                ${open ? "justify-start" : "justify-center"}
-              `}
-              onClick={() => setActive(item.key)}
-              style={active === item.key ? { boxShadow: "0 0 14px #12fff188" } : {}}
-            >
-              <item.icon className={`h-6 w-6 ${active === item.key ? "text-midnight" : "text-cyan-400 group-hover:text-aqua"}`} />
-              {open && <span className={`font-bold ${active === item.key ? "text-midnight" : "text-white"}`}>{item.name}</span>}
-            </Link>
+              item={item}
+              open={open}
+              active={active}
+              setActive={setActive}
+            />
           );
         })}
       </nav>
+      {/* Glow highlight on sidebar edge */}
+      <div className="absolute right-0 top-0 h-full w-1 bg-gradient-to-b from-[#18f0ff60] to-transparent rounded-lg pointer-events-none blur-[1px]" />
     </div>
+  );
+}
+
+function SidebarItem({
+  item,
+  open,
+  active,
+  setActive,
+}: {
+  item: { name: string; icon: any; key: string; path: string };
+  open: boolean;
+  active: string;
+  setActive: (k: string) => void;
+}) {
+  const isActive = active === item.key;
+  return (
+    <Link
+      to={item.path}
+      className={`group flex items-center gap-3 px-4 py-3 mx-1 rounded-xl transition-all duration-150 relative
+        ${isActive
+          ? "bg-gradient-to-tr from-[#22f0ff] to-[#1257c7] text-midnight shadow-[0_0_16px_#22f0ffcc]"
+          : "hover:bg-cyan-900/40 hover:text-aqua/90"
+        }
+        ${open ? "justify-start" : "justify-center"}
+        `}
+      onClick={() => setActive(item.key)}
+      style={
+        isActive
+          ? { boxShadow: "0 0 16px #12fff199, 0 1px 6px 1px #0ff7" }
+          : {}
+      }
+    >
+      <item.icon
+        className={`
+          h-6 w-6
+          ${isActive
+            ? "text-midnight drop-shadow-[0_0_6px_#1bd6e8]"
+            : "text-cyan-400 group-hover:text-aqua transition-colors duration-150"
+          }
+        `}
+      />
+      {open && (
+        <span
+          className={`font-semibold tracking-wide text-[1.08rem] transition-all
+            ${isActive ? "text-midnight" : "text-cyan-50 group-hover:text-aqua"}
+          `}
+        >
+          {item.name}
+        </span>
+      )}
+      {isActive && (
+        <span className="absolute -left-2 top-1/2 -translate-y-1/2 h-5 w-1 rounded-full bg-aqua shadow-lg blur-[1px]"></span>
+      )}
+    </Link>
   );
 }
