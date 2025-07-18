@@ -42,19 +42,22 @@ export default function Sidebar({
         borderRight: "2.5px solid rgba(18,244,255,0.09)"
       }}
     >
-      <div className="flex flex-1 flex-col justify-center px-3">
-        <button
-          onClick={() => setOpen((o) => !o)}
-          className="p-2 hover:bg-cyan-800/20 rounded transition"
-          aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
-        >
-          {open ? (
-            <XMarkIcon className="h-7 w-7 text-aqua drop-shadow-[0_0_6px_#18f0ff]" />
-          ) : (
-            <Bars3Icon className="h-7 w-7 text-aqua drop-shadow-[0_0_6px_#18f0ff]" />
-          )}
-        </button>
-      </div>
+    <div
+      className={`flex items-center ${open ? "justify-between px-3 pt-3 pb-1" : "justify-center py-4"}`}
+    >
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="p-2 hover:bg-cyan-800/20 rounded transition"
+        aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
+      >
+        {open ? (
+          <XMarkIcon className="h-7 w-7 text-aqua drop-shadow-[0_0_6px_#18f0ff]" />
+        ) : (
+          <Bars3Icon className="h-7 w-7 text-aqua drop-shadow-[0_0_6px_#18f0ff]" />
+        )}
+      </button>
+    </div>
+
       <nav className="flex-1 flex flex-col mt-2 gap-2">
         {nav.slice(0, 1).map((item) => (
           <SidebarItem
