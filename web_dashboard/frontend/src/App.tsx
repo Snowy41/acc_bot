@@ -19,9 +19,10 @@ import SystemMessage from "./components/SystemMessage";
 import NotificationBell from "./components/NotificationBell";
 import type {UserNotification} from "./components/NotificationBell"
 import { ToastContainer, toast } from "react-toastify";
-import AnimatedCursor from "./components/AnimatedCursor";
 import ParticleBackground from "./components/ParticleBackground";
-
+import Shop from "./components/Shop";
+import ShopCategory from "./components/ShopCategory";
+import ShopItemDetail from "./components/ShopItemDetails";
 
 function App() {
   const [active, setActive] = useState("home");
@@ -312,7 +313,9 @@ useEffect(() => {
             <Route path="/forum" element={<ForumCategories />} />
             <Route path="/forum/:category" element={<ForumCategoryView usertag={usertag} displayName={displayName} />} />
             <Route path="/forum/:category/:postId" element={<ForumPostView usertag={usertag} displayName={displayName} />} />
-
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/shop/:category" element={<ShopCategory />} />
+            <Route path="/shop/:category/:item" element={<ShopItemDetail />} />
             <Route path="*" element={<div>Page not found!</div>} />
           </Routes>
         </main>

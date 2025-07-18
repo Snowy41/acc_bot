@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { HomeIcon, ClipboardDocumentListIcon, Bars3Icon, XMarkIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import { HomeIcon, ClipboardDocumentListIcon, Bars3Icon, XMarkIcon, UserGroupIcon, ShoppingBagIcon } from "@heroicons/react/24/outline";
 
 const nav = [
   { name: "Home", icon: HomeIcon, key: "home", path: "/" },
-  { name: "Logs", icon: ClipboardDocumentListIcon, key: "logs", path: "/logs" },
   { name: "Forum", icon: UserGroupIcon, key: "forum", path: "/forum" },
+  { name: "Shop", icon: ShoppingBagIcon, key: "shop", path: "/shop" },
+  { name: "Logs", icon: ClipboardDocumentListIcon, key: "logs", path: "/logs" },
   { name: "Bot Selection", icon: UserGroupIcon, key: "botSelection", path: "/botSelection" },
 ];
 
