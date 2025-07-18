@@ -110,10 +110,11 @@ export default function ChatModal({
 
         {/* MESSAGES */}
         <div
-          className="flex-1 flex flex-col px-5 py-5 overflow-y-auto bg-gradient-to-tr from-[#18222f]/95 to-[#1e2d47]/95"
+          className="flex-1 flex flex-col px-5 py-5 overflow-y-auto"
           style={{
             minHeight: "320px",
             background: "radial-gradient(ellipse at bottom right, #162030cc 75%, #18222fcc 100%)",
+            overflowX: "hidden", // <--- Add this line
           }}
         >
           {messages.length === 0 ? (

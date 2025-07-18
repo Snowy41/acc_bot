@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import ChatModal from "./ChatModal"; // Reusable chat window/modal
-import { useNavigate } from "react-router-dom";
+import ChatModal from "./ChatModal";
 
 interface Conversation {
-  usertag: string;      // Their tag
-  username: string;     // Display name
+  usertag: string;
+  username: string;
   avatar?: string;
   lastMessage: string;
   lastTimestamp: number;
@@ -13,25 +12,57 @@ interface Conversation {
 
 export default function MessagesPage({ usertag }: { usertag: string }) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [friends, setFriends] = useState<string[]>([]);
   const [chatTarget, setChatTarget] = useState<string | null>(null);
   const [targetUsername, setTargetUsername] = useState<string>("");
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<"friends" | "market">("market");
 
   useEffect(() => {
     fetch("/api/messages/list", { credentials: "include" })
       .then(res => res.json())
       .then(data => setConversations(data.conversations || []));
+    fetch("/api/friends/list", { credentials: "include" })
+      .then(res => res.json())
+      .then(data => setFriends(data.friends || []));
   }, []);
+
+  // Split conversations
+  const friendConvos = conversations.filter(conv => friends.includes(conv.usertag));
+  const marketConvos = conversations.filter(conv => !friends.includes(conv.usertag));
+
+  const displayConvos = activeTab === "friends" ? friendConvos : marketConvos;
 
   return (
     <div className="max-w-3xl mx-auto py-10">
       <h2 className="text-3xl font-extrabold text-aqua mb-8">Messages</h2>
+      <div className="flex gap-4 mb-6">
+        <button
+          className={`px-7 py-2 rounded-full font-bold text-lg shadow transition
+            ${activeTab === "friends"
+              ? "bg-aqua text-midnight"
+              : "bg-[#222f43] text-cyan-200 hover:bg-cyan-900/40"
+            }`}
+          onClick={() => setActiveTab("friends")}
+        >
+          Friends
+        </button>
+        <button
+          className={`px-7 py-2 rounded-full font-bold text-lg shadow transition
+            ${activeTab === "market"
+              ? "bg-aqua text-midnight"
+              : "bg-[#222f43] text-cyan-200 hover:bg-cyan-900/40"
+            }`}
+          onClick={() => setActiveTab("market")}
+        >
+          Market
+        </button>
+      </div>
       <div className="rounded-2xl bg-[#162030]/80 border border-cyan-900/40 shadow-xl p-6 mb-6">
-        {conversations.length === 0 ? (
+        {displayConvos.length === 0 ? (
           <div className="text-cyan-300">No conversations yet.</div>
         ) : (
           <ul className="divide-y divide-cyan-900">
-            {conversations.map(conv => (
+            {displayConvos.map(conv => (
               <li
                 key={conv.usertag}
                 className="flex items-center gap-4 py-4 cursor-pointer hover:bg-cyan-900/10 transition"
