@@ -250,7 +250,7 @@ useEffect(() => {
               element={
                 <div className="dashboard-container">
                   {/* Hero Section */}
-                  <div className="w-full flex flex-col items-center justify-center mt-2 mb-2">
+                  <div className="w-full flex flex-col items-center justify-center mb-2">
                     <img
                       src="/logo_for_website.png"  // or use your import if not in public/
                       alt="vanish.rip logo banner"
