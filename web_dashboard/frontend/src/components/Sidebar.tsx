@@ -31,16 +31,17 @@ export default function Sidebar({
           flex flex-col h-screen transition-all duration-300 z-20
           ${open ? "w-60" : "w-20"}
           bg-gradient-to-br from-[#101829cc] to-[#112233a6] 
-          border-r border-cyan-800/50
-          shadow-[0_8px_60px_0_rgba(18,244,255,0.10)]
+          border-r border-cyan-800/40
+          shadow-[8px_0_28px_0_rgba(21,235,255,0.13)]
           backdrop-blur-2xl
           relative
-          `}
+        `}
         style={{
-          boxShadow: "0 4px 40px 0 #18f0ff18, 0 0px 0px 1px #1bd6e811",
-          borderRight: "2.5px solid rgba(18,244,255,0.12)",
-          background: "linear-gradient(135deg,rgba(16,24,41,0.83) 60%,rgba(17,34,51,0.66) 100%)",
-          // The above ensures the sidebar is glassy but readable.
+          boxShadow:
+            "8px 0 24px 0 #19e3f566, 0 4px 40px 0 #18f0ff18, 0 0px 0px 1px #1bd6e811",
+          borderRight: "2.5px solid rgba(18,244,255,0.09)",
+          background:
+            "linear-gradient(135deg,rgba(16,24,41,0.82) 60%,rgba(17,34,51,0.62) 100%)",
         }}
       >
         <div className="flex items-center justify-between px-3 pt-3 pb-1">
@@ -104,15 +105,6 @@ export default function Sidebar({
             );
           })}
         </nav>
-        {/* Glow highlight on sidebar edge */}
-          <div
-            className="absolute right-0 top-0 h-full w-[2.5px] rounded-full pointer-events-none"
-            style={{
-              background: "linear-gradient(180deg, #20ffe7b2 0%, #13bff1b3 85%, transparent 100%)",
-                boxShadow: "0 0 16px 4px #19e3f588",
-                opacity: 0.48,
-            }}
-          />
       </div>
   );
 }
