@@ -11,18 +11,12 @@ const iconMap = {
 export default function Shop() {
   return (
     <div className="flex justify-center items-start w-full min-h-[90vh] pt-12 px-4">
-      <div className="
-        relative bg-gradient-to-br from-[#172736]/70 to-[#151c28]/90
-        border border-cyan-900/60
-        shadow-[0_8px_40px_0_rgba(0,255,255,0.07)]
-        rounded-3xl
-        max-w-3xl w-full
-        backdrop-blur-xl
-        mx-auto
-        flex flex-col items-center
-        p-0 sm:p-10
-        ">
-
+        <div
+          className="relative border border-cyan-900/60 shadow-[0_8px_40px_0_rgba(0,255,255,0.07)] rounded-3xl max-w-3xl w-full backdrop-blur-xl mx-auto flex flex-col items-center p-0 sm:p-10"
+          style={{
+            background: "linear-gradient(135deg, rgba(23,39,54,0.80) 0%, rgba(21,28,40,0.80) 100%)",
+          }}
+        >
         {/* Neon Glow Edge */}
         <div className="absolute -top-1 -left-1 right-0 h-1 w-[calc(100%+8px)] rounded-t-3xl pointer-events-none z-10 blur-[2px]" style={{
           background: "linear-gradient(90deg, #17ffe7cc, #097ea6cc 70%)",
