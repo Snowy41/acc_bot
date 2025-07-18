@@ -425,16 +425,21 @@ def upload_avatar():
     if not file or not allowed_file(file.filename):
         return jsonify({"error": "Invalid file"}), 400
 
+
     ext = file.filename.rsplit('.', 1)[1].lower()
     # Allow GIFs only if the user has role == "admin"
     if ext == "gif" and str(user.get("role", "")).lower() not in ["admin"]:
-        return jsonify({"error": "Only admins can upload GIFs"}), 403
-
+        print("GIF blocked. Role:", user.get("role"))
+        return jsonify({"error": f"Only admins can upload GIFs (your role: {user.get('role')})"}), 403
 
     for ext in ALLOWED_EXTENSIONS:
         old_path = os.path.join(UPLOAD_FOLDER, f"{usertag}.{ext}")
         if os.path.exists(old_path):
             os.remove(old_path)
+
+    print("DEBUG: session user =", session.get("username"))
+    print("DEBUG: user dict loaded =", user)
+    print("DEBUG: role value =", user.get("role"), "== 'admin'?", str(user.get("role", "")).lower() == "admin")
 
     filename = secure_filename(f"{usertag}.{ext}")
     filepath = os.path.join(UPLOAD_FOLDER, filename)
