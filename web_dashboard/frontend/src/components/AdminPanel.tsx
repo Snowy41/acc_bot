@@ -101,8 +101,8 @@ export default function AdminPanel() {
         color: edit.color,
         tags: edit.tags,
         bio: edit.bio,
-        role: edit.role || selected.role || "user",  // <-- always include the current role!
-        animatedColors: edit.animatedColors, // <-- include this
+        role: edit.role || selected.role || "user",
+        animatedColors: edit.animatedColors,
       }),
     });
     setSuccessMsg("Profile updated!");
@@ -287,7 +287,15 @@ export default function AdminPanel() {
                             style={{ background: user.color || "#fff" }}
                           ></span>
                         </td>
-                        <td className="px-4 py-2 text-center">{user.role === "admin" ? "✔️" : ""}</td>
+                        <td className="px-4 py-2 text-center">
+                          {user.role === "admin" && "✔️"}
+                          {user.role === "moderator" && (
+                            <span className="ml-1 px-2 py-0.5 bg-indigo-700/30 border border-indigo-400/50 text-indigo-200 rounded text-[11px] font-bold">
+                              MOD
+                            </span>
+                          )}
+                        </td>
+
                         <td className="px-4 py-2 text-center">
                           <button
                             className="px-3 py-1 rounded bg-aqua/60 text-midnight font-bold hover:bg-aqua/90 transition"
@@ -441,6 +449,18 @@ export default function AdminPanel() {
                     {edit.username || selected?.username}
                   </Username>
                 </div>
+              </div>
+              <div className="mb-5">
+                <label className="block text-cyan-300 mb-1">Role</label>
+                <select
+                  className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800"
+                  value={edit.role || selected.role || "user"}
+                  onChange={e => setEdit({ ...edit, role: e.target.value })}
+                >
+                  <option value="user">User</option>
+                  <option value="moderator">Moderator</option>
+                  <option value="admin">Admin</option>
+                </select>
               </div>
               <button
                 className="bg-aqua text-midnight px-4 py-2 rounded font-bold mt-2 w-full hover:bg-cyan-400 transition"

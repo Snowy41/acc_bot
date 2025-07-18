@@ -1134,6 +1134,82 @@ def list_friends():
     return jsonify({"friends": friends})
 
 
+@app.route("/api/tickets", methods=["POST"])
+def create_ticket():
+    data = request.json
+    if not session.get("username"):
+        return jsonify({"error": "Not logged in"}), 401
+    if not data.get("subject") or not data.get("body"):
+        return jsonify({"error": "Missing fields"}), 400
+    ticket = {
+        "id": str(uuid.uuid4()),
+        "usertag": session["username"],
+        "subject": data["subject"],
+        "body": data["body"],
+        "status": "open",
+        "created_at": int(time.time()),
+        "updated_at": int(time.time()),
+        "assigned_to": None
+    }
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("INSERT INTO tickets VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+              (ticket["id"], ticket["usertag"], ticket["subject"], ticket["body"], ticket["status"], ticket["created_at"], ticket["updated_at"], ticket["assigned_to"]))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "ticket": ticket})
+
+@app.route("/api/tickets", methods=["GET"])
+def get_tickets():
+    usertag = session.get("username")
+    user = get_user_by_usertag(usertag)
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    if user.get("role") in ("admin", "moderator"):
+        c.execute("SELECT * FROM tickets ORDER BY created_at DESC")
+    else:
+        c.execute("SELECT * FROM tickets WHERE usertag=? ORDER BY created_at DESC", (usertag,))
+    rows = c.fetchall()
+    conn.close()
+    tickets = [
+        {
+            "id": row[0],
+            "usertag": row[1],
+            "subject": row[2],
+            "body": row[3],
+            "status": row[4],
+            "created_at": row[5],
+            "updated_at": row[6],
+            "assigned_to": row[7],
+        }
+        for row in rows
+    ]
+    return jsonify({"tickets": tickets})
+
+@app.route("/api/tickets/<tid>", methods=["PATCH"])
+def update_ticket(tid):
+    usertag = session.get("username")
+    user = get_user_by_usertag(usertag)
+    if not user or user.get("role") not in ("admin", "moderator"):
+        return jsonify({"error": "Permission denied"}), 403
+    data = request.json
+    updates = []
+    params = []
+    if "status" in data:
+        updates.append("status=?")
+        params.append(data["status"])
+    if "assigned_to" in data:
+        updates.append("assigned_to=?")
+        params.append(data["assigned_to"])
+    params.append(int(time.time()))
+    params.append(tid)
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute(f"UPDATE tickets SET {', '.join(updates)}, updated_at=? WHERE id=?", params)
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True})
+
 @socketio.on("connect")
 def handle_connect():
     socketio.emit("bot_log", {"script": "knuddels_creator.py", "output": "🔥 From connect handler!"})

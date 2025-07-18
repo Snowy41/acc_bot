@@ -260,6 +260,11 @@ function ThreadRow({
             ADMIN
           </span>
         )}
+        {post.role === "moderator" && (
+          <span className="ml-2 px-2 py-0.5 bg-indigo-700/30 border border-indigo-400/50 text-indigo-200 rounded text-[11px] font-bold">
+            MOD
+          </span>
+        )}
       </div>
       {/* Thread info */}
       <div className="flex-1 min-w-0">

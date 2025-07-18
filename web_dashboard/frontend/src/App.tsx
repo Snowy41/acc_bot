@@ -23,6 +23,8 @@ import ParticleBackground from "./components/ParticleBackground";
 import Shop from "./components/Shop";
 import ShopCategory from "./components/ShopCategory";
 import ShopItemDetail from "./components/ShopItemDetails";
+import SupportPage from "./components/SupportPage";
+import ModerationDashboard from "./components/ModerationDashboard";
 
 function App() {
   const [active, setActive] = useState("home");
@@ -322,6 +324,8 @@ useEffect(() => {
             <Route path="/shop" element={<Shop />} />
             <Route path="/shop/:category" element={<ShopCategory />} />
             <Route path="/shop/:category/:item" element={<ShopItemDetail />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/moderation" element={<ModerationDashboard />} />
             <Route path="*" element={<div>Page not found!</div>} />
           </Routes>
         </main>
