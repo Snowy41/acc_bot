@@ -13,17 +13,15 @@ const AnimatedCursor: React.FC = () => {
     return () => document.removeEventListener("mousemove", move);
   }, []);
 
-  // Animation via JS (pulse effect)
+  // Animate opacity for pulse (not size)
   useEffect(() => {
     let frame = 0;
     let requestId: number;
     const animate = () => {
       if (glowRef.current) {
-        // Pulse between 1 and 1.14x scale and 0.7-1 opacity
-        const scale = 1 + 0.14 * Math.sin(frame / 32);
-        const opacity = 0.72 + 0.28 * Math.abs(Math.sin(frame / 32));
+        // Subtle opacity pulse between 0.42 and 0.7
+        const opacity = 0.42 + 0.28 * Math.abs(Math.sin(frame / 40));
         glowRef.current.style.opacity = String(opacity);
-        glowRef.current.style.transform += ` scale(${scale})`;
       }
       frame++;
       requestId = requestAnimationFrame(animate);
@@ -37,18 +35,17 @@ const AnimatedCursor: React.FC = () => {
       ref={glowRef}
       className="pointer-events-none fixed z-[9999] left-0 top-0"
       style={{
-        width: 54, // covers normal cursor + glow
-        height: 54,
-        marginLeft: -27,
-        marginTop: -27,
+        width: 36,
+        height: 36,
+        marginLeft: -18,
+        marginTop: -18,
         borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(21,248,219,0.26) 0%, rgba(21,248,219,0.12) 55%, transparent 90%)",
-        boxShadow: "0 0 36px 14px #15f8db44, 0 0 88px 20px #15f8db26",
-        opacity: 0.9,
-        willChange: "transform, opacity",
+        background: "radial-gradient(circle, #15f8db55 0%, #15f8db22 60%, transparent 100%)",
+        boxShadow: "0 0 14px 6px #15f8db33, 0 0 40px 10px #15f8db22",
+        willChange: "opacity, transform",
         mixBlendMode: "lighten",
-        pointerEvents: "none",
         border: "none",
+        pointerEvents: "none",
       }}
     />
   );
