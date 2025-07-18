@@ -92,7 +92,7 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
         <div className="absolute bottom-0 right-0 w-[36vw] h-[22vh] bg-gradient-to-tl from-cyan-400/30 to-fuchsia-500/10 blur-2xl rounded-full" />
       </div>
       <div className="relative z-10">
-        <div className="bg-white/10 border border-cyan-700/40 shadow-[0_6px_36px_0_rgba(0,255,255,0.09)] backdrop-blur-xl rounded-3xl py-6 px-2 md:px-8 mb-10">
+      <div className="bg-[#18212e]/90 border border-cyan-700/40 shadow-[0_6px_36px_0_rgba(0,255,255,0.09)] backdrop-blur-xl rounded-3xl py-6 px-2 md:px-8 mb-10">
           <div className="flex items-center justify-between mb-6 border-b border-cyan-900/20 pb-2">
             <div>
               <h2 className="text-3xl font-extrabold text-aqua mb-0 capitalize tracking-wide">{category}</h2>
