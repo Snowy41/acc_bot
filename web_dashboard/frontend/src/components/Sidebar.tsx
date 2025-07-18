@@ -47,7 +47,7 @@ export default function Sidebar({
         <img
           src="/logo_for_website.png"
           alt="Vanish Logo"
-          className="h-10 w-10 mr-3 rounded-lg drop-shadow"
+          className="h-7 w-7 mr-2 rounded drop-shadow"
           style={{ objectFit: "contain" }}
           draggable={false}
         />
