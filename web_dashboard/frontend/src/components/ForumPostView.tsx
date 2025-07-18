@@ -98,36 +98,46 @@ export default function ForumPostView({ usertag, displayName }: ForumPostViewPro
                   No comments yet.
                 </div>
               )}
-              {post.comments.map((cmt, idx) => {
-                const animatedColors =
-                  typeof cmt.animatedColors === "string"
-                    ? JSON.parse(cmt.animatedColors)
-                    : cmt.animatedColors || [];
+                {post.comments.map((cmt, idx) => {
+                  let animatedColors: string[] = [];
 
-                return (
-                  <div
-                    key={idx}
-                    className="bg-[#212b38] border border-cyan-900/10 rounded-xl p-4 shadow flex flex-col"
-                    style={{ boxShadow: "0 0 12px #36f1cd11" }}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-mono text-xs text-cyan-400">@{cmt.usertag}</span>
-                      <Username
-                        animated={animatedColors.length === 2}
-                        colors={animatedColors}
-                      >
-                        {cmt.username}
-                      </Username>
-                      <span className="ml-auto text-xs text-cyan-700">
-                        {new Date(cmt.timestamp).toLocaleString()}
-                      </span>
+                  try {
+                    animatedColors =
+                      typeof cmt.animatedColors === "string"
+                        ? JSON.parse(cmt.animatedColors)
+                        : Array.isArray(cmt.animatedColors)
+                        ? cmt.animatedColors
+                        : [];
+                  } catch (e) {
+                    console.warn("Invalid animatedColors in comment:", cmt.animatedColors);
+                    animatedColors = [];
+                  }
+
+                  return (
+                    <div
+                      key={idx}
+                      className="bg-[#212b38] border border-cyan-900/10 rounded-xl p-4 shadow flex flex-col"
+                      style={{ boxShadow: "0 0 12px #36f1cd11" }}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-mono text-xs text-cyan-400">@{cmt.usertag}</span>
+                        <Username
+                          animated={animatedColors.length === 2}
+                          colors={animatedColors}
+                        >
+                          {cmt.username}
+                        </Username>
+                        <span className="ml-auto text-xs text-cyan-700">
+                          {new Date(cmt.timestamp).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="text-white text-base whitespace-pre-wrap">
+                        {cmt.text}
+                      </div>
                     </div>
-                    <div className="text-white text-base whitespace-pre-wrap">
-                      {cmt.text}
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+
             </div>
             {/* Comment input */}
             <div className="flex gap-2 mt-2">
