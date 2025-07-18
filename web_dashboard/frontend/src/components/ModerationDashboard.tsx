@@ -44,8 +44,21 @@ export default function ModerationDashboard() {
                 </div>
                 <div className="text-white mt-1">{t.body}</div>
                 <div className="flex gap-2 mt-3">
-                  <button className="bg-indigo-400 text-midnight rounded px-3 py-1 font-bold" onClick={() => updateTicket(t.id, { assigned_to: "CURRENT_MOD_USERTAG" })}>Assign to Me</button>
-                  <button className="bg-green-500 text-white rounded px-3 py-1 font-bold" onClick={() => updateTicket(t.id, { status: "closed" })}>Close</button>
+                  <button
+                    className="bg-indigo-500 text-white rounded px-3 py-1 font-bold hover:bg-indigo-400"
+                    onClick={() => updateTicket(t.id, { assigned_to: "CURRENT_MOD_USERTAG" })}
+                  >
+                    Assign to Me
+                  </button>
+                  <button
+                    className={`rounded px-3 py-1 font-bold
+                      ${t.status === "open"
+                        ? "bg-aqua text-midnight hover:bg-cyan-400"
+                        : "bg-gray-700 text-gray-200 hover:bg-gray-600"}`}
+                    onClick={() => updateTicket(t.id, { status: t.status === "open" ? "closed" : "open" })}
+                  >
+                    {t.status === "open" ? "Close" : "Reopen"}
+                  </button>
                 </div>
               </li>
             ))}

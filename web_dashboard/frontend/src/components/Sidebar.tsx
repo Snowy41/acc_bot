@@ -100,7 +100,7 @@ export default function Sidebar({
               group flex items-center gap-3 px-4 py-3 mx-1 rounded-xl transition font-bold
               bg-gradient-to-tr from-[#ffe97a] via-yellow-400 to-[#fff7cc]
               text-midnight shadow-[0_0_16px_#ffe97a99]
-              border border-yellow-300/50 my-0 relative overflow-hidden
+              border border-yellow-300/50 relative overflow-hidden
               ${open ? "justify-start" : "justify-center"}
             `}
             onClick={() => setActive("admin-panel")}
