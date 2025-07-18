@@ -37,8 +37,6 @@ export default function ShopItemDetail() {
             {shopItem.name}
           </h1>
         </div>
-        <p className="text-cyan-100 text-base opacity-90 text-center mb-4">{cat.name}</p>
-
         {/* Card for Item Details */}
         <div className="flex flex-col items-center w-full">
           <div
