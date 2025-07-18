@@ -250,12 +250,12 @@ useEffect(() => {
               element={
                 <div className="dashboard-container">
                   {/* Hero Section */}
-                  <div className="hero-section text-center space-y-8 relative z-10 flex flex-col items-center justify-center">
+                  <div className="w-full flex flex-col items-center justify-center mt-10 mb-2">
                     <img
-                      src="/logo_for_website.png"
-                      alt="White Bot Banner Logo"
-                      className="mx-auto w-full max-w-md drop-shadow-2xl"
-                      style={{ minWidth: 280 }}
+                      src="/logo_for_website.png"  // or use your import if not in public/
+                      alt="vanish.rip logo banner"
+                      className="max-w-lg w-full h-auto drop-shadow-lg"
+                      style={{ marginBottom: '10px' }}
                     />
                   </div>
                   {/* Info Section */}
