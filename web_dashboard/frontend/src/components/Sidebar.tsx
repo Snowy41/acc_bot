@@ -42,12 +42,10 @@ export default function Sidebar({
         borderRight: "2.5px solid rgba(18,244,255,0.09)"
       }}
     >
-    <div
-      className={`flex items-center ${open ? "justify-between px-3 pt-3 pb-1" : "justify-center py-4"}`}
-    >
+    <div className="relative h-[56px] flex items-center">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="p-2 hover:bg-cyan-800/20 rounded transition"
+        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-cyan-800/20 rounded transition"
         aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
       >
         {open ? (
@@ -57,7 +55,6 @@ export default function Sidebar({
         )}
       </button>
     </div>
-
       <nav className="flex-1 flex flex-col mt-2 gap-2">
         {nav.slice(0, 1).map((item) => (
           <SidebarItem
