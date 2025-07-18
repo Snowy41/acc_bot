@@ -3,6 +3,7 @@ import React from "react";
 interface UsernameStyle extends React.CSSProperties {
   "--color1"?: string;
   "--color2"?: string;
+  "--color3"?: string;
 }
 
 export default function Username({
@@ -20,12 +21,14 @@ export default function Username({
 }) {
   const color1 = (colors && colors[0]) || "#18f0ff";
   const color2 = (colors && colors[1]) || "#d275fa";
+  const color3 = (colors && colors[0]) || "#18f0ff";
 
   const gradientStyle: UsernameStyle = animated
     ? {
         ...style,
         "--color1": color1,
         "--color2": color2,
+        "--color3": color3,
       }
     : style;
 
