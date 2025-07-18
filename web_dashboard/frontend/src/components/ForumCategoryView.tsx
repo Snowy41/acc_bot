@@ -39,19 +39,15 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
       .then(data => setRole(data.role || "user"));
   }, []);
   const handlePost = async () => {
+    if (!newTitle.trim() || !newContent.trim()) return;
     await fetch("/api/forum/posts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({
-        title: newTitle,
-        content: newContent,
-        category,
-        usertag,
-        username: displayName,
-        role, // <-- add this line!
-      }),
+      body: JSON.stringify({ title: newTitle, content: newContent, category, usertag, username: displayName, role}),
     });
+    setNewTitle(""); setNewContent("");
+    fetch(`/api/forum/posts?category=${category}`).then(res => res.json()).then(data => setPosts(data.posts || []));
   };
 
   return (
