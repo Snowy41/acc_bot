@@ -42,19 +42,19 @@ export default function Sidebar({
         borderRight: "2.5px solid rgba(18,244,255,0.09)"
       }}
     >
-    <div className="relative h-[56px] flex items-center px-2">
+    <div className="flex items-center h-[56px] px-3">
       {open && (
         <img
           src="/logo_for_website.png"
           alt="Vanish Logo"
-          className="h-7 w-7 mr-2 rounded drop-shadow"
-          style={{ objectFit: "contain" }}
+          className="h-[42px] w-auto mr-2 rounded drop-shadow"
+          style={{ objectFit: "contain", maxHeight: "42px" }}
           draggable={false}
         />
       )}
       <button
         onClick={() => setOpen((o) => !o)}
-        className={`p-2 hover:bg-cyan-800/20 rounded transition ml-auto ${open ? "" : "mx-auto"} `}
+        className="ml-auto p-2 hover:bg-cyan-800/20 rounded transition"
         aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
         style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
       >
