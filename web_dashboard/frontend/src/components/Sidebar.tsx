@@ -42,7 +42,7 @@ export default function Sidebar({
         borderRight: "2.5px solid rgba(18,244,255,0.09)"
       }}
     >
-      <div className="flex items-center justify-between px-3 pt-3 pb-1">
+      <div className="flex-1 flex flex-col justify-center items-center">
         <button
           onClick={() => setOpen((o) => !o)}
           className="p-2 hover:bg-cyan-800/20 rounded transition"
