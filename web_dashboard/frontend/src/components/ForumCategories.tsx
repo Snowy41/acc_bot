@@ -12,7 +12,6 @@ export default function ForumCategories() {
     <div className="w-full min-h-[95vh] relative overflow-x-hidden">
       {/* BG GLOW/SHAPES */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute -top-44 left-1/2 -translate-x-1/2 w-[70vw] h-[40vh] bg-gradient-to-r from-aqua/30 to-cyan-500/10 blur-3xl rounded-full" />
         <div className="absolute bottom-0 right-0 w-[40vw] h-[30vh] bg-gradient-to-tl from-cyan-400/30 to-fuchsia-500/10 blur-2xl rounded-full" />
         <div className="absolute top-1/4 left-0 w-[25vw] h-[28vh] bg-gradient-to-br from-fuchsia-400/10 to-aqua/10 blur-2xl rounded-full" />
       </div>
