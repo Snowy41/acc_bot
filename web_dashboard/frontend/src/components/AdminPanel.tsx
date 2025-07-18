@@ -76,10 +76,13 @@ export default function AdminPanel() {
 
 
   const handleSelect = (user: User) => {
+    const parsedColors = typeof user.animatedColors === "string"
+  ? JSON.parse(user.animatedColors)
+  : user.animatedColors;
     setSelected(user);
     setEdit({
       ...user,
-      animatedColors: user.animatedColors ? [...user.animatedColors] : [],
+      animatedColors: parsedColors  ? [...parsedColors ] : [],
       tags: user.tags ? [...user.tags] : [],
       color: user.color || "#fff",
       username: user.username || "",
