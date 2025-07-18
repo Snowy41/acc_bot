@@ -27,7 +27,6 @@
 }
 
 .animated-gradient-text {
-  // @ts-ignore
   background: linear-gradient(90deg, var(--color1, #18f0ff), var(--color2, #d275fa));
   background-size: 200% auto;
   -webkit-background-clip: text;
@@ -41,6 +40,7 @@
     background-position: 200% center;
   }
 }
+
 
 
 
