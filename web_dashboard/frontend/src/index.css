@@ -26,5 +26,18 @@
   animation: sparkle2 2.2s infinite linear;
 }
 
+.animated-gradient-text {
+  background: linear-gradient(90deg, #18f0ff, #60f77a, #d275fa, #18f0ff);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  animation: gradientScroll 4s linear infinite;
+}
+@keyframes gradientScroll {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
 
 

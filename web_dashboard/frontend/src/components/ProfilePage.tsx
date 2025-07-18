@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import Username from "./Username";
 
 interface Profile {
   username: string;     // Display name
@@ -16,6 +17,8 @@ interface Profile {
   isOnline?: boolean;
   social?: { github?: string; discord?: string; twitter?: string };
   avatar?: string;     // URL to avatar image
+  role?: string; // <-- Add this!
+  animatedColors?: string[];
 }
 
 export default function ProfilePage() {
@@ -24,7 +27,7 @@ export default function ProfilePage() {
   const [notFound, setNotFound] = useState(false);
   const [currentUser, setCurrentUser] = useState("");
   const navigate = useNavigate();
-    const [isFriend, setIsFriend] = useState(false);
+  const [isFriend, setIsFriend] = useState(false);
 
   useEffect(() => {
       fetch(`/api/users/${usertag}`)
@@ -109,19 +112,15 @@ fetch("/api/auth/status", { credentials: "include" })
 
           {/* DISPLAY NAME + BADGES */}
           <div className="flex items-center gap-3 mb-1">
-            <h1
-              className={
-                "text-3xl font-bold" +
-                (["owner", "rainbow"].includes((profile.frame || "").toLowerCase()) ||
-                 profile.tags?.some(t => t.toLowerCase() === "owner" || t.toLowerCase() === "premium")
-                  ? " username-animated-gradient"
-                  : ""
-                )
-              }
+            <Username
+              animated={profile.isAdmin || profile.role === "premium" || (profile.animatedColors && profile.animatedColors.length > 1)}
+              colors={profile.animatedColors}
+              className="text-3xl"
               style={{ color: profile.color || "#fff" }}
             >
               {profile.username}
-            </h1>
+            </Username>
+
             {profile.isAdmin && (
               <span className="text-yellow-300 text-xl" title="Admin">
                 🛡️

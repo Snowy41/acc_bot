@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import Username from "./Username";
 
 interface Post {
   id: string;
@@ -9,7 +10,9 @@ interface Post {
   content: string;
   comments: any[];
   timestamp: number;
+  role?: "admin" | "premium" | "user";
   category: string;
+  animatedColors?: string[];
 }
 
 interface ForumCategoryViewProps {
@@ -72,7 +75,14 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
                         <span className="text-xs text-cyan-600">{new Date(post.timestamp).toLocaleString()}</span>
                       </div>
                       <div className="flex items-center gap-3 px-7 pb-2 pt-1 text-cyan-300 text-xs">
-                        <span>by <span className="text-white font-bold">{post.username}</span></span>
+                        <span>by <Username
+                                  animated={post.role === "admin" || post.role === "premium" || (post.animatedColors && post.animatedColors.length > 1)}
+                                  colors={post.animatedColors}
+                                >
+                                  {post.username}
+                                </Username>
+
+                        </span>
                         <span className="font-mono">@{post.usertag}</span>
                       </div>
                       <div className="bg-[#232e43]/90 text-white text-base px-7 py-6 rounded-b-2xl border border-cyan-900/10 mx-4 my-3 whitespace-pre-line shadow-inner">

@@ -1,11 +1,15 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import Username from "./Username";
 
 interface Comment {
   usertag: string;
   username: string;
   text: string;
   timestamp: number;
+  role?: "admin" | "premium" | "user";
+  animatedColors?: string[];
+
 }
 interface Post {
   id: string;
@@ -16,6 +20,8 @@ interface Post {
   comments: Comment[];
   timestamp: number;
   category: string;
+  role?: "admin" | "premium" | "user";
+  animatedColors?: string[];
 }
 
 interface ForumPostViewProps {
@@ -62,7 +68,14 @@ export default function ForumPostView({ usertag, displayName }: ForumPostViewPro
             <div className="bg-gradient-to-br from-aqua/30 to-cyan-800/40 p-7 rounded-2xl border border-cyan-700/20 shadow-lg">
               <h2 className="font-black text-3xl text-aqua mb-2 drop-shadow tracking-tight">{post.title}</h2>
               <div className="flex items-center gap-2 text-cyan-200 text-sm mb-3">
-                <span>by <span className="font-bold text-white">{post.username}</span> <span className="font-mono">@{post.usertag}</span></span>
+                <span>by <Username
+                          animated={post.role === "admin" || post.role === "premium" || (post.animatedColors && post.animatedColors.length > 1)}
+                          colors={post.animatedColors}
+                        >
+                          {post.username}
+                        </Username>
+                     <span className="font-mono">@{post.usertag}</span>
+                </span>
                 <span className="mx-2">&bull;</span>
                 <span>{new Date(post.timestamp).toLocaleString()}</span>
               </div>
@@ -88,7 +101,14 @@ export default function ForumPostView({ usertag, displayName }: ForumPostViewPro
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-mono text-xs text-cyan-400">@{cmt.usertag}</span>
-                    <span className="text-xs text-cyan-100">{cmt.username}</span>
+                    <Username
+                      animated={cmt.role === "admin" || cmt.role === "premium" || (cmt.animatedColors && cmt.animatedColors.length > 1)}
+                      colors={cmt.animatedColors}
+                    >
+                      {cmt.username}
+                    </Username>
+
+
                     <span className="ml-auto text-xs text-cyan-700">{new Date(cmt.timestamp).toLocaleString()}</span>
                   </div>
                   <div className="text-white text-base whitespace-pre-wrap">{cmt.text}</div>

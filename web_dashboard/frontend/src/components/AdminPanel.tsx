@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { socket } from "../socket";
 import AdminStatsPanel from "./AdminStatsPanel";
+import Username from "./Username";
 
 interface User {
   username: string;
@@ -12,6 +13,8 @@ interface User {
   color?: string;
   tags?: string[];
   role?: "admin" | "user" | string;
+  animatedColors?: string[];
+
 }
 
 export default function AdminPanel() {
@@ -77,6 +80,7 @@ export default function AdminPanel() {
     setSelected(user);
     setEdit({
       ...user,
+      animatedColors: user.animatedColors ? [...user.animatedColors] : [],
       tags: user.tags ? [...user.tags] : [],
       color: user.color || "#fff",
       username: user.username || "",
@@ -252,9 +256,15 @@ export default function AdminPanel() {
                           selected?.usertag === user.usertag ? "bg-cyan-900/30" : "hover:bg-cyan-900/10"
                         }`}
                       >
-                        <td className="px-4 py-2 font-semibold" style={{ color: user.color || "#fff" }}>
-                          {user.username}
-                        </td>
+                      <td className="px-4 py-2 font-semibold" style={{ color: user.color || "#fff" }}>
+                        <Username
+                          animated={!!(edit.animatedColors && edit.animatedColors.length > 1)}
+                          colors={edit.animatedColors}
+                        >
+                          {edit.username || selected?.username}
+                        </Username>
+
+                      </td>
                         <td className="px-4 py-2 font-mono">@{user.usertag}</td>
                         <td className="px-4 py-2">
                           {(user.tags || []).map((tag) => (

@@ -38,6 +38,7 @@ function App() {
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [isPremium, setIsPremium] = useState(false);
   const [role, setRole] = useState("user");
+  const [animatedColors, setAnimatedColors] = useState<string[]>([]);
 
   // Modal state for register
   const [showRegister, setShowRegister] = useState(false);
@@ -58,6 +59,7 @@ function App() {
         setRole(data.role || "user");
         setIsAdmin(data.role === "admin");
         setIsPremium(data.role === "premium" || data.role === "admin");
+        setAnimatedColors(Array.isArray(data.animatedColors) ? data.animatedColors : []);
         if (Array.isArray(data.notifications)) {
           setNotifications(data.notifications);
         }
@@ -213,6 +215,8 @@ useEffect(() => {
             userColor={userColor}
             displayName={displayName}
             userAvatar={userAvatar}
+            userRole={role}
+            animatedColors={animatedColors}
           />
         </div>
 

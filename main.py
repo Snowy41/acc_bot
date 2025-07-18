@@ -77,6 +77,7 @@ def get_user_by_usertag(usertag):
     # Add these two lines:
     user["friends"] = json.loads(user.get("friends") or "[]")
     user["friendRequests"] = json.loads(user.get("friendRequests") or "[]")
+    user["animatedColors"] = json.loads(user.get("animatedColors") or "[]")
     return user
 
 
@@ -87,9 +88,9 @@ def save_user(user):
     c.execute("""
     INSERT OR REPLACE INTO users (
         usertag, username, password, is_admin, is_banned, is_muted,
-        color, bio, tags, social, avatar, uid, friends, friendRequests, role
+        color, bio, tags, social, avatar, uid, friends, friendRequests, role, animatedColors
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         user["usertag"],
         user.get("username"),
@@ -105,13 +106,15 @@ def save_user(user):
         user.get("uid", 0),
         json.dumps(user.get("friends", [])),
         json.dumps(user.get("friendRequests", [])),
-        user.get("role", "user"),  # <--- ACTUALLY SAVE THE ROLE!
+        user.get("role", "user"),
+        json.dumps(user.get("animatedColors", [])),  # <-- ADD THIS
     ))
 
     conn.commit()
     conn.close()
 
 def load_forum(category=None):
+    import copy
     conn = sqlite3.connect(FORUM_DB_PATH)
     c = conn.cursor()
     if category:
@@ -125,8 +128,24 @@ def load_forum(category=None):
     for row in rows:
         post = dict(zip(fields, row))
         post["comments"] = json.loads(post["comments"] or "[]")
+        # Enrich post author
+        author = get_user_by_usertag(post["usertag"])
+        post["color"] = author.get("color", "#fff") if author else "#fff"
+        post["animatedColors"] = author.get("animatedColors", []) if author else []
+        post["role"] = author.get("role", "user") if author else "user"
+        # Optionally also enrich comment authors here if you want!
+        enriched_comments = []
+        for cmt in post["comments"]:
+            cmt_copy = copy.deepcopy(cmt)
+            cmt_author = get_user_by_usertag(cmt_copy["usertag"])
+            cmt_copy["color"] = cmt_author.get("color", "#fff") if cmt_author else "#fff"
+            cmt_copy["animatedColors"] = cmt_author.get("animatedColors", []) if cmt_author else []
+            cmt_copy["role"] = cmt_author.get("role", "user") if cmt_author else "user"
+            enriched_comments.append(cmt_copy)
+        post["comments"] = enriched_comments
         posts.append(post)
     return posts
+
 
 def save_forum_post(post):
     conn = sqlite3.connect(FORUM_DB_PATH)
@@ -371,6 +390,7 @@ def status():
         "avatar": avatar,
         "role": user.get("role", "user") if user else "user",
         "notifications": user.get("notifications", []) if user else [],
+        "animatedColors": user.get("animatedColors", []) if user else [],
     })
 
 @app.route("/api/notifications/clear", methods=["POST"])
@@ -463,7 +483,9 @@ def list_users():
             "is_banned": bool(user.get("is_banned", False)),
             "is_muted": bool(user.get("is_muted", False)),
             # Optionally for backward compatibility:
-            "is_admin": user.get("role") == "admin"
+            "is_admin": user.get("role") == "admin",
+            "animatedColors": user.get("animatedColors", []),
+
         })
 
     return jsonify({"users": user_list})
@@ -516,6 +538,8 @@ def get_user(usertag):
             "banner": user.get("banner", ""),
             "uid": user.get("uid", 0),
             "avatar": user.get("avatar", ""),
+            "role": user.get("role", "user"),
+            "animatedColors": user.get("animatedColors", [])
         }
         return jsonify(profile)
     return jsonify({"error": "User not found"}), 404
@@ -551,6 +575,8 @@ def update_user(usertag):
         user["social"] = data["social"]
     if "tags" in data and isinstance(data["tags"], list):
         user["tags"] = data["tags"]
+    if "animatedColors" in data and isinstance(data["animatedColors"], list):
+        user["animatedColors"] = data["animatedColors"]
 
     # Never let role disappear!
     if "role" not in user or not user["role"]:
@@ -824,6 +850,7 @@ def get_forum_posts():
 
 @app.route("/api/forum/posts/<post_id>", methods=["GET"])
 def get_single_post(post_id):
+    import copy
     conn = sqlite3.connect(FORUM_DB_PATH)
     c = conn.cursor()
     c.execute("SELECT * FROM forum_posts WHERE id=?", (post_id,))
@@ -834,7 +861,26 @@ def get_single_post(post_id):
     fields = ["id", "category", "title", "content", "usertag", "username", "comments", "timestamp", "role"]
     post = dict(zip(fields, row))
     post["comments"] = json.loads(post["comments"] or "[]")
+
+    # Enrich main post
+    author = get_user_by_usertag(post["usertag"])
+    post["color"] = author.get("color", "#fff") if author else "#fff"
+    post["animatedColors"] = author.get("animatedColors", []) if author else []
+    post["role"] = author.get("role", "user") if author else "user"
+
+    # Enrich comments
+    enriched_comments = []
+    for cmt in post["comments"]:
+        cmt_copy = copy.deepcopy(cmt)
+        cmt_author = get_user_by_usertag(cmt_copy["usertag"])
+        cmt_copy["color"] = cmt_author.get("color", "#fff") if cmt_author else "#fff"
+        cmt_copy["animatedColors"] = cmt_author.get("animatedColors", []) if cmt_author else []
+        cmt_copy["role"] = cmt_author.get("role", "user") if cmt_author else "user"
+        enriched_comments.append(cmt_copy)
+    post["comments"] = enriched_comments
+
     return jsonify({"post": post})
+
 
 @app.route("/api/forum/posts", methods=["POST"])
 def create_forum_post():

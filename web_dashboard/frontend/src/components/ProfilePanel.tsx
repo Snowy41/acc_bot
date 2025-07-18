@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import LoginModal from "./LoginModal";
+import Username from "./Username";
 
 interface ProfilePanelProps {
   loggedIn: boolean;
@@ -10,7 +11,10 @@ interface ProfilePanelProps {
   userColor: string;
   displayName: string;
   userAvatar: string;
+  userRole: string;
+  animatedColors?: string[];
 }
+
 
 export default function ProfilePanel({
   loggedIn,
@@ -19,11 +23,13 @@ export default function ProfilePanel({
   setUser,
   userColor,
   displayName,
-  userAvatar
+  userAvatar,
+  userRole,
 }: ProfilePanelProps) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const [userTags, setUserTags] = useState<string[]>([]);
 
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
@@ -92,15 +98,16 @@ export default function ProfilePanel({
             </span>
           )}
         </span>
-        <span
+        <Username
+          animated={userRole === "admin" || userRole === "premium"}
           className="font-semibold text-cyan-50 max-w-[120px] truncate text-base tracking-wide"
           style={{
-            color: userColor || "#6ff6ff",
+            color: userColor || "#ffffff",
             textShadow: "0 0 5px #12fff155",
           }}
         >
           {displayName}
-        </span>
+        </Username>
         <svg className="w-4 h-4 ml-1 text-cyan-300 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path d="M19 9l-7 7-7-7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
