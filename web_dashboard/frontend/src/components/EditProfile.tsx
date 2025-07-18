@@ -108,7 +108,6 @@ export default function EditProfile() {
                     console.log("UPLOAD RESPONSE:", data); // add this
                     if (data.success) {
                       alert("Avatar uploaded successfully!");
-                          window.location.reload();
                     } else {
                       alert(data.error || "Failed to upload avatar");
                     }
