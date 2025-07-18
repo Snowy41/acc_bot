@@ -56,9 +56,23 @@ export default function SupportPage() {
           <ul className="space-y-3">
             {tickets.map((t: any) => (
               <li key={t.id} className="border border-cyan-900/30 rounded p-3 bg-[#232e43]">
-                <div className="font-bold text-cyan-200">{t.subject}</div>
-                <div className="text-cyan-400 text-xs">{new Date(t.created_at * 1000).toLocaleString()} - {t.status}</div>
-                <div className="text-white mt-1">{t.body}</div>
+                <div className="font-bold text-cyan-200 mb-1">{t.subject}</div>
+                <div className="text-cyan-400 text-xs mb-2">{new Date(t.created_at * 1000).toLocaleString()} – {t.status}</div>
+                {/* Show all messages for this ticket */}
+                <div className="bg-[#18212e]/80 rounded p-2 mb-2">
+                  <div className="text-cyan-300 text-xs font-bold mb-1">Messages</div>
+                  <ul className="space-y-2">
+                    {(t.messages || []).map((msg: any, idx: number) => (
+                      <li key={idx} className="flex flex-col">
+                        <span className="text-xs text-cyan-400 font-mono">
+                          {msg.from}
+                          <span className="ml-2 text-gray-500">{new Date((msg.timestamp || 0) * 1000).toLocaleString()}</span>
+                        </span>
+                        <span className="text-white ml-2">{msg.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </li>
             ))}
           </ul>
