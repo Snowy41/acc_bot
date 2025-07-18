@@ -66,7 +66,7 @@ def get_user_by_usertag(usertag):
         return None
     fields = [
         "usertag", "username", "password", "is_admin", "is_banned", "is_muted",
-        "color", "bio", "tags", "social", "avatar", "uid", "friends", "friendRequests", "role"
+        "color", "bio", "tags", "social", "avatar", "uid", "friends", "friendRequests", "role", "animatedColors"
     ]
     user = dict(zip(fields, row))
     user["tags"] = json.loads(user.get("tags") or "[]")
