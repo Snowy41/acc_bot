@@ -12,7 +12,7 @@ interface Post {
   timestamp: number;
   role?: "admin" | "premium" | "user";
   category: string;
-  is_announcement?: boolean; // NEW
+  is_announcement?: boolean;
   animatedColors?: string[];
 }
 
@@ -26,7 +26,7 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
   const [posts, setPosts] = useState<Post[]>([]);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
-  const [isAnnouncement, setIsAnnouncement] = useState(false); // NEW
+  const [isAnnouncement, setIsAnnouncement] = useState(false);
   const [role, setRole] = useState("user");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -58,7 +58,7 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
         usertag,
         username: displayName,
         role,
-        is_announcement: role === "admin" ? isAnnouncement : false, // NEW
+        is_announcement: role === "admin" ? isAnnouncement : false,
       }),
     });
     setNewTitle("");
@@ -69,7 +69,6 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
       .then(data => setPosts(data.posts || []));
   };
 
-  // NEW: Use is_announcement
   const stickyPosts = posts.filter(p => p.is_announcement);
   const regularPosts = posts.filter(p => !p.is_announcement);
 
@@ -93,28 +92,28 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
         <div className="absolute bottom-0 right-0 w-[36vw] h-[22vh] bg-gradient-to-tl from-cyan-400/30 to-fuchsia-500/10 blur-2xl rounded-full" />
       </div>
       <div className="relative z-10">
-        <div className="bg-white/10 border border-cyan-700/40 shadow-[0_6px_36px_0_rgba(0,255,255,0.09)] backdrop-blur-xl rounded-3xl py-8 px-4 md:px-10 mb-10">
-          <div className="flex items-center justify-between mb-2">
+        <div className="bg-white/10 border border-cyan-700/40 shadow-[0_6px_36px_0_rgba(0,255,255,0.09)] backdrop-blur-xl rounded-3xl py-6 px-2 md:px-8 mb-10">
+          <div className="flex items-center justify-between mb-6 border-b border-cyan-900/20 pb-2">
             <div>
-              <h2 className="text-4xl font-extrabold text-aqua mb-0 capitalize tracking-wide">{category}</h2>
+              <h2 className="text-3xl font-extrabold text-aqua mb-0 capitalize tracking-wide">{category}</h2>
               <Link to="/forum" className="text-cyan-300 hover:text-aqua mt-1 block text-base">&larr; All Categories</Link>
             </div>
             <button onClick={() => navigate("/forum")} className="hidden md:inline text-cyan-400 hover:text-aqua text-lg font-medium">&larr; Back</button>
           </div>
-          {/* --- Sticky/Announcements --- */}
+          {/* Sticky/announcements */}
           {stickyPosts.length > 0 && (
-            <div className="mb-10">
+            <div className="mb-5">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-yellow-300 text-xl">📢</span>
-                <span className="text-cyan-200 text-lg font-bold tracking-wide">Official Announcements</span>
+                <span className="text-cyan-200 text-base font-bold tracking-wide">Sticky/Announcements</span>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {stickyPosts.map(post => (
-                  <PostCard
+                  <ThreadRow
                     key={post.id}
                     post={post}
                     category={category!}
-                    sticky
+                    isSticky
                     currentUserTag={usertag}
                     role={role}
                     onDelete={handleDelete}
@@ -123,18 +122,18 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
               </div>
             </div>
           )}
-          {/* --- All Other Posts --- */}
-          <div className="mt-2">
-            <div className="text-cyan-400 text-lg font-bold mb-4">Threads</div>
-            <div className="space-y-4">
+          {/* All other threads */}
+          <div>
+            <div className="flex items-center gap-2 text-cyan-400 font-semibold mb-2 text-base">Threads</div>
+            <div className="space-y-2">
               {loading ? (
                 <div className="text-white text-center">Loading posts...</div>
               ) : (
                 regularPosts.length === 0 ? (
-                  <div className="text-cyan-300 text-lg my-8 text-center">No posts in this category yet.</div>
+                  <div className="text-cyan-300 text-base my-8 text-center">No threads in this category yet.</div>
                 ) : (
                   regularPosts.map(post => (
-                    <PostCard
+                    <ThreadRow
                       key={post.id}
                       post={post}
                       category={category!}
@@ -148,18 +147,18 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
             </div>
           </div>
         </div>
-        {/* --- Post Form --- */}
+        {/* Post form */}
         <div className="w-full md:max-w-lg mx-auto bg-[#18212e]/90 border border-cyan-900/40 rounded-2xl p-8 shadow-2xl mt-12 mb-10">
-          <h3 className="text-xl font-bold mb-4 text-aqua flex items-center gap-2">
+          <h3 className="text-lg font-bold mb-4 text-aqua flex items-center gap-2">
             Create a new post
           </h3>
           {category?.toLowerCase().includes("announc") && role !== "admin" ? (
-            <div className="text-red-300 bg-[#232e43]/80 border border-red-400/20 px-4 py-6 rounded-lg text-lg font-semibold flex items-center gap-2">
-              <span className="text-2xl">🔒</span>
+            <div className="text-red-300 bg-[#232e43]/80 border border-red-400/20 px-4 py-6 rounded-lg text-base font-semibold flex items-center gap-2">
+              <span className="text-xl">🔒</span>
               Only <span className="text-yellow-200 mx-1">admins</span> can post announcements.
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {role === "admin" && (
                 <div className="flex items-center gap-3 mb-1">
                   <input
@@ -170,14 +169,14 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
                     className="accent-aqua w-5 h-5"
                   />
                   <label htmlFor="isAnnouncement" className="text-cyan-300 font-medium select-none cursor-pointer">
-                    Mark as announcement (sticky)
+                    Mark as announcement
                   </label>
                 </div>
               )}
               <div>
                 <label className="block text-cyan-300 mb-1 font-medium">Title</label>
                 <input
-                  className="w-full px-4 py-3 rounded-lg bg-[#232e43] text-white border border-cyan-800 focus:outline-none focus:ring-2 focus:ring-aqua"
+                  className="w-full px-4 py-2 rounded bg-[#232e43] text-white border border-cyan-800 focus:outline-none focus:ring-2 focus:ring-aqua"
                   placeholder="Thread title"
                   value={newTitle}
                   onChange={e => setNewTitle(e.target.value)}
@@ -187,16 +186,16 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
               <div>
                 <label className="block text-cyan-300 mb-1 font-medium">Your post</label>
                 <textarea
-                  className="w-full px-4 py-3 rounded-lg bg-[#232e43] text-white border border-cyan-800 focus:outline-none focus:ring-2 focus:ring-aqua"
+                  className="w-full px-4 py-2 rounded bg-[#232e43] text-white border border-cyan-800 focus:outline-none focus:ring-2 focus:ring-aqua"
                   placeholder="What's on your mind?"
-                  rows={7}
+                  rows={6}
                   value={newContent}
                   onChange={e => setNewContent(e.target.value)}
                   maxLength={3000}
                 />
               </div>
               <button
-                className="bg-aqua text-midnight px-6 py-2 rounded-lg font-bold text-lg shadow hover:bg-cyan-400 transition w-full"
+                className="bg-aqua text-midnight px-5 py-2 rounded-lg font-bold text-base shadow hover:bg-cyan-400 transition w-full"
                 onClick={handlePost}
                 disabled={!newTitle.trim() || !newContent.trim()}
               >
@@ -210,18 +209,18 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
   );
 }
 
-// --- Reusable Card for Each Post (summary) ---
-function PostCard({
+// --- Thread Row like scene boards ---
+function ThreadRow({
   post,
   category,
-  sticky = false,
+  isSticky,
   currentUserTag,
   role,
   onDelete,
 }: {
   post: Post;
   category: string;
-  sticky?: boolean;
+  isSticky?: boolean;
   currentUserTag: string;
   role: string;
   onDelete: (postId: string) => void;
@@ -230,64 +229,56 @@ function PostCard({
     typeof post.animatedColors === "string"
       ? JSON.parse(post.animatedColors)
       : post.animatedColors || [];
-
   const canDelete = role === "admin" || post.usertag === currentUserTag;
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.preventDefault();
-    onDelete(post.id);
-  };
-
   return (
-    <Link
-      to={`/forum/${category}/${post.id}`}
-      className={`block rounded-xl border transition
-        ${post.is_announcement
-          ? "bg-gradient-to-br from-yellow-300/10 to-aqua/5 border-yellow-400/40 shadow-lg"
-          : "bg-gradient-to-tr from-[#223348]/80 to-cyan-800/40 border-cyan-900/20 hover:border-aqua hover:shadow-aqua/40"
-        }
-        hover:scale-[1.03] relative`}
-      style={{
-        boxShadow: post.is_announcement
-          ? "0 0 32px #ffe06622, 0 4px 24px #12fff1cc"
-          : "0 0 18px #36f1cd33, 0 2px 12px #14d4ff44"
-      }}
-    >
-      <div className={`flex items-center justify-between px-7 pt-5 pb-3 rounded-t-xl ${post.is_announcement ? "bg-yellow-100/5" : "bg-[#162030]"}`}>
-        <span className={`font-bold text-xl md:text-2xl ${post.is_announcement ? "text-yellow-200" : "text-aqua"} drop-shadow`}>{post.title}</span>
-        <span className={`text-xs ${post.is_announcement ? "text-yellow-500" : "text-cyan-600"}`}>{new Date(post.timestamp).toLocaleString()}</span>
+    <div className={`flex items-center border rounded-xl bg-[#1a2232]/80 px-3 md:px-6 py-4 gap-5 transition group
+      ${isSticky ? "border-yellow-300/50" : "border-cyan-900/40"}
+      hover:border-aqua hover:bg-cyan-900/20 hover:scale-[1.01]"`}>
+      {/* Left meta */}
+      <div className="flex flex-col items-center min-w-[70px]">
+        <Username
+          animated={animatedColors.length === 2}
+          colors={animatedColors}
+          className="font-bold"
+        >
+          {post.username}
+        </Username>
+        <span className="text-xs text-cyan-400 font-mono break-all">@{post.usertag}</span>
+        <span className="text-[11px] text-cyan-700 font-mono">{new Date(post.timestamp).toLocaleString()}</span>
+        {isSticky && (
+          <span className="mt-2 px-2 py-0.5 bg-yellow-200/30 border border-yellow-200/60 text-yellow-800 rounded text-[10px] font-bold">ANNOUNCE</span>
+        )}
+        {post.role === "admin" && !isSticky && (
+          <span className="mt-2 px-2 py-0.5 bg-cyan-900/30 border border-cyan-300/20 text-cyan-100 rounded text-[10px] font-bold">
+            ADMIN
+          </span>
+        )}
+      </div>
+      {/* Thread info */}
+      <div className="flex-1 min-w-0">
+        <Link
+          to={`/forum/${category}/${post.id}`}
+          className="block font-bold text-lg md:text-xl text-cyan-100 hover:text-aqua transition truncate"
+        >
+          {post.title}
+        </Link>
+        <div className="text-cyan-200/80 text-sm line-clamp-2 whitespace-pre-line mt-1">
+          {post.content.length > 128 ? post.content.slice(0, 128) + "..." : post.content}
+        </div>
+      </div>
+      <div className="flex flex-col items-end ml-2 gap-2">
+        <span className="text-xs text-cyan-400 font-mono">{post.comments.length} replies</span>
         {canDelete && (
           <button
-            className="ml-4 px-3 py-1 rounded bg-red-500 text-white font-bold text-xs shadow hover:bg-red-600 z-10"
-            onClick={handleDelete}
-            title="Delete post"
+            className="px-2 py-1 bg-red-500 text-white text-xs rounded font-bold shadow hover:bg-red-600"
+            onClick={() => onDelete(post.id)}
+            title="Delete thread"
           >
             Delete
           </button>
         )}
       </div>
-      <div className={`flex items-center gap-3 px-7 pb-2 pt-1 ${post.is_announcement ? "text-yellow-400" : "text-cyan-300"} text-xs`}>
-        <span>
-          by{" "}
-          <Username
-            animated={animatedColors.length === 2}
-            colors={animatedColors}
-          >
-            {post.username}
-          </Username>
-        </span>
-        <span className="font-mono">@{post.usertag}</span>
-        {post.is_announcement && <span className="ml-3 px-2 py-1 bg-yellow-400/30 rounded font-bold text-yellow-700 text-xs">Announcement</span>}
-      </div>
-      <div className={`bg-[#232e43]/90 text-white text-base px-7 py-5 rounded-b-xl border border-cyan-900/10 mx-4 my-2 whitespace-pre-line shadow-inner`}>
-        {post.content ? (
-          post.content.length > 180
-            ? post.content.slice(0, 180) + "..."
-            : post.content
-        ) : (
-          <span className="italic text-gray-400">No content</span>
-        )}
-      </div>
-    </Link>
+    </div>
   );
 }
