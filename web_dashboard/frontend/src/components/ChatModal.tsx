@@ -7,12 +7,22 @@ export default function ChatModal({
   currentUserTag,
   friendUsername,
   initialMessage = "",
+  embed,
 }: {
   friend: string;
   onClose: () => void;
   currentUserTag: string;
   friendUsername?: string;
   initialMessage?: string;
+  embed?: {
+    id: string;
+    title: string;
+    price: string | number;
+    desc: string;
+    category: string;
+    seller: string;
+    sellerTag: string;
+  };
 }) {
   const [messages, setMessages] = useState<{ from: string; text: string; timestamp: number }[]>([]);
   const [input, setInput] = useState(initialMessage);
@@ -107,6 +117,30 @@ export default function ChatModal({
             ×
           </button>
         </div>
+        {/* Embed Section */}
+          {embed && (
+          <div className="p-5 border-b border-cyan-800 bg-[#162030]/80">
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <div className="text-lg font-bold text-aqua">{embed.title}</div>
+                <div className="text-cyan-300 text-base">{embed.desc}</div>
+                <div className="mt-1 flex items-center gap-4">
+                  <span className="text-xl font-black text-aqua">${embed.price}</span>
+                  <span className="text-cyan-400 text-xs bg-cyan-900/40 rounded px-2 py-1">{embed.category}</span>
+                  <span className="text-xs text-cyan-400">by @{embed.seller}</span>
+                </div>
+              </div>
+              <a
+                href={`/forum/marketplace/${embed.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-2 px-4 py-1 bg-aqua text-midnight rounded-full text-xs font-bold shadow hover:bg-cyan-400 transition"
+              >
+                View Listing
+              </a>
+            </div>
+          </div>
+        )}
 
         {/* MESSAGES */}
         <div

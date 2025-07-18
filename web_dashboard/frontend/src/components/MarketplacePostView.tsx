@@ -58,6 +58,16 @@ export default function MarketplacePostView({ usertag, displayName }) {
             onClose={() => setShowChat(false)}
             currentUserTag={usertag}
             friendUsername={post.username}
+            embed={{
+              id: post.id,
+              title: post.title,
+              price: post.price,
+              desc: post.desc,
+              category: post.category,
+              seller: post.username,
+              sellerTag: post.usertag,
+              // any other fields you want!
+            }}
             initialMessage={`Hi, I'm interested in your "${post.title}" listing!`}
           />
         )}
