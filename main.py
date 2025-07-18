@@ -124,7 +124,8 @@ def load_forum(category=None):
     rows = c.fetchall()
     conn.close()
     posts = []
-    fields = ["id", "category", "title", "content", "usertag", "username", "comments", "timestamp", "role"]
+    fields = ["id", "category", "title", "content", "usertag", "username", "comments", "timestamp", "role",
+              "is_announcement"]
     for row in rows:
         post = dict(zip(fields, row))
         post["comments"] = json.loads(post["comments"] or "[]")
@@ -133,6 +134,7 @@ def load_forum(category=None):
         post["color"] = author.get("color", "#fff") if author else "#fff"
         post["animatedColors"] = author.get("animatedColors", []) if author else []
         post["role"] = author.get("role", "user") if author else "user"
+        post["is_announcement"] = bool(post.get("is_announcement", 0))
         # Optionally also enrich comment authors here if you want!
         enriched_comments = []
         for cmt in post["comments"]:
@@ -152,8 +154,8 @@ def save_forum_post(post):
     c = conn.cursor()
     c.execute("""
         INSERT OR REPLACE INTO forum_posts
-        (id, category, title, content, usertag, username, comments, timestamp)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        (id, category, title, content, usertag, username, comments, timestamp, is_announcement)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         post["id"],
         post["category"],
@@ -162,7 +164,8 @@ def save_forum_post(post):
         post["usertag"],
         post["username"],
         json.dumps(post.get("comments", [])),
-        post["timestamp"]
+        post["timestamp"],
+        int(post.get("is_announcement", False)),
     ))
     conn.commit()
     conn.close()
@@ -856,7 +859,8 @@ def get_single_post(post_id):
     conn.close()
     if not row:
         return jsonify({"error": "Post not found"}), 404
-    fields = ["id", "category", "title", "content", "usertag", "username", "comments", "timestamp", "role"]
+    fields = ["id", "category", "title", "content", "usertag", "username", "comments", "timestamp", "role",
+              "is_announcement"]
     post = dict(zip(fields, row))
     post["comments"] = json.loads(post["comments"] or "[]")
 
@@ -865,6 +869,7 @@ def get_single_post(post_id):
     post["color"] = author.get("color", "#fff") if author else "#fff"
     post["animatedColors"] = author.get("animatedColors", []) if author else []
     post["role"] = author.get("role", "user") if author else "user"
+    post["is_announcement"] = bool(post.get("is_announcement", 0))
 
     # Enrich comments
     enriched_comments = []
@@ -888,10 +893,14 @@ def create_forum_post():
         return jsonify({"error": "Missing fields"}), 400
 
     # Only admins may post in "announcement" (case-insensitive)
-    if data["category"].lower() in ["announcement", "announcements"]:
-        user = get_user_by_usertag(session.get("username"))
-        if not user or user.get("role", "user") != "admin":
-            return jsonify({"error": "Only admins can post in Announcements."}), 403
+    is_announcement = False
+    user = get_user_by_usertag(session.get("username"))
+    if data.get("is_announcement") and user and user.get("role") == "admin":
+        is_announcement = True
+
+    # Only admins can post in announcement category:
+    if data["category"].lower() in ["announcement", "announcements"] and (not user or user.get("role") != "admin"):
+        return jsonify({"error": "Only admins can post in Announcements."}), 403
 
     post = {
         "id": str(uuid.uuid4()),
@@ -901,8 +910,10 @@ def create_forum_post():
         "usertag": data["usertag"],
         "username": data["username"],
         "comments": [],
-        "timestamp": int(time.time() * 1000)
+        "timestamp": int(time.time() * 1000),
+        "is_announcement": is_announcement
     }
+
     save_forum_post(post)
     return jsonify({"success": True})
 

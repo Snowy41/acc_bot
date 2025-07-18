@@ -20,6 +20,7 @@ interface Post {
   timestamp: number;
   category: string;
   role?: "admin" | "premium" | "user";
+  is_announcement?: boolean; // NEW
   animatedColors?: string[];
 }
 
@@ -64,7 +65,6 @@ export default function ForumPostView({ usertag, displayName }: ForumPostViewPro
       .then(data => setPost(data.post));
   };
 
-  // --- NEW: handle delete ---
   const canDelete = post && (role === "admin" || post.usertag === usertag);
 
   const handleDelete = async () => {
@@ -89,7 +89,6 @@ export default function ForumPostView({ usertag, displayName }: ForumPostViewPro
 
   return (
     <div className="w-full max-w-3xl mx-auto mt-10 relative">
-      {/* BG shapes, blurred gradient glows */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[70vw] h-[18vh] bg-gradient-to-tr from-aqua/30 to-cyan-500/15 blur-3xl rounded-full" />
       </div>
@@ -108,10 +107,10 @@ export default function ForumPostView({ usertag, displayName }: ForumPostViewPro
         <div className="bg-white/10 border border-cyan-700/40 shadow-[0_6px_36px_0_rgba(0,255,255,0.09)] backdrop-blur-xl rounded-3xl pb-6 pt-8 px-0">
           {/* POST SECTION */}
           <div className="mx-auto max-w-2xl mb-8">
-            <div className={`bg-gradient-to-br from-aqua/30 to-cyan-800/40 p-7 rounded-2xl border border-cyan-700/20 shadow-lg ${post.role === "admin" ? "border-yellow-400/60" : ""}`}>
+            <div className={`bg-gradient-to-br from-aqua/30 to-cyan-800/40 p-7 rounded-2xl border border-cyan-700/20 shadow-lg ${post.is_announcement ? "border-yellow-400/60" : ""}`}>
               <div className="flex items-center mb-2 gap-2">
                 <h2 className="font-black text-3xl text-aqua drop-shadow tracking-tight flex-1">{post.title}</h2>
-                {post.role === "admin" && (
+                {post.is_announcement && (
                   <span className="text-yellow-300 bg-yellow-100/10 border border-yellow-400/30 px-3 py-1 rounded text-xs font-bold">Announcement</span>
                 )}
               </div>

@@ -12,6 +12,7 @@ interface Post {
   timestamp: number;
   role?: "admin" | "premium" | "user";
   category: string;
+  is_announcement?: boolean; // NEW
   animatedColors?: string[];
 }
 
@@ -25,6 +26,7 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
   const [posts, setPosts] = useState<Post[]>([]);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
+  const [isAnnouncement, setIsAnnouncement] = useState(false); // NEW
   const [role, setRole] = useState("user");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -56,21 +58,21 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
         usertag,
         username: displayName,
         role,
+        is_announcement: role === "admin" ? isAnnouncement : false, // NEW
       }),
     });
     setNewTitle("");
     setNewContent("");
+    setIsAnnouncement(false);
     fetch(`/api/forum/posts?category=${category}`)
       .then(res => res.json())
       .then(data => setPosts(data.posts || []));
   };
 
-  // Forum design: sort posts (newest first), sticky/announcements at top
-  const isAnnouncements = (category || "").toLowerCase() === "announcement" || (category || "").toLowerCase() === "announcements";
-  const stickyPosts = posts.filter(p => (p.role === "admin" && isAnnouncements));
-  const regularPosts = posts.filter(p => !stickyPosts.includes(p));
+  // NEW: Use is_announcement
+  const stickyPosts = posts.filter(p => p.is_announcement);
+  const regularPosts = posts.filter(p => !p.is_announcement);
 
-  // --- NEW: Handle delete, refresh after ---
   const handleDelete = async (postId: string) => {
     if (!window.confirm("Delete this post? This cannot be undone.")) return;
     const res = await fetch(`/api/forum/posts/${postId}`, {
@@ -101,7 +103,7 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
             <button onClick={() => navigate("/forum")} className="hidden md:inline text-cyan-400 hover:text-aqua text-lg font-medium">&larr; Back</button>
           </div>
           {/* --- Sticky/Announcements --- */}
-          {isAnnouncements && stickyPosts.length > 0 && (
+          {stickyPosts.length > 0 && (
             <div className="mb-10">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-yellow-300 text-xl">📢</span>
@@ -151,15 +153,28 @@ export default function ForumCategoryView({ usertag, displayName }: ForumCategor
         <div className="w-full md:max-w-lg mx-auto bg-[#18212e]/90 border border-cyan-900/40 rounded-2xl p-8 shadow-2xl mt-12 mb-10">
           <h3 className="text-xl font-bold mb-4 text-aqua flex items-center gap-2">
             Create a new post
-            {isAnnouncements && <span className="text-yellow-300 text-xl">📢</span>}
           </h3>
-          {isAnnouncements && role !== "admin" ? (
+          {category?.toLowerCase().includes("announc") && role !== "admin" ? (
             <div className="text-red-300 bg-[#232e43]/80 border border-red-400/20 px-4 py-6 rounded-lg text-lg font-semibold flex items-center gap-2">
               <span className="text-2xl">🔒</span>
               Only <span className="text-yellow-200 mx-1">admins</span> can post announcements.
             </div>
           ) : (
             <div className="space-y-4">
+              {role === "admin" && (
+                <div className="flex items-center gap-3 mb-1">
+                  <input
+                    type="checkbox"
+                    id="isAnnouncement"
+                    checked={isAnnouncement}
+                    onChange={e => setIsAnnouncement(e.target.checked)}
+                    className="accent-aqua w-5 h-5"
+                  />
+                  <label htmlFor="isAnnouncement" className="text-cyan-300 font-medium select-none cursor-pointer">
+                    Mark as announcement (sticky)
+                  </label>
+                </div>
+              )}
               <div>
                 <label className="block text-cyan-300 mb-1 font-medium">Title</label>
                 <input
@@ -228,20 +243,20 @@ function PostCard({
     <Link
       to={`/forum/${category}/${post.id}`}
       className={`block rounded-xl border transition
-        ${sticky
+        ${post.is_announcement
           ? "bg-gradient-to-br from-yellow-300/10 to-aqua/5 border-yellow-400/40 shadow-lg"
           : "bg-gradient-to-tr from-[#223348]/80 to-cyan-800/40 border-cyan-900/20 hover:border-aqua hover:shadow-aqua/40"
         }
         hover:scale-[1.03] relative`}
       style={{
-        boxShadow: sticky
+        boxShadow: post.is_announcement
           ? "0 0 32px #ffe06622, 0 4px 24px #12fff1cc"
           : "0 0 18px #36f1cd33, 0 2px 12px #14d4ff44"
       }}
     >
-      <div className={`flex items-center justify-between px-7 pt-5 pb-3 rounded-t-xl ${sticky ? "bg-yellow-100/5" : "bg-[#162030]"}`}>
-        <span className={`font-bold text-xl md:text-2xl ${sticky ? "text-yellow-200" : "text-aqua"} drop-shadow`}>{post.title}</span>
-        <span className={`text-xs ${sticky ? "text-yellow-500" : "text-cyan-600"}`}>{new Date(post.timestamp).toLocaleString()}</span>
+      <div className={`flex items-center justify-between px-7 pt-5 pb-3 rounded-t-xl ${post.is_announcement ? "bg-yellow-100/5" : "bg-[#162030]"}`}>
+        <span className={`font-bold text-xl md:text-2xl ${post.is_announcement ? "text-yellow-200" : "text-aqua"} drop-shadow`}>{post.title}</span>
+        <span className={`text-xs ${post.is_announcement ? "text-yellow-500" : "text-cyan-600"}`}>{new Date(post.timestamp).toLocaleString()}</span>
         {canDelete && (
           <button
             className="ml-4 px-3 py-1 rounded bg-red-500 text-white font-bold text-xs shadow hover:bg-red-600 z-10"
@@ -252,7 +267,7 @@ function PostCard({
           </button>
         )}
       </div>
-      <div className={`flex items-center gap-3 px-7 pb-2 pt-1 ${sticky ? "text-yellow-400" : "text-cyan-300"} text-xs`}>
+      <div className={`flex items-center gap-3 px-7 pb-2 pt-1 ${post.is_announcement ? "text-yellow-400" : "text-cyan-300"} text-xs`}>
         <span>
           by{" "}
           <Username
@@ -263,7 +278,7 @@ function PostCard({
           </Username>
         </span>
         <span className="font-mono">@{post.usertag}</span>
-        {sticky && <span className="ml-3 px-2 py-1 bg-yellow-400/30 rounded font-bold text-yellow-700 text-xs">Announcement</span>}
+        {post.is_announcement && <span className="ml-3 px-2 py-1 bg-yellow-400/30 rounded font-bold text-yellow-700 text-xs">Announcement</span>}
       </div>
       <div className={`bg-[#232e43]/90 text-white text-base px-7 py-5 rounded-b-xl border border-cyan-900/10 mx-4 my-2 whitespace-pre-line shadow-inner`}>
         {post.content ? (
