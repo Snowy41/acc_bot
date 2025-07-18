@@ -1,5 +1,10 @@
 import React from "react";
 
+interface UsernameStyle extends React.CSSProperties {
+  "--color1"?: string;
+  "--color2"?: string;
+}
+
 export default function Username({
   children,
   animated = false,
@@ -9,13 +14,20 @@ export default function Username({
 }: {
   children: React.ReactNode;
   animated?: boolean;
-  colors?: string[];           // <-- NEW
+  colors?: string[];
   className?: string;
   style?: React.CSSProperties;
 }) {
-  const gradient = colors && colors.length > 1
-    ? `linear-gradient(90deg, ${colors.join(",")})`
-    : "linear-gradient(90deg, #18f0ff, #60f77a, #d275fa, #18f0ff)";
+  const color1 = (colors && colors[0]) || "#18f0ff";
+  const color2 = (colors && colors[1]) || "#d275fa";
+
+  const gradientStyle: UsernameStyle = animated
+    ? {
+        ...style,
+        "--color1": color1,
+        "--color2": color2,
+      }
+    : style;
 
   return (
     <span
@@ -24,7 +36,7 @@ export default function Username({
         "font-bold drop-shadow " +
         className
       }
-      style={animated ? { ...style, background: gradient } : style}
+      style={gradientStyle}
     >
       {children}
     </span>

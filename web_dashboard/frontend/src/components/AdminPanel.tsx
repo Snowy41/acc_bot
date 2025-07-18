@@ -14,7 +14,6 @@ interface User {
   tags?: string[];
   role?: "admin" | "user" | string;
   animatedColors?: string[];
-
 }
 
 export default function AdminPanel() {
@@ -100,6 +99,8 @@ export default function AdminPanel() {
         tags: edit.tags,
         bio: edit.bio,
         role: edit.role || selected.role || "user",  // <-- always include the current role!
+        animatedColors: edit.animatedColors, // <-- include this
+
       }),
     });
     setSuccessMsg("Profile updated!");
@@ -377,6 +378,40 @@ export default function AdminPanel() {
                   onChange={(e) => setEdit({ ...edit, bio: e.target.value })}
                 />
               </div>
+              <div className="mb-5">
+                <label className="block text-cyan-300 mb-1">
+                  Animated Username Colors<br />
+                  <span className="text-xs text-cyan-200">
+                    Enter two HEX colors, comma separated (e.g. <b>#18f0ff,#d275fa</b>)
+                  </span>
+                </label>
+                <input
+                  className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800"
+                  value={edit.animatedColors?.join(",") || ""}
+                  onChange={e =>
+                    setEdit({
+                      ...edit,
+                      animatedColors: e.target.value
+                        .split(",")
+                        .map(s => s.trim())
+                        .filter(Boolean)
+                        .slice(0, 2), // only two!
+                    })
+                  }
+                  placeholder="#18f0ff,#d275fa"
+                  maxLength={32}
+                />
+                <div className="mt-2">
+                  <Username
+                    animated={!!(edit.animatedColors && edit.animatedColors.length === 2)}
+                    colors={edit.animatedColors}
+                    className="text-lg"
+                  >
+                    {edit.username || selected?.username}
+                  </Username>
+                </div>
+              </div>
+
               <button
                 className="bg-aqua text-midnight px-4 py-2 rounded font-bold mt-2 w-full hover:bg-cyan-400 transition"
                 onClick={handleSave}
