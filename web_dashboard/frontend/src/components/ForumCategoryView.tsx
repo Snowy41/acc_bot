@@ -244,19 +244,27 @@ function PostCard({
       to={`/forum/${category}/${post.id}`}
       className={`block rounded-xl border transition
         ${post.is_announcement
-          ? "bg-gradient-to-br from-yellow-300/10 to-aqua/5 border-yellow-400/40 shadow-lg"
+          ? "bg-white/10 border-yellow-300 shadow-[0_4px_28px_0_rgba(255,230,102,0.13)]"
           : "bg-gradient-to-tr from-[#223348]/80 to-cyan-800/40 border-cyan-900/20 hover:border-aqua hover:shadow-aqua/40"
         }
         hover:scale-[1.03] relative`}
       style={{
         boxShadow: post.is_announcement
-          ? "0 0 32px #ffe06622, 0 4px 24px #12fff1cc"
+          ? "0 2px 16px #ffe06633"
           : "0 0 18px #36f1cd33, 0 2px 12px #14d4ff44"
       }}
     >
-      <div className={`flex items-center justify-between px-7 pt-5 pb-3 rounded-t-xl ${post.is_announcement ? "bg-yellow-100/5" : "bg-[#162030]"}`}>
-        <span className={`font-bold text-xl md:text-2xl ${post.is_announcement ? "text-yellow-200" : "text-aqua"} drop-shadow`}>{post.title}</span>
-        <span className={`text-xs ${post.is_announcement ? "text-yellow-500" : "text-cyan-600"}`}>{new Date(post.timestamp).toLocaleString()}</span>
+      <div className={`flex items-center justify-between px-7 pt-5 pb-3 rounded-t-xl ${
+        post.is_announcement ? "bg-yellow-100/20 border-b border-yellow-200/50" : "bg-[#162030]"
+      }`}>
+        <span className={`font-bold text-xl md:text-2xl ${
+          post.is_announcement ? "text-yellow-300" : "text-aqua"
+        } drop-shadow`}>
+          {post.title}
+        </span>
+        <span className={`text-xs ${post.is_announcement ? "text-yellow-600" : "text-cyan-600"}`}>
+          {new Date(post.timestamp).toLocaleString()}
+        </span>
         {canDelete && (
           <button
             className="ml-4 px-3 py-1 rounded bg-red-500 text-white font-bold text-xs shadow hover:bg-red-600 z-10"
@@ -267,7 +275,9 @@ function PostCard({
           </button>
         )}
       </div>
-      <div className={`flex items-center gap-3 px-7 pb-2 pt-1 ${post.is_announcement ? "text-yellow-400" : "text-cyan-300"} text-xs`}>
+      <div className={`flex items-center gap-3 px-7 pb-2 pt-1 ${
+        post.is_announcement ? "text-yellow-500" : "text-cyan-300"
+      } text-xs`}>
         <span>
           by{" "}
           <Username
@@ -278,7 +288,11 @@ function PostCard({
           </Username>
         </span>
         <span className="font-mono">@{post.usertag}</span>
-        {post.is_announcement && <span className="ml-3 px-2 py-1 bg-yellow-400/30 rounded font-bold text-yellow-700 text-xs">Announcement</span>}
+        {post.is_announcement && (
+          <span className="ml-3 px-2 py-1 bg-yellow-200/30 rounded font-bold text-yellow-700 text-xs border border-yellow-200/60 shadow-sm">
+            Announcement
+          </span>
+        )}
       </div>
       <div className={`bg-[#232e43]/90 text-white text-base px-7 py-5 rounded-b-xl border border-cyan-900/10 mx-4 my-2 whitespace-pre-line shadow-inner`}>
         {post.content ? (
@@ -290,5 +304,6 @@ function PostCard({
         )}
       </div>
     </Link>
+
   );
 }
