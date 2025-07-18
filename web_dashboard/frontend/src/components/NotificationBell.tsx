@@ -98,7 +98,7 @@ export default function NotificationBell({
   return (
     <div className="relative z-50" ref={dropdownRef}>
       {/* Pop notifications beside the bell */}
-      <div className="fixed top-6 right-20 flex flex-col gap-2 items-end z-[9999] pointer-events-none">
+      <div className="fixed top-6 right-18 flex flex-col gap-2 items-end z-[9999] pointer-events-none">
         {popNotifications.map((n) => (
           <div
             key={n.id}

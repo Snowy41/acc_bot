@@ -63,7 +63,10 @@ fetch("/api/auth/status", { credentials: "include" })
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center min-h-screen">
-      <div className="bg-[#19212a] border border-cyan-900/40 rounded-2xl shadow-2xl p-10 max-w-lg w-full">
+     <div
+       className="border border-cyan-900/40 rounded-2xl shadow-2xl p-10 max-w-lg w-full"
+       style={{ background: "rgba(25, 33, 42, 0.80)" }}
+     >
         <div className="flex flex-col items-center">
 
           {/* AVATAR WITH FRAME */}
