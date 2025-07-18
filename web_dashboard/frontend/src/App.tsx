@@ -19,6 +19,7 @@ import SystemMessage from "./components/SystemMessage";
 import NotificationBell from "./components/NotificationBell";
 import type {UserNotification} from "./components/NotificationBell"
 import { ToastContainer, toast } from "react-toastify";
+import logoBanner from "./assets/logo_for_website.png";
 
 
 function App() {
@@ -250,14 +251,13 @@ useEffect(() => {
               element={
                 <div className="dashboard-container">
                   {/* Hero Section */}
-                  <div className="hero-section text-center space-y-8 relative z-10">
-                    <h1 className="text-6xl font-extrabold tracking-tight text-aqua drop-shadow-lg animate__animated animate__fadeIn animate__delay-1s">
-                      Welcome to White Bot Dashboard
-                    </h1>
-                    <p className="text-xl text-gray-300 max-w-xl mx-auto animate__animated animate__fadeIn animate__delay-1s">
-                      Run and monitor your automation scripts in style. <br />
-                      Use the sidebar to view logs or return here at any time.
-                    </p>
+                  <div className="hero-section text-center space-y-8 relative z-10 flex flex-col items-center justify-center">
+                    <img
+                      src={logoBanner}
+                      alt="White Bot Banner Logo"
+                      className="mx-auto w-full max-w-md drop-shadow-2xl"
+                      style={{ minWidth: 280 }}
+                    />
                   </div>
                   {/* Info Section */}
                   <div className="info-section mt-12 flex flex-wrap justify-center gap-10">
