@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { socket } from "../socket";
-import { Link } from "react-router-dom";
+import {Link} from "react-router-dom";
 
 interface MessageEmbed {
   id: string;
@@ -120,17 +120,20 @@ export default function ChatModal({
           />
           <div className="flex flex-col flex-1">
             <div className="flex items-center gap-2">
-              <Link
-                to={`/profile/${friend}`}
-                className="text-aqua font-bold hover:underline hover:text-cyan-400 transition"
-              >
+              <span className="font-bold text-aqua text-xl drop-shadow-[0_0_4px_#13e0f5] tracking-wide">
                 {friendUsername || "@" + friend}
-              </Link>
+              </span>
               {isOnline && (
                 <span className="ml-2 text-green-400 font-bold text-xs animate-pulse">● Online</span>
               )}
             </div>
-            <span className="text-cyan-400 text-xs opacity-70">@{friend}</span>
+              <Link
+                to={`/profile/${friend}`}
+                onClick={onClose}
+                className="text-aqua font-bold hover:underline hover:text-cyan-400 transition"
+              >
+                @{friend}
+              </Link>
           </div>
           <button
             onClick={onClose}
@@ -174,6 +177,7 @@ export default function ChatModal({
                           <Link
                             to={`/profile/${msg.embed.sellerTag || msg.embed.seller}`}
                             className="text-xs text-cyan-400 hover:underline hover:text-aqua"
+                            onClick={onClose}
                           >
                             by @{msg.embed.seller}
                           </Link>
