@@ -185,7 +185,14 @@ useEffect(() => {
 }, [usertag]);
 
 
-
+useEffect(() => {
+  if (sidebarChatPopups.length > 0) {
+    const timer = setTimeout(() => {
+      setSidebarChatPopups([]);
+    }, 4200); // 4.2 seconds
+    return () => clearTimeout(timer);
+  }
+}, [sidebarChatPopups]);
 
   // Show login/register modal when not logged in
   if (!loggedIn) {

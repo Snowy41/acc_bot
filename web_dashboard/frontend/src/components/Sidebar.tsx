@@ -53,11 +53,12 @@ export default function Sidebar({
     if (currentPath === "/moderation") setActive("moderation");
   }, [location, setActive]);
 
+
   return (
   <div className="relative h-screen">
     {/* Sidebar DM Popup */}
     {sidebarChatPopups && sidebarChatPopups.length > 0 && (
-      <div className="fixed left-6 top-24 z-50 animate__animated animate__fadeInDown pointer-events-auto">
+      <div className="fixed left-7 bottom-8 z-50 animate__animated animate__fadeInUp pointer-events-auto">
         {sidebarChatPopups.slice(-1).map((notif, idx) => (
           <div
             key={idx}
