@@ -139,9 +139,10 @@ export default function ChatModal({
 
         {/* MESSAGES */}
         <div
-          className="flex-1 flex flex-col px-5 py-5 overflow-y-auto overflow-x-hidden"
+          className="flex-1 flex flex-col px-5 py-5 overflow-y-auto overflow-x-hidden custom-scrollbar"
           style={{
             minHeight: "320px",
+            maxHeight: "450px", // or whatever fits your design
             background: "radial-gradient(ellipse at bottom right, #162030cc 75%, #18222fcc 100%)",
           }}
         >
@@ -205,33 +206,35 @@ export default function ChatModal({
         <div className="flex items-center gap-2 px-6 py-5 bg-[#1b2537]/90 border-t border-cyan-800">
           {/* If there is a pending embed to send, preview it above the input */}
           {pendingEmbed && (
-            <div className="absolute bottom-24 left-8 right-8 mb-2 p-3 rounded-xl border border-cyan-700 bg-[#142030]/80 shadow-lg flex flex-col z-40">
-              <div className="flex items-center gap-3">
-                <div className="flex-1">
-                  <div className="font-bold text-aqua">{pendingEmbed.title}</div>
-                  <div className="text-cyan-300 text-sm">{pendingEmbed.desc}</div>
-                  <div className="mt-1 flex items-center gap-2">
-                    <span className="text-lg font-black text-aqua">${pendingEmbed.price}</span>
-                    <span className="text-xs text-cyan-400 bg-cyan-900/40 rounded px-2 py-1">{pendingEmbed.category}</span>
-                    <span className="text-xs text-cyan-400">by @{pendingEmbed.seller}</span>
-                    <a
-                      href={`/forum/marketplace/${pendingEmbed.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-2 px-2 py-1 bg-aqua text-midnight rounded-full text-xs font-bold shadow hover:bg-cyan-400 transition"
-                    >
-                      View
-                    </a>
+            <div className="px-8 pt-4">
+              <div className="mb-2 p-3 rounded-xl border border-cyan-700 bg-[#142030]/80 shadow-lg flex flex-col z-40">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <div className="font-bold text-aqua">{pendingEmbed.title}</div>
+                    <div className="text-cyan-300 text-sm">{pendingEmbed.desc}</div>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="text-lg font-black text-aqua">${pendingEmbed.price}</span>
+                      <span className="text-xs text-cyan-400 bg-cyan-900/40 rounded px-2 py-1">{pendingEmbed.category}</span>
+                      <span className="text-xs text-cyan-400">by @{pendingEmbed.seller}</span>
+                      <a
+                        href={`/forum/marketplace/${pendingEmbed.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-2 px-2 py-1 bg-aqua text-midnight rounded-full text-xs font-bold shadow hover:bg-cyan-400 transition"
+                      >
+                        View
+                      </a>
+                    </div>
                   </div>
+                  <button
+                    className="ml-4 px-3 py-1 bg-red-400 text-white rounded-full font-bold text-xs hover:bg-red-500 transition"
+                    onClick={() => setPendingEmbed(undefined)}
+                  >
+                    ×
+                  </button>
                 </div>
-                <button
-                  className="ml-4 px-3 py-1 bg-red-400 text-white rounded-full font-bold text-xs hover:bg-red-500 transition"
-                  onClick={() => setPendingEmbed(undefined)}
-                >
-                  ×
-                </button>
+                <span className="text-xs text-cyan-400 mt-1">This offer will be attached to your next message.</span>
               </div>
-              <span className="text-xs text-cyan-400 mt-1">This offer will be attached to your next message.</span>
             </div>
           )}
           <input
