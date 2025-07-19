@@ -26,8 +26,9 @@ import ShopItemDetail from "./components/ShopItemDetails";
 import SupportPage from "./components/SupportPage";
 import ModerationDashboard from "./components/ModerationDashboard";
 import MessagesPage from "./components/MessagePage";
-import ChatModal from "./components/ChatModal";
 import FriendsModal from "./components/FriendsModal"; // adjust path if needed
+import { useLocation } from "react-router-dom";
+
 
 function App() {
   const [active, setActive] = useState("home");
