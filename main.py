@@ -1389,18 +1389,20 @@ def handle_dm(data):
     sender = session.get("username")
     to = data.get("to")
     text = data.get("text", "").strip()
+    embed = data.get("embed", None)
 
     if not sender or not to or not text:
         return
 
     timestamp = int(time.time() * 1000)
-    save_chat_message(sender, to, sender, text, timestamp)
+    save_chat_message(sender, to, sender, text, timestamp, embed)  # Pass embed!
 
     socketio.emit("dm", {
         "from": sender,
         "to": to,
         "text": text,
-        "timestamp": timestamp
+        "timestamp": timestamp,
+        "embed": embed  # Emit embed too
     })
 
 # Gunicorn-compatible setup
