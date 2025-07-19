@@ -66,7 +66,6 @@ export default function MarketplacePostView({ usertag, displayName }) {
               category: post.category,
               seller: post.username,
               sellerTag: post.usertag,
-              // any other fields you want!
             }}
             initialMessage={`Hi, I'm interested in your "${post.title}" listing!`}
           />

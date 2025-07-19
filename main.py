@@ -197,25 +197,46 @@ def get_chat_messages(user1, user2):
     chatkey = chat_key(user1, user2)
     conn = sqlite3.connect(MESSAGES_DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT sender, recipient, text, timestamp FROM chat_messages WHERE chat_key=? ORDER BY timestamp ASC", (chatkey,))
-    messages = [
-        {"from": row[0], "to": row[1], "text": row[2], "timestamp": row[3]}
-        for row in c.fetchall()
-    ]
+    # Note the new "embed" column
+    c.execute("SELECT sender, recipient, text, timestamp, embed FROM chat_messages WHERE chat_key=? ORDER BY timestamp ASC", (chatkey,))
+    messages = []
+    for row in c.fetchall():
+        msg = {
+            "from": row[0],
+            "to": row[1],
+            "text": row[2],
+            "timestamp": row[3]
+        }
+        # Parse the embed JSON if present
+        if row[4]:
+            try:
+                msg["embed"] = json.loads(row[4])
+            except Exception:
+                msg["embed"] = None
+        messages.append(msg)
     conn.close()
     return messages
 
-def save_chat_message(user1, user2, sender, text, timestamp):
+
+def save_chat_message(user1, user2, sender, text, timestamp, embed=None):
     chatkey = chat_key(user1, user2)
     recipient = user2 if sender == user1 else user1
     conn = sqlite3.connect(MESSAGES_DB_PATH)
     c = conn.cursor()
     c.execute("""
-        INSERT INTO chat_messages (chat_key, sender, recipient, text, timestamp)
-        VALUES (?, ?, ?, ?, ?)
-    """, (chatkey, sender, recipient, text, timestamp))
+        INSERT INTO chat_messages (chat_key, sender, recipient, text, timestamp, embed)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (
+        chatkey,
+        sender,
+        recipient,
+        text,
+        timestamp,
+        json.dumps(embed) if embed else None
+    ))
     conn.commit()
     conn.close()
+
 
 
 
@@ -651,6 +672,7 @@ def send_message(friend_tag):
     try:
         data = request.get_json(force=True)
         text = data.get("text", "").strip()
+        embed = data.get("embed", None)
     except Exception as e:
         print("[ERROR] Failed to parse message payload:", e)
         return jsonify({"error": "Invalid message payload"}), 400
@@ -660,7 +682,9 @@ def send_message(friend_tag):
 
     print(f"[MESSAGE] {current_user} → {friend_tag}: {text}")
     timestamp = int(time.time() * 1000)
-    save_chat_message(current_user, friend_tag, current_user, text, timestamp)
+
+    # Save with embed as JSON string if present
+    save_chat_message(current_user, friend_tag, current_user, text, timestamp, embed)
 
     notif_id = str(uuid.uuid4())
     recipient = get_user_by_usertag(friend_tag)
@@ -673,18 +697,13 @@ def send_message(friend_tag):
             "timestamp": timestamp,
         })
         save_user(recipient)
-    print("[SOCKET EMIT] chat_message to:", friend_tag, "payload:", {
-        "to": friend_tag,
-        "from": current_user,
-        "text": text,
-        "timestamp": timestamp,
-        "notification": notification,
-    })
+    # Include embed in socket emit
     socketio.emit("chat_message", {
         "to": friend_tag,
         "from": current_user,
         "text": text,
         "timestamp": timestamp,
+        "embed": embed,
         "notification": {
             "id": notif_id,
             "type": "chat",
@@ -694,6 +713,7 @@ def send_message(friend_tag):
     })
 
     return jsonify({"success": True})
+
 
 
 

@@ -1,31 +1,43 @@
 import { useState, useEffect, useRef } from "react";
 import { socket } from "../socket";
 
+interface MessageEmbed {
+  id: string;
+  title: string;
+  price: string | number;
+  desc: string;
+  category: string;
+  seller: string;
+  sellerTag: string;
+}
+
+interface ChatMessage {
+  from: string;
+  to: string;
+  text: string;
+  timestamp: number;
+  embed?: MessageEmbed;
+}
+
+
 export default function ChatModal({
   friend,
   onClose,
   currentUserTag,
   friendUsername,
   initialMessage = "",
-  embed,
+  embed: initialEmbed, // Only used for first message
 }: {
   friend: string;
   onClose: () => void;
   currentUserTag: string;
   friendUsername?: string;
   initialMessage?: string;
-  embed?: {
-    id: string;
-    title: string;
-    price: string | number;
-    desc: string;
-    category: string;
-    seller: string;
-    sellerTag: string;
-  };
+  embed?: MessageEmbed;
 }) {
-  const [messages, setMessages] = useState<{ from: string; text: string; timestamp: number }[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState(initialMessage);
+  const [pendingEmbed, setPendingEmbed] = useState<MessageEmbed | undefined>(initialEmbed);
   const [friendAvatar, setFriendAvatar] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -54,8 +66,8 @@ export default function ChatModal({
 
   // Listen for new DMs
   useEffect(() => {
-    const handler = (data: any) => {
-      if (data.from === friend || data.to === friend) {
+    const handler = (data: ChatMessage) => {
+      if ((data.from === friend || data.to === friend) && data.text) {
         setMessages(prev => [...prev, data]);
         setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
       }
@@ -66,11 +78,18 @@ export default function ChatModal({
     };
   }, [friend]);
 
+  // --- Send Message (with optional embed) ---
   const sendMessage = () => {
     const text = input.trim();
     if (!text) return;
-    socket.emit("dm", { to: friend, text });
+    // Send embed with message if pendingEmbed exists
+    socket.emit("dm", {
+      to: friend,
+      text,
+      embed: pendingEmbed,
+    });
     setInput("");
+    setPendingEmbed(undefined); // only send embed once, unless reset
   };
 
   const formatTime = (ts: number) => {
@@ -117,38 +136,13 @@ export default function ChatModal({
             ×
           </button>
         </div>
-        {/* Embed Section */}
-          {embed && (
-          <div className="p-5 border-b border-cyan-800 bg-[#162030]/80">
-            <div className="flex items-center gap-3">
-              <div className="flex-1">
-                <div className="text-lg font-bold text-aqua">{embed.title}</div>
-                <div className="text-cyan-300 text-base">{embed.desc}</div>
-                <div className="mt-1 flex items-center gap-4">
-                  <span className="text-xl font-black text-aqua">${embed.price}</span>
-                  <span className="text-cyan-400 text-xs bg-cyan-900/40 rounded px-2 py-1">{embed.category}</span>
-                  <span className="text-xs text-cyan-400">by @{embed.seller}</span>
-                </div>
-              </div>
-              <a
-                href={`/forum/marketplace/${embed.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="ml-2 px-4 py-1 bg-aqua text-midnight rounded-full text-xs font-bold shadow hover:bg-cyan-400 transition"
-              >
-                View Listing
-              </a>
-            </div>
-          </div>
-        )}
 
         {/* MESSAGES */}
         <div
-          className="flex-1 flex flex-col px-5 py-5 overflow-y-auto"
+          className="flex-1 flex flex-col px-5 py-5 overflow-y-auto overflow-x-hidden"
           style={{
             minHeight: "320px",
             background: "radial-gradient(ellipse at bottom right, #162030cc 75%, #18222fcc 100%)",
-            overflowX: "hidden", // <--- Add this line
           }}
         >
           {messages.length === 0 ? (
@@ -161,23 +155,43 @@ export default function ChatModal({
                   key={i}
                   className={`flex w-full my-1 ${isMe ? "justify-end" : "justify-start"}`}
                 >
-                  <div
-                    className={`max-w-[80%] px-4 py-3 rounded-[1.4rem] text-base font-medium shadow
-                      transition
-                      ${isMe
-                        ? "bg-gradient-to-tr from-aqua to-cyan-400 text-midnight rounded-br-md border border-aqua/60"
-                        : "bg-cyan-900/50 text-white border border-cyan-800 rounded-bl-md"
-                      }
-                      ${isMe ? "animate__animated animate__fadeInRight" : "animate__animated animate__fadeInLeft"}
-                    `}
-                    style={{
-                      marginRight: isMe ? 0 : "auto",
-                      marginLeft: isMe ? "auto" : 0,
-                    }}
-                  >
-                    <div className="whitespace-pre-wrap break-words">{msg.text}</div>
-                    <div className="text-[11px] text-right opacity-60 mt-2 font-mono">
-                      {formatTime(msg.timestamp)}
+                  <div className="flex flex-col max-w-[80%]">
+                    {/* EMBED CARD (if this message has one) */}
+                    {msg.embed && (
+                      <div className="mb-1 p-3 rounded-xl border border-cyan-800 bg-[#162030]/80 shadow"
+                        style={{marginBottom: "6px"}}
+                      >
+                        <div className="font-bold text-aqua text-base mb-1">{msg.embed.title}</div>
+                        <div className="text-cyan-300 text-sm">{msg.embed.desc}</div>
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className="text-lg font-black text-aqua">${msg.embed.price}</span>
+                          <span className="text-xs text-cyan-400 bg-cyan-900/40 rounded px-2 py-1">{msg.embed.category}</span>
+                          <span className="text-xs text-cyan-400">by @{msg.embed.seller}</span>
+                          <a
+                            href={`/forum/marketplace/${msg.embed.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-2 px-3 py-1 bg-aqua text-midnight rounded-full text-xs font-bold shadow hover:bg-cyan-400 transition"
+                          >
+                            View
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                    <div
+                      className={`px-4 py-3 rounded-[1.4rem] text-base font-medium shadow
+                        transition
+                        ${isMe
+                          ? "bg-gradient-to-tr from-aqua to-cyan-400 text-midnight rounded-br-md border border-aqua/60"
+                          : "bg-cyan-900/50 text-white border border-cyan-800 rounded-bl-md"
+                        }
+                        whitespace-pre-wrap break-words
+                      `}
+                    >
+                      {msg.text}
+                      <div className="text-[11px] text-right opacity-60 mt-2 font-mono">
+                        {formatTime(msg.timestamp)}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -189,6 +203,37 @@ export default function ChatModal({
 
         {/* INPUT */}
         <div className="flex items-center gap-2 px-6 py-5 bg-[#1b2537]/90 border-t border-cyan-800">
+          {/* If there is a pending embed to send, preview it above the input */}
+          {pendingEmbed && (
+            <div className="absolute bottom-24 left-8 right-8 mb-2 p-3 rounded-xl border border-cyan-700 bg-[#142030]/80 shadow-lg flex flex-col z-40">
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <div className="font-bold text-aqua">{pendingEmbed.title}</div>
+                  <div className="text-cyan-300 text-sm">{pendingEmbed.desc}</div>
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="text-lg font-black text-aqua">${pendingEmbed.price}</span>
+                    <span className="text-xs text-cyan-400 bg-cyan-900/40 rounded px-2 py-1">{pendingEmbed.category}</span>
+                    <span className="text-xs text-cyan-400">by @{pendingEmbed.seller}</span>
+                    <a
+                      href={`/forum/marketplace/${pendingEmbed.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-2 px-2 py-1 bg-aqua text-midnight rounded-full text-xs font-bold shadow hover:bg-cyan-400 transition"
+                    >
+                      View
+                    </a>
+                  </div>
+                </div>
+                <button
+                  className="ml-4 px-3 py-1 bg-red-400 text-white rounded-full font-bold text-xs hover:bg-red-500 transition"
+                  onClick={() => setPendingEmbed(undefined)}
+                >
+                  ×
+                </button>
+              </div>
+              <span className="text-xs text-cyan-400 mt-1">This offer will be attached to your next message.</span>
+            </div>
+          )}
           <input
             className="flex-1 px-5 py-3 rounded-2xl bg-cyan-900/20 text-white text-lg border border-cyan-700 focus:border-aqua outline-none placeholder-cyan-400 transition-all shadow-md"
             value={input}
