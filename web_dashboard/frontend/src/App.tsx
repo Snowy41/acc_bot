@@ -44,9 +44,12 @@ function App() {
   const [isPremium, setIsPremium] = useState(false);
   const [role, setRole] = useState("user");
   const [animatedColors, setAnimatedColors] = useState<string[]>([]);
-    const [sidebarChatPopups, setSidebarChatPopups] = useState<
+  const [sidebarChatPopups, setSidebarChatPopups] = useState<
       { from: string; text: string; timestamp: number; }[]
     >([]);
+  const [unreadDMCount, setUnreadDMCount] = useState(0);
+  const location = useLocation();
+
   // Modal state for register
   const [showRegister, setShowRegister] = useState(false);
 
@@ -73,6 +76,12 @@ function App() {
       });
   }, []);
 
+  useEffect(() => {
+    if (location.pathname === "/messages") {
+      setUnreadDMCount(0);
+      setSidebarChatPopups([]); // (optional)
+    }
+  }, [location]);
 
   useEffect(() => {
     setTimeout(() => setShowGetStarted(true), 3000);
@@ -159,15 +168,11 @@ useEffect(() => {
 
   const handleChatMessage = (data: { to: string; from: string; text: string; timestamp: number; notification?: UserNotification }) => {
     if (data.to === usertag) {
-      // Add to notification bell as before
-      if (data.notification) {
-        setNotifications(prev => [data.notification, ...prev]);
-      }
-      // Show sidebar popup
-      setSidebarChatPopups(prev => [
-        ...prev,
-        { from: data.from, text: data.text, timestamp: Date.now() }
-      ]);
+     setSidebarChatPopups(prev => [
+              ...prev,
+              { from: data.from, text: data.text, timestamp: Date.now() }
+            ]);
+            setUnreadDMCount(c => c + 1); // <--- NEW: increment counter
     }
   };
 
@@ -221,15 +226,15 @@ useEffect(() => {
     <Router>
       <ParticleBackground />
       <div className="flex min-h-screen relative z-10">
-        <Sidebar
-          active={active}
-          setActive={setActive}
-          isAdmin={isAdmin}
-          isPremium={isPremium}
-          unreadDM={sidebarChatPopups.length}
-          sidebarChatPopups={sidebarChatPopups}
-          clearSidebarChatPopups={() => setSidebarChatPopups([])}
-        />
+          <Sidebar
+            active={active}
+            setActive={setActive}
+            isAdmin={isAdmin}
+            isPremium={isPremium}
+            unreadDM={unreadDMCount} // <--- Pass this to Sidebar!
+            sidebarChatPopups={sidebarChatPopups}
+            clearSidebarChatPopups={() => setSidebarChatPopups([])}
+          />
 
         <SearchBar />
         <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
