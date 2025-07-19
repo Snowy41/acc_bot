@@ -44,7 +44,9 @@ function App() {
   const [isPremium, setIsPremium] = useState(false);
   const [role, setRole] = useState("user");
   const [animatedColors, setAnimatedColors] = useState<string[]>([]);
-
+    const [sidebarChatPopups, setSidebarChatPopups] = useState<
+      { from: string; text: string; timestamp: number; }[]
+    >([]);
   // Modal state for register
   const [showRegister, setShowRegister] = useState(false);
 
@@ -132,7 +134,7 @@ useEffect(() => {
   };
 }, [usertag]);
 
- useEffect(() => {
+useEffect(() => {
   const handleSystemMessage = (msg: { text: string }) => {
     setSystemMessage(msg.text);
     setTimeout(() => setSystemMessage(null), 5000);
@@ -156,26 +158,32 @@ useEffect(() => {
   };
 
   const handleChatMessage = (data: { to: string; from: string; text: string; timestamp: number; notification?: UserNotification }) => {
-    console.log("[Socket] chat_message received:", data); // <--- ADD THIS
-    if (data.to === usertag && data.notification) {
-      setNotifications(prev => [data.notification, ...prev]);
+    if (data.to === usertag) {
+      // Add to notification bell as before
+      if (data.notification) {
+        setNotifications(prev => [data.notification, ...prev]);
+      }
+      // Show sidebar popup
+      setSidebarChatPopups(prev => [
+        ...prev,
+        { from: data.from, text: data.text, timestamp: Date.now() }
+      ]);
     }
-    socket.on("chat_message", handleChatMessage);
-    return () => {
-      socket.off("chat_message", handleChatMessage);
-  };
   };
 
   socket.on("system_message", handleSystemMessage);
   socket.on("friend_request", handleFriendRequest);
   socket.on("chat_message", handleChatMessage);
+  socket.on("dm", handleChatMessage); // Also listen to DM events (Socket.IO direct)
 
   return () => {
     socket.off("system_message", handleSystemMessage);
     socket.off("friend_request", handleFriendRequest);
     socket.off("chat_message", handleChatMessage);
+    socket.off("dm", handleChatMessage);
   };
 }, [usertag]);
+
 
 
 
@@ -206,7 +214,16 @@ useEffect(() => {
     <Router>
       <ParticleBackground />
       <div className="flex min-h-screen relative z-10">
-        <Sidebar active={active} setActive={setActive} isAdmin={isAdmin} isPremium={isPremium}/>
+        <Sidebar
+          active={active}
+          setActive={setActive}
+          isAdmin={isAdmin}
+          isPremium={isPremium}
+          unreadDM={sidebarChatPopups.length}
+          sidebarChatPopups={sidebarChatPopups}
+          clearSidebarChatPopups={() => setSidebarChatPopups([])}
+        />
+
         <SearchBar />
         <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
           <NotificationBell

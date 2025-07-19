@@ -27,14 +27,21 @@ export default function Sidebar({
   setActive,
   isAdmin,
   isPremium,
-  isModerator,   // <--- ADD THIS
+  isModerator,
+  unreadDM = 0,
+  sidebarChatPopups = [],
+  clearSidebarChatPopups = () => {},
 }: {
   active: string,
   setActive: (k: string) => void,
   isAdmin?: boolean,
   isPremium?: boolean,
-  isModerator?: boolean,   // <--- ADD THIS
+  isModerator?: boolean,
+  unreadDM?: number, // <--- add
+  sidebarChatPopups?: { from: string; text: string; timestamp: number }[], // <--- add
+  clearSidebarChatPopups?: () => void // <--- add
 }) {
+
   const [open, setOpen] = useState(true);
   const location = useLocation();
 
@@ -47,6 +54,38 @@ export default function Sidebar({
   }, [location, setActive]);
 
   return (
+  <div className="relative h-screen">
+    {/* Sidebar DM Popup */}
+    {sidebarChatPopups && sidebarChatPopups.length > 0 && (
+      <div className="fixed left-6 top-24 z-50 animate__animated animate__fadeInDown pointer-events-auto">
+        {sidebarChatPopups.slice(-1).map((notif, idx) => (
+          <div
+            key={idx}
+            className="flex items-center gap-3 bg-gradient-to-tr from-cyan-900/90 via-[#13e0f5cc] to-cyan-700/90 border border-aqua/70 shadow-2xl rounded-2xl px-5 py-4 mb-3 min-w-[240px] max-w-[340px]"
+            style={{ boxShadow: "0 2px 22px #18f0ff55, 0 1px 8px #12fff199" }}
+          >
+            <span className="text-aqua font-bold text-base">
+              New DM
+            </span>
+            <span className="ml-2 text-cyan-100 truncate text-sm flex-1">
+              <span className="font-bold text-aqua mr-1">@{notif.from}</span>
+              {notif.text.length > 42
+                ? notif.text.slice(0, 39) + "..."
+                : notif.text}
+            </span>
+            <button
+              onClick={clearSidebarChatPopups}
+              className="ml-2 text-cyan-200 hover:text-red-400 text-lg px-1"
+              aria-label="Close notification"
+            >
+              ×
+            </button>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {/* Main Sidebar */}
     <div
       className={`
         flex flex-col h-screen transition-all duration-300 z-20
@@ -154,12 +193,15 @@ export default function Sidebar({
               open={open}
               active={active}
               setActive={setActive}
+              unread={item.key === "messages" ? unreadDM : 0}
             />
           );
         })}
       </nav>
     </div>
-  );
+  </div>
+);
+
 }
 
 // --- SidebarItem ---
