@@ -130,7 +130,7 @@ export default function ChatModal({
               <Link
                 to={`/profile/${friend}`}
                 onClick={onClose}
-                className="text-aqua font-bold hover:underline hover:text-cyan-400 transition"
+                className="text-cyan-400 text-xs opacity-70"
               >
                 @{friend}
               </Link>
