@@ -28,6 +28,8 @@ from backend.api.admin_routes import admin_bp
 from backend.api.search_routes import search_bp
 from backend.api.upload_routes import upload_bp
 from backend.api.logs_routes import logs_bp
+from backend.api.wallet_routes import wallet_bp
+from backend.api.shop_routes import shop_bp
 
 app.register_blueprint(knuddels_api, url_prefix='/api/knuddels')
 app.register_blueprint(connect_api, url_prefix='/api/connect')
@@ -39,6 +41,9 @@ app.register_blueprint(admin_bp)
 app.register_blueprint(search_bp)
 app.register_blueprint(upload_bp)
 app.register_blueprint(logs_bp)
+app.register_blueprint(wallet_bp)
+app.register_blueprint(shop_bp)
+
 # --- Global Error Handler ---
 @app.errorhandler(Exception)
 def handle_all_errors(e):

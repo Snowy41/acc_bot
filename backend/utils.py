@@ -9,6 +9,7 @@ DB_PATH = os.path.abspath("./db/users.db")
 FORUM_DB_PATH = os.path.abspath("./db/forum.db")
 MESSAGES_DB_PATH = os.path.abspath("./db/messages.db")
 TRANSACTIONS_DB_PATH = os.path.abspath("./db/transactions.db")
+SHOP_DB = os.path.abspath("./db/shop.db")
 
 # --- User Functions ---
 def get_user_by_usertag(usertag):
@@ -233,6 +234,48 @@ def record_transaction(id, from_user, to_user, amount, tx_type, ref=None, timest
     """, (id, from_user, to_user, amount, tx_type, ref, timestamp))
     conn.commit()
     conn.close()
+
+
+def get_item_from_db(category, key):
+    import sqlite3
+    conn = sqlite3.connect(SHOP_DB)
+    c = conn.cursor()
+    id = f"{category}:{key}"
+    c.execute("SELECT id, category, name, description, price, type, metadata FROM shop_items WHERE id=?", (id,))
+    row = c.fetchone()
+    conn.close()
+    if not row:
+        return None
+    return {
+        "id": row[0],
+        "category": row[1],
+        "name": row[2],
+        "description": row[3],
+        "price": row[4],
+        "type": row[5],
+        "metadata": json.loads(row[6]) if row[6] else {}
+    }
+
+def get_items_in_category(category):
+    conn = sqlite3.connect(SHOP_DB)
+    c = conn.cursor()
+    c.execute("""
+        SELECT id, name, description, price, type, metadata
+        FROM shop_items WHERE category=?
+    """, (category,))
+    rows = c.fetchall()
+    conn.close()
+    items = []
+    for row in rows:
+        items.append({
+            "key": row[0].split(":")[1],
+            "name": row[1],
+            "description": row[2],
+            "price": row[3],
+            "type": row[4],
+            "metadata": json.loads(row[5]) if row[5] else {}
+        })
+    return items
 
 def public_user_dict(user):
     """Return a public-safe user dict (no password, admin, etc)."""

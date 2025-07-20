@@ -1,17 +1,21 @@
 import { Link, useParams } from "react-router-dom";
 import { shopData } from "./shopData";
 import { ArrowLeftIcon, CurrencyEuroIcon } from "@heroicons/react/24/outline";
+import {useEffect, useState} from "react";
 
 export default function ShopCategory() {
-  const { category } = useParams();
-  const cat = shopData.find(c => c.key === category);
+    const { category } = useParams();
+    const [items, setItems] = useState([]);
+    const [catName, setCatName] = useState(category);
 
-  if (!cat)
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] text-aqua text-2xl">
-        Category not found.
-      </div>
-    );
+    useEffect(() => {
+      fetch(`/api/shop/category/${category}`)
+        .then(res => res.json())
+        .then(data => {
+          setItems(data.items);
+          setCatName(data.category); // or get category name from metadata if needed
+        });
+    }, [category]);
 
   return (
     <div className="flex justify-center items-start w-full min-h-[90vh] pt-12 px-4">
@@ -33,18 +37,20 @@ export default function ShopCategory() {
             <Link to="/shop" className="p-2 rounded-full hover:bg-cyan-900/40 transition">
               <ArrowLeftIcon className="h-6 w-6 text-aqua" />
             </Link>
-            <h1 className="text-3xl font-extrabold bg-gradient-to-r from-aqua to-cyan-400 text-transparent bg-clip-text drop-shadow-xl tracking-tight">
-              {cat.name}
+            <h1 className="text-3xl font-extrabold ...">
+              {catName.charAt(0).toUpperCase() + catName.slice(1)}
             </h1>
           </div>
-          <p className="text-cyan-100 text-base opacity-90 text-center">{cat.description}</p>
+            <p className="text-cyan-100 text-base opacity-90 text-center">
+              Explore all {catName} items in the shop
+            </p>
         </div>
 
         {/* Item Grid */}
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-8 pb-8 pt-4 px-2">
-          {cat.items.map(item => (
+          {items.map(item => (
             <Link
-              to={`/shop/${cat.key}/${item.key}`}
+              to={`/shop/${category}/${item.key}`}
               key={item.key}
               className={`
                 group bg-gradient-to-br from-[#19e3ff11] via-[#13202b]/40 to-[#0ed0c533]
