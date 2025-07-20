@@ -229,6 +229,8 @@ def public_user_dict(user):
 
 def public_post_dict(post):
     """Sanitize a forum/marketplace post for public API."""
+    user = get_user_by_usertag(post.get("usertag", ""))
+
     return {
         "id": post.get("id"),
         "category": post.get("category"),
@@ -243,6 +245,7 @@ def public_post_dict(post):
         "animatedColors": post.get("animatedColors", []),
         "desc": post.get("desc", ""),
         "price": post.get("price", ""),
+        "reputation": int(user["reputation"]) if user else 0,
     }
 
 def public_comment_dict(cmt):
