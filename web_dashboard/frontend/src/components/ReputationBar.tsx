@@ -2,16 +2,17 @@ import React from "react";
 
 // Blackhat/marketplace themed rep levels:
 const levels = [
-  { min: 5000, title: "Mythic", emoji: "🦾", color: "#0ff0fc" },
+  { min: 10000,  title: "Verified", emoji: "✅", color: "#08ff00" },
+  { min: 5000, title: "Mythic", emoji: "🦾", color: "#3f4849" },
   { min: 3000, title: "Kingpin", emoji: "👑", color: "#ffe066" },
   { min: 2000, title: "Black Market", emoji: "🕵️", color: "#ffba49" },
-  { min: 1500, title: "Ghost", emoji: "👻", color: "#00ffd0" },
-  { min: 1200, title: "Power Seller", emoji: "🔥", color: "#fc49d5" },
-  { min: 900,  title: "Service Pro", emoji: "🛠️", color: "#6fc7f7" },
-  { min: 700, title: "Operator", emoji: "📡", color: "#ad6fff" },
+  { min: 1500, title: "Ghost", emoji: "👻", color: "#bebebe" },
+  { min: 1200, title: "Power Seller", emoji: "🔥", color: "#942d2d" },
+  { min: 900,  title: "Service Pro", emoji: "🛠️", color: "#643d3d" },
+  { min: 700, title: "Operator", emoji: "📡", color: "#5a4670" },
   { min: 500,  title: "Trusted", emoji: "🛡️", color: "#2dc5ff" },
   { min: 300,  title: "Vendor", emoji: "🛒", color: "#ffe066" },
-  { min: 150,  title: "Verified", emoji: "✅", color: "#00ffe7" },
+  { min: 150,  title: "Reseller", emoji: "🔄", color: "#0066ff" },
   { min: 50,   title: "Buyer", emoji: "💵", color: "#49fced" },
   { min: 0,    title: "Fresh Drop", emoji: "🟤", color: "#8e9296" },
 ];
