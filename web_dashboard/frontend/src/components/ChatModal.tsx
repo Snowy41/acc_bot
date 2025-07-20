@@ -252,29 +252,27 @@ export default function ChatModal({
         {/* INPUT */}
         <div className="flex items-center gap-2 px-6 py-5 bg-[#1b2537]/90 border-t border-cyan-800">
           {/* Preview Embed ABOVE the input row */}
-          {/* Message input row */}
-          <div className="flex items-end gap-3 px-6 pb-6">
-            <input
-              className="flex-1 px-4 py-3 rounded-xl bg-[#232e43] border border-cyan-800 text-white text-base focus:outline-none focus:ring-2 focus:ring-aqua"
-              placeholder="Write your message..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && (input.trim() || pendingEmbed)) sendMessage();
-              }}
-            />
-            <button
-              onClick={sendMessage}
-              disabled={input.trim() === "" && !pendingEmbed}
-              className="bg-aqua text-midnight px-6 py-2 rounded-full font-extrabold text-lg shadow transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{
-                boxShadow: "0 1px 8px #12fff122, 0 0 0 1.5px #19e3f588",
-              }}
-            >
-              Send
-            </button>
-          </div>
-
+          <input
+            className="flex-1 px-5 py-3 rounded-2xl bg-cyan-900/20 text-white text-lg border border-cyan-700 focus:border-aqua outline-none placeholder-cyan-400 transition-all shadow-md"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            placeholder="Type your message and press Enter..."
+            autoFocus
+            maxLength={1200}
+          />
+          <button
+            onClick={sendMessage}
+            className="bg-aqua hover:bg-cyan-300 text-midnight px-6 py-2 rounded-full font-extrabold text-lg shadow transition-all active:scale-95"
+            style={{
+              opacity: input.trim() === "" && !pendingEmbed ? 0.5 : 1,
+              cursor: input.trim() === "" && !pendingEmbed ? "not-allowed" : "pointer",
+              boxShadow: "0 1px 8px #12fff122, 0 0 0 1.5px #19e3f588"
+            }}
+            disabled={input.trim() === "" && !pendingEmbed}
+          >
+            Send
+          </button>
         </div>
       </div>
     </div>
