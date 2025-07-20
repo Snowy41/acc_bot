@@ -8,6 +8,7 @@ import hashlib
 DB_PATH = os.path.abspath("./db/users.db")
 FORUM_DB_PATH = os.path.abspath("./db/forum.db")
 MESSAGES_DB_PATH = os.path.abspath("./db/messages.db")
+TRANSACTIONS_DB_PATH = os.path.abspath("./db/transactions.db")
 
 # --- User Functions ---
 def get_user_by_usertag(usertag):
@@ -202,6 +203,36 @@ def get_all_users():
         users[user["usertag"]] = user
         user["reputation"] = int(user.get("reputation") or 0)
     return users
+
+
+
+def get_user_balance(usertag):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT balance FROM users WHERE usertag=?", (usertag,))
+    row = c.fetchone()
+    conn.close()
+    return int(row[0]) if row else 0
+
+def update_user_balance(usertag, delta):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("UPDATE users SET balance = balance + ? WHERE usertag=?", (delta, usertag))
+    conn.commit()
+    conn.close()
+
+def record_transaction(id, from_user, to_user, amount, tx_type, ref=None, timestamp=None):
+    import time
+    if timestamp is None:
+        timestamp = int(time.time() * 1000)
+    conn = sqlite3.connect(TRANSACTIONS_DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+        INSERT INTO transactions (id, from_user, to_user, amount, type, ref, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (id, from_user, to_user, amount, tx_type, ref, timestamp))
+    conn.commit()
+    conn.close()
 
 def public_user_dict(user):
     """Return a public-safe user dict (no password, admin, etc)."""
