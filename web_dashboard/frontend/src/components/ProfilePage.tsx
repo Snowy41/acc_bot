@@ -95,10 +95,10 @@ return (
         minWidth: "340px"
       }}
     >
-      <div className="flex flex-col items-center w-full">
+      <div className="flex flex-col items-center">
 
         {/* AVATAR */}
-        <div className="w-24 h-24 flex items-center justify-center mb-4 relative">
+        <div className="w-24 h-24 flex items-center justify-center mb-4">
           <div className={`w-24 h-24 rounded-full flex items-center justify-center text-5xl font-bold text-midnight
               shadow-xl border-2
               ${profile.frame === "gold" ? "border-yellow-400 shadow-yellow-300" : ""}
@@ -136,56 +136,57 @@ return (
         </div>
 
         {/* === THE BATCH ROW: Username, Badges, Rep Bar === */}
-        <div className="flex flex-row items-center justify-center gap-4 mb-2 w-full">
-          <span className="flex items-center">
-            <Username
-              animated={parsedColors.length === 2}
-              colors={parsedColors}
-              className="text-3xl"
-              style={
-                parsedColors.length !== 2
-                  ? { color: profile.color || "#fff" }
-                  : undefined
-              }
-            >
-              {profile.username}
-            </Username>
-            {profile.isAdmin && (
-              <span className="ml-2 text-yellow-300 text-xl" title="Admin">🛡️</span>
-            )}
-            {profile.tags?.includes("Founder") && (
-              <span className="ml-2 text-pink-400 text-xl" title="Founder">👑</span>
-            )}
-            {profile.tags?.includes("Premium") && (
-              <span className="ml-2 text-blue-400 text-xl" title="Premium">💎</span>
-            )}
-          </span>
-          {typeof profile.reputation === "number" && (
-            <span className="flex-shrink-0">
-              <ReputationBar rep={profile.reputation} />
+        <div style={{ minHeight: "2.75rem" }} />
+          <div className="flex flex-row items-center justify-center mb-2">
+            {/* This row is only as wide as its content */}
+            <span className="flex items-center">
+              <Username
+                animated={parsedColors.length === 2}
+                colors={parsedColors}
+                className="text-3xl"
+                style={
+                  parsedColors.length !== 2
+                    ? { color: profile.color || "#fff" }
+                    : undefined
+                }
+              >
+                {profile.username}
+              </Username>
+              {profile.isAdmin && (
+                <span className="ml-2 text-yellow-300 text-xl" title="Admin">🛡️</span>
+              )}
+              {profile.tags?.includes("Founder") && (
+                <span className="ml-2 text-pink-400 text-xl" title="Founder">👑</span>
+              )}
+              {profile.tags?.includes("Premium") && (
+                <span className="ml-2 text-blue-400 text-xl" title="Premium">💎</span>
+              )}
             </span>
-          )}
-        </div>
-
-        {/* @usertag and ID, centered below batch */}
-        <div className="flex items-center justify-center mb-2">
-          <span className="text-cyan-300 font-mono text-base">@{profile.usertag}</span>
-          {profile.uid && (
-            <span
-              className="ml-2 text-xs px-2 py-0.5 rounded border border-cyan-900/40 font-mono"
-              style={{
-                background: 'rgba(120,130,140,0.08)',
-                color: '#90a0b7',
-                opacity: 0.7,
-                letterSpacing: '0.05em'
-              }}
-              title="Internal User ID"
-            >
-              ID: {profile.uid}
-            </span>
-          )}
-        </div>
-
+            {/* Rep bar */}
+            {typeof profile.reputation === "number" && (
+              <span className="ml-6">
+                <ReputationBar rep={profile.reputation} />
+              </span>
+            )}
+          </div>
+          {/* Usertag row (centered, not full width) */}
+          <div className="flex items-center justify-center mb-2">
+            <span className="text-cyan-300 font-mono text-base">@{profile.usertag}</span>
+            {profile.uid && (
+              <span
+                className="ml-2 text-xs px-2 py-0.5 rounded border border-cyan-900/40 font-mono"
+                style={{
+                  background: 'rgba(120,130,140,0.08)',
+                  color: '#90a0b7',
+                  opacity: 0.7,
+                  letterSpacing: '0.05em'
+                }}
+                title="Internal User ID"
+              >
+                ID: {profile.uid}
+              </span>
+            )}
+            </div>
         {/* TAGS */}
         <div className="flex flex-wrap gap-2 mb-4 justify-center">
           {profile.tags && profile.tags.length > 0 &&
