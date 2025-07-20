@@ -130,7 +130,7 @@ return (
         {/* Place this directly after the avatar block */}
         <div className="flex flex-col items-center">
           {/* This row aligns batch directly under avatar */}
-          <div className="flex flex-row flex-wrap items-center justify-center mt-1 mb-2">
+          <div className="flex flex-row items-center justify-center mt-1 mb-2">
             {/* Username + Badges always together */}
             <span className="flex items-center">
               <Username
@@ -163,7 +163,6 @@ return (
             )}
           </div>
         </div>
-
 
 
         <div className="flex items-center justify-center mb-2">
