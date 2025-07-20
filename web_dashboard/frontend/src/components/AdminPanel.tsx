@@ -3,6 +3,8 @@ import { socket } from "../socket";
 import AdminStatsPanel from "./AdminStatsPanel";
 import Username from "./Username";
 import {ReputationBar} from "./ReputationBar";
+import { TAGS } from "./tags.config";
+import { TagSection } from "./TagSection";
 
 interface User {
   username: string;
@@ -354,35 +356,13 @@ export default function AdminPanel() {
                     ></span>
                   </div>
                 </div>
-              <div className="mb-5">
-                <label className="block text-cyan-300 mb-1">Tags</label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {edit.tags?.map((tag) => (
-                    <span
-                      key={tag}
-                      className="bg-cyan-900/60 text-cyan-200 text-xs px-2 py-1 rounded-full border border-cyan-700 shadow-sm flex items-center gap-1"
-                    >
-                      {tag}
-                      <button
-                        className="ml-1 text-red-400 font-bold hover:text-red-600"
-                        onClick={() => handleTagRemove(tag)}
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
+                <div className="mb-5">
+                  <label className="block text-cyan-300 mb-1">Tags</label>
+                  <TagDropdown
+                    selectedTags={edit.tags || []}
+                    setTags={tags => setEdit({ ...edit, tags })}
+                  />
                 </div>
-                <input
-                  className="px-2 py-1 rounded bg-[#232e43] text-white w-full"
-                  placeholder="Add tag"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                      handleTagAdd(e.currentTarget.value);
-                      e.currentTarget.value = "";
-                    }
-                  }}
-                />
-              </div>
               <div className="mb-5">
                 <label className="block text-cyan-300 mb-1">Bio</label>
                 <textarea
@@ -505,6 +485,50 @@ export default function AdminPanel() {
         </div>
       </div>
       {showStats && <AdminStatsPanel onClose={() => setShowStats(false)} />}
+    </div>
+  );
+}
+
+function TagDropdown({ selectedTags, setTags }: {
+  selectedTags: string[],
+  setTags: (tags: string[]) => void
+}) {
+  const tagKeys = Object.keys(TAGS);
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        {tagKeys.map(tag => {
+          const isSelected = selectedTags.includes(tag);
+          return (
+            <button
+              type="button"
+              key={tag}
+              onClick={() => setTags(
+                isSelected
+                  ? selectedTags.filter(t => t !== tag)
+                  : [...selectedTags, tag]
+              )}
+              className={`
+                flex items-center gap-2 px-3 py-2 rounded-lg border
+                ${isSelected
+                  ? "bg-aqua/30 border-aqua text-aqua font-bold"
+                  : "bg-cyan-900/60 border-cyan-800 text-cyan-100 opacity-90 hover:bg-cyan-900"}
+                transition cursor-pointer
+              `}
+              style={{ minWidth: 120 }}
+            >
+              <TagSection tags={[tag]} />
+              <span className="ml-2 text-xs font-mono">{tag}</span>
+              {isSelected && <span className="ml-auto text-green-300 font-bold">✔</span>}
+            </button>
+          );
+        })}
+      </div>
+      {/* Preview row */}
+      <div className="mt-2">
+        <div className="text-cyan-300 text-xs mb-1">Selected:</div>
+        <TagSection tags={selectedTags} />
+      </div>
     </div>
   );
 }
