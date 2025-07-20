@@ -384,23 +384,6 @@ export default function AdminPanel() {
                   max={100}
                   onChange={e => setEdit({ ...edit, reputation: parseInt(e.target.value) })}
                 />
-                <button
-                  className="bg-aqua text-midnight px-3 py-1 rounded ml-2 font-bold hover:bg-cyan-400"
-                  onClick={async () => {
-                    const res = await fetch("/api/admin/set_reputation", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      credentials: "include",
-                      body: JSON.stringify({
-                        usertag: selected.usertag,
-                        reputation: edit.reputation ?? 0
-                      })
-                    });
-                    if (res.ok) alert("Reputation updated!");
-                  }}
-                >
-                  Update Rep
-                </button>
                 <ReputationBar rep={edit.reputation ?? 0} />
               </div>
               <div className="mb-5">
