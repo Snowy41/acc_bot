@@ -128,8 +128,8 @@ return (
         </div>
 
         {/* USERNAME, BADGES, REP BAR (RESPONSIVE ROW) */}
-        <div className="flex flex-col items-center mt-1 mb-2">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mb-2">
+          <span className="flex items-center">
             <Username
               animated={parsedColors.length === 2}
               colors={parsedColors}
@@ -142,21 +142,19 @@ return (
             >
               {profile.username}
             </Username>
-            {/* All badges inline */}
             {profile.isAdmin && (
-              <span className="text-yellow-300 text-xl" title="Admin">🛡️</span>
+              <span className="ml-2 text-yellow-300 text-xl" title="Admin">🛡️</span>
             )}
             {profile.tags?.includes("Founder") && (
-              <span className="text-pink-400 text-xl" title="Founder">👑</span>
+              <span className="ml-2 text-pink-400 text-xl" title="Founder">👑</span>
             )}
             {profile.tags?.includes("Premium") && (
-              <span className="text-blue-400 text-xl" title="Premium">💎</span>
+              <span className="ml-2 text-blue-400 text-xl" title="Premium">💎</span>
             )}
-            {/* Add more custom badges here if needed */}
-          </div>
-          {/* Reputation bar directly below username/badges, still centered */}
+          </span>
+          {/* Rep bar will wrap below on narrow screens, otherwise stays in row */}
           {profile.reputation !== undefined && (
-            <div className="mt-1">
+            <div className="ml-2 min-w-[160px] flex-shrink-0">
               <ReputationBar rep={profile.reputation} />
             </div>
           )}
