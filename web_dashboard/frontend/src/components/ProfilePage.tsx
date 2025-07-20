@@ -156,7 +156,7 @@ return (
             )}
           </div>
           {/* Right: rep bar (on same row on desktop, wraps below on mobile if not enough space) */}
-          <div className="justify-self-start">
+          <div className="justify-self-start ml-8 sm:ml-10">
             {profile.reputation !== undefined && (
               <ReputationBar rep={profile.reputation} />
             )}
