@@ -149,7 +149,8 @@ def update_user(usertag):
         user["tags"] = data["tags"]
     if "animatedColors" in data and isinstance(data["animatedColors"], list):
         user["animatedColors"] = data["animatedColors"]
-
+    if "reputation" in data and isinstance(data["reputation"], int):
+        user["reputation"] = data["reputation"]
     if "role" not in user or not user["role"]:
         user["role"] = "user"
 
