@@ -242,94 +242,92 @@ return (
             })
           }
         </div>
+            <div className="flex flex-col items-center w-full">
+                {/* STATUS BADGES, left-aligned under avatar */}
+                <div className="flex gap-4 mb-4" style={{ marginLeft: "96px" }}>
+                  {profile.isBanned && (
+                    <span className="bg-red-700/70 text-white text-xs px-3 py-1 rounded-full">Banned</span>
+                  )}
+                  {profile.isMuted && (
+                    <span className="bg-yellow-600/60 text-white text-xs px-3 py-1 rounded-full">Muted</span>
+                  )}
+                  {profile.isAdmin && (
+                    <span className="bg-aqua/80 text-midnight text-xs px-3 py-1 rounded-full font-bold">Admin</span>
+                  )}
+                </div>
 
-        {/* STATUS BADGES, left-aligned under avatar */}
-        <div className="flex gap-4 mb-4" style={{ marginLeft: "96px" }}>
-          {profile.isBanned && (
-            <span className="bg-red-700/70 text-white text-xs px-3 py-1 rounded-full">Banned</span>
-          )}
-          {profile.isMuted && (
-            <span className="bg-yellow-600/60 text-white text-xs px-3 py-1 rounded-full">Muted</span>
-          )}
-          {profile.isAdmin && (
-            <span className="bg-aqua/80 text-midnight text-xs px-3 py-1 rounded-full font-bold">Admin</span>
-          )}
-        </div>
+                {/* BIO, left-aligned under avatar */}
+                <p className="text-white text-left mb-6" style={{ marginLeft: "96px" }}>{profile.bio}</p>
 
-        {/* BIO, left-aligned under avatar */}
-        <p className="text-white text-left mb-6" style={{ marginLeft: "96px" }}>{profile.bio}</p>
+                {/* Social Links */}
+                {profile.social && (
+                  <div className="flex gap-6 mt-3 items-center" style={{ marginLeft: "96px" }}>
+                    {/* ...social links as before... */}
+                  </div>
+                )}
 
-        {/* Social Links */}
-        {profile.social && (
-          <div className="flex gap-6 mt-3 items-center" style={{ marginLeft: "96px" }}>
-            {/* ...social links as before... */}
-          </div>
-        )}
+                {/* Friend/Remove/Edit Buttons */}
+                {currentUser && currentUser !== profile.usertag && (
+                  isFriend ? (
+                    <button
+                      className="mt-4 px-5 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition"
+                      onClick={async () => {
+                        await fetch("/api/friends/remove", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          credentials: "include",
+                          body: JSON.stringify({ friendTag: profile.usertag }),
+                        });
+                        setIsFriend(false);
+                      }}
+                      style={{ marginLeft: "96px" }}
+                    >
+                      Remove Friend
+                    </button>
+                  ) : (
+                    <button
+                      className="mt-4 px-5 py-2 bg-aqua text-midnight rounded-lg font-semibold hover:bg-cyan-400 transition"
+                      onClick={async () => {
+                        const res = await fetch("/api/friends/add", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          credentials: "include",
+                          body: JSON.stringify({ friendTag: profile.usertag }),
+                        });
+                        const data = await res.json();
+                        alert(data.message || "Friend request sent!");
+                      }}
+                      style={{ marginLeft: "96px" }}
+                    >
+                      Add Friend
+                    </button>
+                  )
+                )}
 
-        {/* Friend/Remove/Edit Buttons */}
-        {currentUser && currentUser !== profile.usertag && (
-          isFriend ? (
-            <button
-              className="mt-4 px-5 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition"
-              onClick={async () => {
-                await fetch("/api/friends/remove", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  credentials: "include",
-                  body: JSON.stringify({ friendTag: profile.usertag }),
-                });
-                setIsFriend(false);
-              }}
-              style={{ marginLeft: "96px" }}
-            >
-              Remove Friend
-            </button>
-          ) : (
-            <button
-              className="mt-4 px-5 py-2 bg-aqua text-midnight rounded-lg font-semibold hover:bg-cyan-400 transition"
-              onClick={async () => {
-                const res = await fetch("/api/friends/add", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  credentials: "include",
-                  body: JSON.stringify({ friendTag: profile.usertag }),
-                });
-                const data = await res.json();
-                alert(data.message || "Friend request sent!");
-              }}
-              style={{ marginLeft: "96px" }}
-            >
-              Add Friend
-            </button>
-          )
-        )}
-
-        {/* EDIT BUTTON */}
-        {currentUser && currentUser === profile.usertag && (
-          <button
-            className="px-5 py-2 bg-aqua text-midnight rounded-lg font-semibold mt-6 hover:bg-cyan-400 transition"
-            onClick={() => navigate(`/profile/${profile.usertag}/edit`)}
-            style={{ marginLeft: "96px" }}
-          >
-            Edit Profile
-          </button>
-        )}
+                {/* EDIT BUTTON */}
+                {currentUser && currentUser === profile.usertag && (
+                  <button
+                    className="px-5 py-2 bg-aqua text-midnight rounded-lg font-semibold mt-6 hover:bg-cyan-400 transition"
+                    onClick={() => navigate(`/profile/${profile.usertag}/edit`)}
+                    style={{ marginLeft: "96px" }}
+                  >
+                    Edit Profile
+                  </button>
+                )}
+            </div>
       </div>
     </div>
-    {/* Animations for tags/badges... */}
-    <style>{`
-      @keyframes glowPulse {
-        0% { box-shadow: 0 0 4px #00ffff88, 0 0 8px #00ffff44; }
-        50% { box-shadow: 0 0 12px #00ffffaa, 0 0 24px #00ffff77; }
-        100% { box-shadow: 0 0 4px #00ffff88, 0 0 8px #00ffff44; }
-      }
-      .animate-glow {
-        animation: glowPulse 2s ease-in-out infinite;
-      }
-    `}</style>
+        {/* Animations for tags/badges... */}
+        <style>{`
+          @keyframes glowPulse {
+            0% { box-shadow: 0 0 4px #00ffff88, 0 0 8px #00ffff44; }
+            50% { box-shadow: 0 0 12px #00ffffaa, 0 0 24px #00ffff77; }
+            100% { box-shadow: 0 0 4px #00ffff88, 0 0 8px #00ffff44; }
+          }
+          .animate-glow {
+            animation: glowPulse 2s ease-in-out infinite;
+          }
+        `}</style>
   </div>
 );
-
-
-
 }
