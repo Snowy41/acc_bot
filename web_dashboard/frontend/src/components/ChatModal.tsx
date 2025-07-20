@@ -228,38 +228,33 @@ export default function ChatModal({
         {/* INPUT */}
         <div className="flex items-center gap-2 px-6 py-5 bg-[#1b2537]/90 border-t border-cyan-800">
           {/* If there is a pending embed to send, preview it above the input */}
+          {/* Embed Preview Above Input */}
           {pendingEmbed && (
-            <div className="px-8 pt-4">
-              <div className="mb-2 p-3 rounded-xl border border-cyan-700 bg-[#142030]/80 shadow-lg flex flex-col z-40">
-                <div className="flex items-center gap-3">
-                  <div className="flex-1">
-                    <div className="font-bold text-aqua">{pendingEmbed.title}</div>
-                    <div className="text-cyan-300 text-sm">{pendingEmbed.desc}</div>
-                    <div className="mt-1 flex items-center gap-2">
-                      <span className="text-lg font-black text-aqua">${pendingEmbed.price}</span>
-                      <span className="text-xs text-cyan-400 bg-cyan-900/40 rounded px-2 py-1">{pendingEmbed.category}</span>
-                      <span className="text-xs text-cyan-400">by @{pendingEmbed.seller}</span>
-                      <a
-                        href={`/forum/marketplace/${pendingEmbed.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ml-2 px-2 py-1 bg-aqua text-midnight rounded-full text-xs font-bold shadow hover:bg-cyan-400 transition"
-                      >
-                        View
-                      </a>
-                    </div>
-                  </div>
+            <div className="px-6 pb-2">
+              <div className="rounded-xl border border-cyan-800 bg-[#162330]/70 p-4 text-white shadow-xl relative">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="font-bold text-aqua text-lg">{pendingEmbed.title}</div>
                   <button
-                    className="ml-4 px-3 py-1 bg-red-400 text-white rounded-full font-bold text-xs hover:bg-red-500 transition"
                     onClick={() => setPendingEmbed(undefined)}
+                    className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-bold"
                   >
                     ×
                   </button>
                 </div>
-                <span className="text-xs text-cyan-400 mt-1">This offer will be attached to your next message.</span>
+                <div className="text-cyan-400 text-sm mb-1">
+                  ${pendingEmbed.price} · <span className="uppercase text-cyan-300">{pendingEmbed.category}</span> · by @{pendingEmbed.sellerTag}
+                </div>
+                <a
+                  href={`/forum/${pendingEmbed.category}/${pendingEmbed.id}`}
+                  className="inline-block mt-2 bg-aqua text-midnight px-4 py-1 rounded-full font-bold text-sm shadow hover:bg-cyan-400"
+                >
+                  View
+                </a>
+                <div className="text-cyan-500 text-xs mt-2">This offer will be attached to your next message.</div>
               </div>
             </div>
           )}
+
           <input
             className="flex-1 px-5 py-3 rounded-2xl bg-cyan-900/20 text-white text-lg border border-cyan-700 focus:border-aqua outline-none placeholder-cyan-400 transition-all shadow-md"
             value={input}
