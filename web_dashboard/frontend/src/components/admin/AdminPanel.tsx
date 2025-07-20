@@ -376,7 +376,12 @@ export default function AdminPanel() {
                 value={edit.username || ""}
                 onChange={(e) => setEdit({ ...edit, username: e.target.value })}
               />
-              <button onClick={() => saveField({ username: edit.username })}>Save</button>
+              <button
+                onClick={() => saveField({ username: edit.username })}
+                className="bg-aqua text-midnight px-4 py-1 rounded font-bold text-sm hover:bg-cyan-400 transition mt-2"
+              >
+                Save
+              </button>
             </div>
 
             {/* Color */}
@@ -396,7 +401,6 @@ export default function AdminPanel() {
                   placeholder="#RRGGBB"
                 />
               </div>
-              <button onClick={() => saveField({ color: edit.color })}>Save</button>
             </div>
 
             {/* Tags */}
@@ -420,7 +424,12 @@ export default function AdminPanel() {
                 value={edit.bio || ""}
                 onChange={(e) => setEdit({ ...edit, bio: e.target.value })}
               />
-              <button onClick={() => saveField({ bio: edit.bio })}>Save</button>
+              <button
+                onClick={() => saveField({ bio: edit.bio })}
+                className="bg-aqua text-midnight px-4 py-1 rounded font-bold text-sm hover:bg-cyan-400 transition mt-2"
+              >
+                Save
+              </button>
             </div>
 
             {/* Reputation */}
@@ -437,7 +446,12 @@ export default function AdminPanel() {
                 }
               />
               <ReputationBar rep={edit.reputation ?? 0} />
-              <button onClick={() => saveField({ reputation: edit.reputation })}>Save</button>
+              <button
+                onClick={() => saveField({ reputation: edit.reputation })}
+                className="bg-aqua text-midnight px-4 py-1 rounded font-bold text-sm hover:bg-cyan-400 transition mt-2"
+              >
+              Save
+            </button>
             </div>
 
             {/* Balance */}
