@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 import time
 import uuid
-from backend.utils import get_chat_messages, save_chat_message, get_user_by_usertag, save_user
+from backend.utils import get_chat_messages, save_chat_message, get_user_by_usertag, save_user, public_message_dict
 
 message_bp = Blueprint("message", __name__)
 
@@ -83,3 +83,4 @@ def list_conversations():
             }
     conn.close()
     return jsonify({"conversations": list(conversations.values())})
+
