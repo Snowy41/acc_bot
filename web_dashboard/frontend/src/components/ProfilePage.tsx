@@ -87,7 +87,7 @@ fetch("/api/auth/status", { credentials: "include" })
 return (
   <div className="min-h-screen w-full flex flex-col items-center justify-center min-h-screen">
     <div
-      className="border border-cyan-900/40 rounded-2xl shadow-2xl p-10 max-w-lg w-full"
+      className="border border-cyan-900/40 rounded-2xl shadow-2xl p-10 bg-opacity-95 max-w-fit min-w-[340px]"
       style={{ background: "rgba(25, 33, 42, 0.80)" }}
     >
       <div className="flex flex-col items-center w-full">
@@ -127,41 +127,41 @@ return (
           )}
         </div>
 
-        {/* Grid: 3 columns, rep bar only in col 3, username+badges in col 2, empty in col 1 */}
-        <div className="grid grid-cols-3 items-center justify-items-center w-full mb-2">
-          {/* Left: empty (for spacing) */}
-          <div></div>
-          {/* Center: username + badges */}
-          <div className="flex items-center justify-center">
-            <Username
-              animated={parsedColors.length === 2}
-              colors={parsedColors}
-              className="text-3xl"
-              style={
-                parsedColors.length !== 2
-                  ? { color: profile.color || "#fff" }
-                  : undefined
-              }
-            >
-              {profile.username}
-            </Username>
-            {profile.isAdmin && (
-              <span className="ml-2 text-yellow-300 text-xl" title="Admin">🛡️</span>
-            )}
-            {profile.tags?.includes("Founder") && (
-              <span className="ml-2 text-pink-400 text-xl" title="Founder">👑</span>
-            )}
-            {profile.tags?.includes("Premium") && (
-              <span className="ml-2 text-blue-400 text-xl" title="Premium">💎</span>
-            )}
-          </div>
-          {/* Right: rep bar (on same row on desktop, wraps below on mobile if not enough space) */}
-          <div className="justify-self-start ml-8 sm:ml-10">
+        <div className="flex flex-col items-center w-full">
+          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 w-full mb-2">
+            {/* Username + Badges as one block */}
+            <span className="flex items-center">
+              <Username
+                animated={parsedColors.length === 2}
+                colors={parsedColors}
+                className="text-3xl"
+                style={
+                  parsedColors.length !== 2
+                    ? { color: profile.color || "#fff" }
+                    : undefined
+                }
+              >
+                {profile.username}
+              </Username>
+              {profile.isAdmin && (
+                <span className="ml-2 text-yellow-300 text-xl" title="Admin">🛡️</span>
+              )}
+              {profile.tags?.includes("Founder") && (
+                <span className="ml-2 text-pink-400 text-xl" title="Founder">👑</span>
+              )}
+              {profile.tags?.includes("Premium") && (
+                <span className="ml-2 text-blue-400 text-xl" title="Premium">💎</span>
+              )}
+            </span>
+            {/* Rep bar: always to the right, with a gap, wraps below if needed */}
             {profile.reputation !== undefined && (
-              <ReputationBar rep={profile.reputation} />
+              <span className="ml-8 flex-shrink-0 mt-2 sm:mt-0">
+                <ReputationBar rep={profile.reputation} />
+              </span>
             )}
           </div>
         </div>
+
 
         <div className="flex items-center justify-center mb-2">
           <span className="text-cyan-300 font-mono text-base">@{profile.usertag}</span>
