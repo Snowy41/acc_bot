@@ -84,240 +84,125 @@ fetch("/api/auth/status", { credentials: "include" })
 }
 
 
-return (
-  <div className="min-h-screen w-full flex flex-col items-center justify-center">
-    <div
-      className="border border-cyan-900/40 rounded-2xl shadow-2xl p-10"
-      style={{
-        background: "rgba(25, 33, 42, 0.80)",
-        maxWidth: "min(98vw, 680px)",
-        minWidth: "340px",
-      }}
-    >
-      <div className="flex flex-col items-center w-full">
-        {/* AVATAR */}
-        <div className="flex flex-col items-center" style={{ marginLeft: "40px" }}>
-        <div className="w-24 h-24 mb-4 flex items-center justify-center">
-          <div className={`w-24 h-24 rounded-full flex items-center justify-center text-5xl font-bold text-midnight
-              shadow-xl border-2
-              ${profile.frame === "gold" ? "border-yellow-400 shadow-yellow-300" : ""}
-              ${profile.frame === "aqua-glow" ? "border-aqua shadow-aqua animate-glow" : ""}
-              ${profile.frame === "rainbow" ? "rainbow-frame" : ""}
-              ${!profile.frame ? "border-aqua/70" : ""}
-            `}
-            style={
-              profile.frame === "rainbow"
-                ? {
-                  borderWidth: 4,
-                  borderStyle: "solid",
-                  borderImage: "linear-gradient(90deg, #f00, #0ff, #f0f, #0f0, #ff0, #f00) 1"
-                }
-                : undefined
-            }
-          >
-            {profile.avatar && profile.avatar !== "" ? (
-              <div className="w-[92%] h-[92%] rounded-full overflow-hidden">
-                <img
-                  src={profile.avatar}
-                  alt="avatar"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-midnight">
-                {profile.username[0]?.toUpperCase() ?? "?"}
-              </div>
-            )}
-          </div>
-        </div>
-
-
-        {/* Username + badges + rep bar (left-aligned under avatar) */}
-        <div className="flex flex-row items-center justify-center mb-2">
-          <span className="flex items-center">
-            <Username
-              animated={parsedColors.length === 2}
-              colors={parsedColors}
-              className="text-3xl"
-              style={
-                parsedColors.length !== 2
-                  ? { color: profile.color || "#fff" }
-                  : undefined
-              }
-            >
-              {profile.username}
-            </Username>
-            {profile.isAdmin && (
-              <span className="ml-2 text-yellow-300 text-xl" title="Admin">🛡️</span>
-            )}
-            {profile.tags?.includes("Founder") && (
-              <span className="ml-2 text-pink-400 text-xl" title="Founder">👑</span>
-            )}
-            {profile.tags?.includes("Premium") && (
-              <span className="ml-2 text-blue-400 text-xl" title="Premium">💎</span>
-            )}
-          </span>
-          {typeof profile.reputation === "number" && (
-            <span className="ml-6">
-              <ReputationBar rep={profile.reputation} />
-            </span>
-          )}
-        </div>
-        </div>
-        {/* Usertag + ID, left-aligned under avatar */}
-        <div className="flex items-center mb-2" style={{ marginLeft: "96px" }}>
-          <span className="text-cyan-300 font-mono text-base">@{profile.usertag}</span>
-          {profile.uid && (
-            <span
-              className="ml-2 text-xs px-2 py-0.5 rounded border border-cyan-900/40 font-mono"
-              style={{
-                background: 'rgba(120,130,140,0.08)',
-                color: '#90a0b7',
-                opacity: 0.7,
-                letterSpacing: '0.05em'
-              }}
-              title="Internal User ID"
-            >
-              ID: {profile.uid}
-            </span>
-          )}
-        </div>
-
-        {/* TAGS, left-aligned under avatar */}
-        <div className="flex flex-wrap gap-2 mb-4" style={{ marginLeft: "96px" }}>
-          {profile.tags && profile.tags.length > 0 &&
-            profile.tags.map(tag => {
-              const lower = tag.toLowerCase();
-              if (lower === "owner") {
-                return (
-                  <span
-                    key={tag}
-                    className="relative inline-flex items-center px-4 py-1 rounded-full font-semibold text-xs
-                      bg-gradient-to-r from-pink-500 via-aqua to-cyan-400
-                      text-white shadow-md border-2 border-aqua
-                      animate-pulse-owner overflow-hidden"
-                    style={{ boxShadow: "0 0 16px 2px #12fff1cc, 0 0 2px #ff3b82cc" }}
-                  >
-                    <span className="z-10 font-bold tracking-wide">Owner</span>
-                    <span className="absolute left-0 top-0 w-full h-full pointer-events-none">
-                      <span className="absolute left-2 top-1 w-2 h-2 bg-white/70 rounded-full animate-sparkle"></span>
-                      <span className="absolute right-3 bottom-1 w-1.5 h-1.5 bg-yellow-400/80 rounded-full animate-sparkle2"></span>
-                    </span>
-                  </span>
-                );
-              }
-              if (lower === "founder") {
-                return (
-                  <span
-                    key={tag}
-                    className="relative inline-flex items-center px-4 py-1 rounded-full font-semibold text-xs
-                      bg-gradient-to-r from-yellow-400 via-yellow-300 to-amber-500
-                      text-yellow-900 shadow-md border-2 border-yellow-400
-                      animate-shimmer-founder overflow-hidden"
-                    style={{
-                      boxShadow: "0 0 16px 3px #ffe06688, 0 0 2px #fbbf24cc"
-                    }}
-                  >
-                    <span className="z-10 font-bold tracking-wide flex items-center">
-                      <span className="mr-1">👑</span>Founder
-                    </span>
-                    <span className="absolute inset-0 w-full h-full pointer-events-none">
-                      <span className="absolute left-1/2 top-1/2 w-16 h-16 bg-yellow-200/50 rounded-full blur-2xl opacity-60 animate-founder-glow"></span>
-                      <span className="absolute left-1/2 top-1/2 w-10 h-10 bg-white/30 rounded-full blur opacity-30 animate-founder-glow2"></span>
-                    </span>
-                  </span>
-                );
-              }
-              return (
-                <span
-                  key={tag}
-                  className="bg-cyan-900/60 text-cyan-200 text-xs px-3 py-1 rounded-full border border-cyan-700 shadow-sm"
+    return (
+      <div className="min-h-screen w-full flex flex-col items-center justify-center">
+        <div
+          className="relative border border-cyan-900/40 rounded-2xl shadow-2xl p-10 bg-[rgba(25,33,42,0.80)]"
+          style={{
+            width: "540px", // set this to your desired profile card width
+            minWidth: "340px",
+            maxWidth: "95vw",
+          }}
+        >
+          {/* Grid: 3 columns, Avatar perfectly centered in col 2 */}
+          <div className="grid grid-cols-3 gap-0 items-start w-full">
+            {/* Left: empty for spacing */}
+            <div />
+            {/* Center: avatar */}
+            <div className="flex flex-col items-center">
+              <div className="w-24 h-24 mb-4 flex items-center justify-center">
+                {/* Avatar code as before */}
+                <div className={`w-24 h-24 rounded-full flex items-center justify-center text-5xl font-bold text-midnight
+                    shadow-xl border-2
+                    ${profile.frame === "gold" ? "border-yellow-400 shadow-yellow-300" : ""}
+                    ${profile.frame === "aqua-glow" ? "border-aqua shadow-aqua animate-glow" : ""}
+                    ${profile.frame === "rainbow" ? "rainbow-frame" : ""}
+                    ${!profile.frame ? "border-aqua/70" : ""}
+                  `}
+                  style={
+                    profile.frame === "rainbow"
+                      ? {
+                        borderWidth: 4,
+                        borderStyle: "solid",
+                        borderImage: "linear-gradient(90deg, #f00, #0ff, #f0f, #0f0, #ff0, #f00) 1"
+                      }
+                      : undefined
+                  }
                 >
-                  {tag}
-                </span>
-              );
-            })
-          }
-        </div>
-            <div className="flex flex-col items-center w-full">
-                {/* STATUS BADGES, left-aligned under avatar */}
-                <div className="flex gap-4 mb-4" style={{ marginLeft: "96px" }}>
-                  {profile.isBanned && (
-                    <span className="bg-red-700/70 text-white text-xs px-3 py-1 rounded-full">Banned</span>
-                  )}
-                  {profile.isMuted && (
-                    <span className="bg-yellow-600/60 text-white text-xs px-3 py-1 rounded-full">Muted</span>
-                  )}
-                  {profile.isAdmin && (
-                    <span className="bg-aqua/80 text-midnight text-xs px-3 py-1 rounded-full font-bold">Admin</span>
+                  {profile.avatar && profile.avatar !== "" ? (
+                    <div className="w-[92%] h-[92%] rounded-full overflow-hidden">
+                      <img
+                        src={profile.avatar}
+                        alt="avatar"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-5xl font-bold text-midnight">
+                      {profile.username[0]?.toUpperCase() ?? "?"}
+                    </div>
                   )}
                 </div>
-
-                {/* BIO, left-aligned under avatar */}
-                <p className="text-white text-left mb-6" style={{ marginLeft: "96px" }}>{profile.bio}</p>
-
-                {/* Social Links */}
-                {profile.social && (
-                  <div className="flex gap-6 mt-3 items-center" style={{ marginLeft: "96px" }}>
-                    {/* ...social links as before... */}
-                  </div>
-                )}
-
-                {/* Friend/Remove/Edit Buttons */}
-                {currentUser && currentUser !== profile.usertag && (
-                  isFriend ? (
-                    <button
-                      className="mt-4 px-5 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition"
-                      onClick={async () => {
-                        await fetch("/api/friends/remove", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          credentials: "include",
-                          body: JSON.stringify({ friendTag: profile.usertag }),
-                        });
-                        setIsFriend(false);
-                      }}
-                      style={{ marginLeft: "96px" }}
-                    >
-                      Remove Friend
-                    </button>
-                  ) : (
-                    <button
-                      className="mt-4 px-5 py-2 bg-aqua text-midnight rounded-lg font-semibold hover:bg-cyan-400 transition"
-                      onClick={async () => {
-                        const res = await fetch("/api/friends/add", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          credentials: "include",
-                          body: JSON.stringify({ friendTag: profile.usertag }),
-                        });
-                        const data = await res.json();
-                        alert(data.message || "Friend request sent!");
-                      }}
-                      style={{ marginLeft: "96px" }}
-                    >
-                      Add Friend
-                    </button>
-                  )
-                )}
-
-                {/* EDIT BUTTON */}
-                {currentUser && currentUser === profile.usertag && (
-                  <button
-                    className="px-5 py-2 bg-aqua text-midnight rounded-lg font-semibold mt-6 hover:bg-cyan-400 transition"
-                    onClick={() => navigate(`/profile/${profile.usertag}/edit`)}
-                    style={{ marginLeft: "96px" }}
-                  >
-                    Edit Profile
-                  </button>
-                )}
+              </div>
             </div>
-      </div>
-    </div>
-        {/* Animations for tags/badges... */}
+            {/* Right: empty */}
+            <div />
+            {/* Below: the "batch" row, starts in col 2, ends in col 3 */}
+            <div />
+            <div className="col-span-2 flex flex-row items-center w-full" style={{marginLeft: "0"}}>
+              {/* Username + badges */}
+              <span className="flex items-center">
+                <Username
+                  animated={parsedColors.length === 2}
+                  colors={parsedColors}
+                  className="text-3xl"
+                  style={
+                    parsedColors.length !== 2
+                      ? { color: profile.color || "#fff" }
+                      : undefined
+                  }
+                >
+                  {profile.username}
+                </Username>
+                {profile.isAdmin && (
+                  <span className="ml-2 text-yellow-300 text-xl" title="Admin">🛡️</span>
+                )}
+                {profile.tags?.includes("Founder") && (
+                  <span className="ml-2 text-pink-400 text-xl" title="Founder">👑</span>
+                )}
+                {profile.tags?.includes("Premium") && (
+                  <span className="ml-2 text-blue-400 text-xl" title="Premium">💎</span>
+                )}
+              </span>
+              {typeof profile.reputation === "number" && (
+                <span className="ml-6">
+                  <ReputationBar rep={profile.reputation} />
+                </span>
+              )}
+            </div>
+            <div />
+            {/* Now below, center rest of card as normal */}
+            <div className="col-span-3 flex flex-col items-center w-full">
+              {/* Usertag and ID */}
+              <div className="flex items-center justify-center mb-2">
+                <span className="text-cyan-300 font-mono text-base">@{profile.usertag}</span>
+                {profile.uid && (
+                  <span
+                    className="ml-2 text-xs px-2 py-0.5 rounded border border-cyan-900/40 font-mono"
+                    style={{
+                      background: 'rgba(120,130,140,0.08)',
+                      color: '#90a0b7',
+                      opacity: 0.7,
+                      letterSpacing: '0.05em'
+                    }}
+                    title="Internal User ID"
+                  >
+                    ID: {profile.uid}
+                  </span>
+                )}
+              </div>
+              {/* Tags row, centered */}
+              <div className="flex flex-wrap gap-2 mb-4 justify-center">
+                {/* ...tags... */}
+              </div>
+              {/* ...rest of profile, all centered... */}
+            </div>
+          </div>
+        </div>
+        {/* CSS for glows... */}
         <style>{`
           @keyframes glowPulse {
             0% { box-shadow: 0 0 4px #00ffff88, 0 0 8px #00ffff44; }
@@ -328,6 +213,6 @@ return (
             animation: glowPulse 2s ease-in-out infinite;
           }
         `}</style>
-  </div>
-);
+      </div>
+    );
 }
