@@ -127,9 +127,12 @@ return (
           )}
         </div>
 
-        {/* USERNAME, BADGES, REP BAR (RESPONSIVE ROW) */}
-        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mb-2">
-          <span className="flex items-center">
+        {/* Grid: 3 columns, rep bar only in col 3, username+badges in col 2, empty in col 1 */}
+        <div className="grid grid-cols-3 items-center justify-items-center w-full mb-2">
+          {/* Left: empty (for spacing) */}
+          <div></div>
+          {/* Center: username + badges */}
+          <div className="flex items-center justify-center">
             <Username
               animated={parsedColors.length === 2}
               colors={parsedColors}
@@ -151,13 +154,13 @@ return (
             {profile.tags?.includes("Premium") && (
               <span className="ml-2 text-blue-400 text-xl" title="Premium">💎</span>
             )}
-          </span>
-          {/* Rep bar will wrap below on narrow screens, otherwise stays in row */}
-          {profile.reputation !== undefined && (
-            <div className="ml-2 min-w-[160px] flex-shrink-0">
+          </div>
+          {/* Right: rep bar (on same row on desktop, wraps below on mobile if not enough space) */}
+          <div className="justify-self-start">
+            {profile.reputation !== undefined && (
               <ReputationBar rep={profile.reputation} />
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         <div className="flex items-center justify-center mb-2">
