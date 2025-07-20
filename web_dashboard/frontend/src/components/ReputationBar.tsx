@@ -36,7 +36,7 @@ export function ReputationBar({ rep = 0 }: { rep: number }) {
         <span className="font-bold text-base tracking-wide" style={{
           color: level.color,
           textShadow: "0 0 4px #1bd6e8"
-        }}>{level.title} Rep</span>
+        }}>{level.title}</span>
         <span className="text-cyan-200 font-mono text-xs ml-2">
           {rep} <span className="opacity-70 mx-1">/</span>
           <span className="text-cyan-400">{siteMax}</span>
