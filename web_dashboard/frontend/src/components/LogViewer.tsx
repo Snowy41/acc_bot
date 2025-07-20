@@ -67,8 +67,8 @@ export default function LogViewer() {
       });
   };
 
-  if (permissionDenied) return <div className="text-red-400 p-10">Access Denied.</div>;
 
+  if (permissionDenied) return <div className="text-red-400 p-10">Access Denied.</div>;
   return (
     <div className="w-full max-w-4xl mx-auto mt-16">
       <div className="bg-white/10 border border-cyan-700/40 shadow-2xl backdrop-blur-xl rounded-3xl p-0">

@@ -40,7 +40,6 @@ export default function BotSelection() {
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center justify-center">
-        if (permissionDenied) return <div className="text-red-400 p-10">Access Denied.</div>;
       <div className="w-full max-w-5xl mx-auto my-16 bg-white/10 border border-cyan-700/40 shadow-2xl backdrop-blur-xl rounded-3xl p-10">
         <h2 className="text-3xl text-aqua font-bold mb-10 tracking-wide text-center">Choose Platform</h2>
         <div className="space-y-10">
