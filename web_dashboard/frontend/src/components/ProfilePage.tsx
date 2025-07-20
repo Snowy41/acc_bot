@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Username from "./Username";
 import {ReputationBar} from "./ReputationBar";
+import {TagSection} from "./TagSection";
 
 interface Profile {
   username: string;     // Display name
@@ -87,15 +88,15 @@ fetch("/api/auth/status", { credentials: "include" })
 return (
   <div className="min-h-screen w-full flex flex-col items-center justify-center">
     <div
-      className="border border-cyan-900/40 rounded-2xl shadow-2xl p-10"
+      className="border border-cyan-900/40 rounded-2xl shadow-2xl p-16"
       style={{
-        background: "rgba(25, 33, 42, 0.80)",
-        maxWidth: "min(98vw, 1080px)",
-        minWidth: "680px",
+        background: "rgba(25, 33, 42, 0.88)",
+        maxWidth: "950px",
+        minWidth: "420px",
+        minHeight: "720px",
       }}
     >
       <div className="flex flex-col items-center w-full">
-
         {/* AVATAR */}
         <div className="w-24 h-24 mb-4 flex items-center justify-center">
           <div className={`w-24 h-24 rounded-full flex items-center justify-center text-5xl font-bold text-midnight
@@ -180,62 +181,8 @@ return (
           )}
         </div>
 
-        {/* TAGS row, centered */}
-        <div className="flex flex-wrap gap-2 mb-4 justify-center">
-          {profile.tags && profile.tags.length > 0 &&
-            profile.tags.map(tag => {
-              const lower = tag.toLowerCase();
-              if (lower === "owner") {
-                return (
-                  <span
-                    key={tag}
-                    className="relative inline-flex items-center px-4 py-1 rounded-full font-semibold text-xs
-                      bg-gradient-to-r from-pink-500 via-aqua to-cyan-400
-                      text-white shadow-md border-2 border-aqua
-                      animate-pulse-owner overflow-hidden"
-                    style={{ boxShadow: "0 0 16px 2px #12fff1cc, 0 0 2px #ff3b82cc" }}
-                  >
-                    <span className="z-10 font-bold tracking-wide">Owner</span>
-                    <span className="absolute left-0 top-0 w-full h-full pointer-events-none">
-                      <span className="absolute left-2 top-1 w-2 h-2 bg-white/70 rounded-full animate-sparkle"></span>
-                      <span className="absolute right-3 bottom-1 w-1.5 h-1.5 bg-yellow-400/80 rounded-full animate-sparkle2"></span>
-                    </span>
-                  </span>
-                );
-              }
-              if (lower === "founder") {
-                return (
-                  <span
-                    key={tag}
-                    className="relative inline-flex items-center px-4 py-1 rounded-full font-semibold text-xs
-                      bg-gradient-to-r from-yellow-400 via-yellow-300 to-amber-500
-                      text-yellow-900 shadow-md border-2 border-yellow-400
-                      animate-shimmer-founder overflow-hidden"
-                    style={{
-                      boxShadow: "0 0 16px 3px #ffe06688, 0 0 2px #fbbf24cc"
-                    }}
-                  >
-                    <span className="z-10 font-bold tracking-wide flex items-center">
-                      <span className="mr-1">👑</span>Founder
-                    </span>
-                    <span className="absolute inset-0 w-full h-full pointer-events-none">
-                      <span className="absolute left-1/2 top-1/2 w-16 h-16 bg-yellow-200/50 rounded-full blur-2xl opacity-60 animate-founder-glow"></span>
-                      <span className="absolute left-1/2 top-1/2 w-10 h-10 bg-white/30 rounded-full blur opacity-30 animate-founder-glow2"></span>
-                    </span>
-                  </span>
-                );
-              }
-              return (
-                <span
-                  key={tag}
-                  className="bg-cyan-900/60 text-cyan-200 text-xs px-3 py-1 rounded-full border border-cyan-700 shadow-sm"
-                >
-                  {tag}
-                </span>
-              );
-            })
-          }
-        </div>
+        {/* TAGS row — now a dedicated component! */}
+        <TagSection tags={profile.tags || []} />
 
         {/* STATUS BADGES row, centered */}
         <div className="flex gap-4 mb-4 justify-center">
@@ -244,9 +191,6 @@ return (
           )}
           {profile.isMuted && (
             <span className="bg-yellow-600/60 text-white text-xs px-3 py-1 rounded-full">Muted</span>
-          )}
-          {profile.isAdmin && (
-            <span className="bg-aqua/80 text-midnight text-xs px-3 py-1 rounded-full font-bold">Admin</span>
           )}
         </div>
 
@@ -287,6 +231,12 @@ return (
           </div>
         )}
 
+        {/* REPUTATION BAR */}
+        {typeof profile.reputation === "number" && (
+          <div className="mt-8 flex justify-center w-full">
+            <ReputationBar rep={profile.reputation} />
+          </div>
+        )}
         {/* FRIEND/REMOVE/EDIT BUTTONS */}
         {currentUser && currentUser !== profile.usertag && (
           isFriend ? (
@@ -332,13 +282,6 @@ return (
           </button>
         )}
 
-        {/* REPUTATION BAR AT THE VERY BOTTOM */}
-        {typeof profile.reputation === "number" && (
-          <div className="mt-8 flex justify-center w-full">
-            <ReputationBar rep={profile.reputation} />
-          </div>
-        )}
-
       </div>
     </div>
     {/* Animations for tags/badges... */}
@@ -354,5 +297,6 @@ return (
     `}</style>
   </div>
 );
+
 
 }
