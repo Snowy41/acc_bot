@@ -91,7 +91,7 @@ return (
       className="border border-cyan-700/50 bg-[#172230] bg-opacity-95 rounded-3xl shadow-[0_10px_60px_0_rgba(0,255,255,0.11)] p-14"
       style={{
         maxWidth: "1080px",
-        minWidth: "420px",
+        minWidth: "620px",
         minHeight: "540px",
         boxShadow: "0 2px 38px 0 #18f0ff22, 0 0 1px #18f0ff55"
       }}
