@@ -224,10 +224,6 @@ export default function ChatModal({
           )}
           <div ref={scrollRef}></div>
         </div>
-
-        {/* INPUT */}
-        <div className="flex items-center gap-2 px-6 py-5 bg-[#1b2537]/90 border-t border-cyan-800">
-          {/* Preview Embed ABOVE the input row */}
           {pendingEmbed && (
             <div className="px-6 pb-3">
               <div className="rounded-xl border border-cyan-800 bg-[#162330]/70 p-4 text-white shadow-xl relative">
@@ -253,8 +249,9 @@ export default function ChatModal({
               </div>
             </div>
           )}
-
-
+        {/* INPUT */}
+        <div className="flex items-center gap-2 px-6 py-5 bg-[#1b2537]/90 border-t border-cyan-800">
+          {/* Preview Embed ABOVE the input row */}
           {/* Message input row */}
           <div className="flex items-end gap-3 px-6 pb-6">
             <input
