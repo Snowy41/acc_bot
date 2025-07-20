@@ -1,38 +1,20 @@
+import uuid
+
 from flask import Blueprint, request, jsonify, session
 import time
 
-from backend.utils import get_user_by_usertag, save_user, hash_pw, public_user_dict
+from backend.utils import get_user_by_usertag, save_user, hash_pw, public_user_dict, update_user_balance, \
+    record_transaction, get_user_balance, get_all_users
 from main import limiter
 
 user_bp = Blueprint("user", __name__)
 
 @user_bp.route("/api/users", methods=["GET"])
 def list_users():
-    import sqlite3, json, os
-    from backend.utils import DB_PATH
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("SELECT * FROM users")
-    rows = c.fetchall()
-    conn.close()
-    fields = [
-        "usertag", "username", "password", "is_admin", "is_banned", "is_muted",
-        "color", "bio", "tags", "social", "avatar", "uid", "friends", "friendRequests", "role", "animatedColors", "reputation"
-    ]
-    user_list = []
-    for row in rows:
-        user = dict(zip(fields, row))
-        user["tags"] = json.loads(user.get("tags") or "[]")
-        user["social"] = json.loads(user.get("social") or "{}")
-        user["is_admin"] = bool(user["is_admin"])
-        user["is_banned"] = bool(user["is_banned"])
-        user["is_muted"] = bool(user["is_muted"])
-        user["friends"] = json.loads(user.get("friends") or "[]")
-        user["friendRequests"] = json.loads(user.get("friendRequests") or "[]")
-        user["animatedColors"] = json.loads(user.get("animatedColors") or "[]")
-        user["reputation"] = int(user.get("reputation") or 0)
-        user_list.append(public_user_dict(user))
-    return jsonify({"users": user_list})
+    users = get_all_users()
+    return jsonify({
+        "users": [public_user_dict(u) for u in users.values()]
+    })
 
 @user_bp.route("/api/auth/register", methods=["POST"])
 @limiter.limit("5 per minute")
@@ -287,3 +269,40 @@ def list_friend_requests():
 
     friend_requests = user.get("friendRequests", [])
     return jsonify({"requests": friend_requests})
+
+@user_bp.route("/api/admin/adjust-balance", methods=["POST"])
+def admin_adjust_balance():
+    usertag = session.get("username")
+    current_user = get_user_by_usertag(usertag)
+    if not current_user or current_user.get("role") != "admin":
+        return jsonify({"error": "Unauthorized"}), 403
+
+    data = request.get_json()
+    target_tag = data.get("usertag")
+    amount = int(data.get("amount", 0))
+
+    if not target_tag or not isinstance(amount, int):
+        return jsonify({"error": "Invalid input"}), 400
+
+    update_user_balance(target_tag, amount)
+    record_transaction(str(uuid.uuid4()), "admin", target_tag, amount, "admin", ref="manual_adjust")
+
+    return jsonify({"success": True})
+
+@user_bp.route("/api/wallet/deposit", methods=["POST"])
+def deposit_tokens():
+    usertag = session.get("username")
+    if not usertag:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.get_json()
+    amount = int(data.get("amount", 0))
+    payment_ref = data.get("ref", "manual")
+
+    if amount <= 0:
+        return jsonify({"error": "Invalid amount"}), 400
+
+    update_user_balance(usertag, amount)
+    record_transaction(str(uuid.uuid4()), "payment", usertag, amount, "deposit", ref=payment_ref)
+
+    return jsonify({"success": True, "balance": get_user_balance(usertag)})

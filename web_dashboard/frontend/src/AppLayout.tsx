@@ -48,6 +48,7 @@ function AppLayout() {
     { from: string; text: string; timestamp: number }[]
   >([]);
   const [unreadDMCount, setUnreadDMCount] = useState(0);
+  const [balance, setBalance] = useState<number | null>(null);
 
   const location = useLocation();
 
@@ -89,6 +90,14 @@ function AppLayout() {
   const safeColors = typeof animatedColors === "string"
     ? JSON.parse(animatedColors)
     : animatedColors;
+
+  useEffect(() => {
+    fetch("/api/wallet/balance", { credentials: "include" })
+      .then(res => res.json())
+      .then(data => {
+        if (data?.balance !== undefined) setBalance(data.balance);
+      });
+  }, [loggedIn]);
 
   const handleLogin = async (enteredUsertag: string, password: string) => {
     try {
@@ -241,6 +250,11 @@ function AppLayout() {
             notifications={notifications}
             onClear={() => setNotifications([])}
           />
+          {balance !== null && (
+            <span className="text-sm text-cyan-300 font-mono pr-2">
+              💰 {balance}
+            </span>
+          )}
           <ProfilePanel
             loggedIn={loggedIn}
             setLoggedIn={setLoggedIn}

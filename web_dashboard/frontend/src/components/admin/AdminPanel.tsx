@@ -18,6 +18,7 @@ interface User {
   role?: "admin" | "user" | string;
   animatedColors?: string[];
   reputation?: number;
+  balance?: number;
 }
 
 export default function AdminPanel() {
@@ -137,8 +138,32 @@ export default function AdminPanel() {
     setEdit({ ...edit, tags: (edit.tags || []).filter(t => t !== tag) });
   };
 
+
+  const adjustBalance = async (delta: number) => {
+    if (!selected) return;
+    const res = await fetch("/api/admin/adjust-balance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        usertag: selected.usertag,
+        amount: delta,
+      }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      setSuccessMsg(`Balance updated (${delta > 0 ? "+" : ""}${delta})`);
+    } else {
+      setSuccessMsg("Failed to update balance");
+    }
+  };
+
+
   if (loading) return <div className="text-white p-10">Loading...</div>;
   if (!isAdmin) return <div className="text-red-400 p-10">You are not an admin.</div>;
+
+
+
 
   return (
     <div className="w-full max-w-6xl mx-auto mt-16 mb-16 relative">
@@ -385,6 +410,23 @@ export default function AdminPanel() {
                   onChange={e => setEdit({ ...edit, reputation: parseInt(e.target.value) })}
                 />
                 <ReputationBar rep={edit.reputation ?? 0} />
+              </div>
+              <div className="mb-5">
+                <label className="block text-cyan-300 mb-1">Balance</label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => adjustBalance(100)}
+                    className="bg-green-500 hover:bg-green-600 text-white font-bold px-3 py-1 rounded"
+                  >
+                    +100
+                  </button>
+                  <button
+                    onClick={() => adjustBalance(-100)}
+                    className="bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-1 rounded"
+                  >
+                    -100
+                  </button>
+                </div>
               </div>
               <div className="mb-5">
                 <label className="block text-cyan-300 mb-1">
