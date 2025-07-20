@@ -24,7 +24,7 @@ def create_ticket():
         "created_at": now,
         "updated_at": now,
         "assigned_to": None,
-        "messages": json.dumps([{
+        "messages": json.dumps([{#
             "from": session["username"],
             "text": data["body"],
             "timestamp": now

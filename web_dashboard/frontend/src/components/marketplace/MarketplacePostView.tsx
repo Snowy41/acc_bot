@@ -1,8 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import Username from "./Username";
-import ChatModal from "./ChatModal";
-import {ReputationBar} from "./ReputationBar";
+import Username from "../profile/Username";
+import ChatModal from "../chat/ChatModal";
+import {ReputationBar} from "../profile/ReputationBar";
 
 export default function MarketplacePostView({ usertag, displayName }) {
   const { postId } = useParams();

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import LoginModal from "./LoginModal";
+import LoginModal from "../auth/LoginModal";
 import Username from "./Username";
 
 interface ProfilePanelProps {

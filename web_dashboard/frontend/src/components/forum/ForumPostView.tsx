@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import Username from "./Username";
-import MarketplacePostView from "./MarketplacePostView";
+import Username from "../profile/Username";
+import MarketplacePostView from "../marketplace/MarketplacePostView";
 
 interface Comment {
   usertag: string;

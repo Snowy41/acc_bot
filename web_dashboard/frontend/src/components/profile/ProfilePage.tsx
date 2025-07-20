@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Username from "./Username";
 import {ReputationBar} from "./ReputationBar";
-import {TagSection} from "./TagSection";
+import {TagSection} from "../shared/TagSection";
 
 interface Profile {
   username: string;     // Display name

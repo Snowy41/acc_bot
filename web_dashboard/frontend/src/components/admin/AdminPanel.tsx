@@ -1,10 +1,10 @@
 import {useEffect, useRef, useState} from "react";
-import { socket } from "../socket";
+import { socket } from "../../socket";
 import AdminStatsPanel from "./AdminStatsPanel";
-import Username from "./Username";
-import {ReputationBar} from "./ReputationBar";
-import { TAGS } from "./tags.config";
-import { TagSection } from "./TagSection";
+import Username from "../profile/Username";
+import {ReputationBar} from "../profile/ReputationBar";
+import { TAGS } from "../shared/tags.config";
+import { TagSection } from "../shared/TagSection";
 
 interface User {
   username: string;

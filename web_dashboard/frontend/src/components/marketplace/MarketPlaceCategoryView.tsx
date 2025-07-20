@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Username from "./Username";
-import {ReputationBar} from "./ReputationBar"; // your animated username component
+import Username from "../profile/Username";
+import {ReputationBar} from "../profile/ReputationBar"; // your animated username component
 
 export default function MarketplaceCategoryView({ usertag, displayName }) {
   const [listings, setListings] = useState([]);

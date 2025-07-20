@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { socket } from "../socket";
+import { socket } from "../../socket";
 import {Link} from "react-router-dom";
 
 interface MessageEmbed {

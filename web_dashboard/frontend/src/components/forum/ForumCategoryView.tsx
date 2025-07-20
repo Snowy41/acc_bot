@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import Username from "./Username";
-import MarketplaceCategoryView from "./MarketPlaceCategoryView";
+import Username from "../profile/Username";
+import MarketplaceCategoryView from "../marketplace/MarketPlaceCategoryView";
 
 interface Post {
   id: string;
