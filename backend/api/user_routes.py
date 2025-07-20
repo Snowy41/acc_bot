@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify, session
 import time
+
 from backend.utils import get_user_by_usertag, save_user, hash_pw, public_user_dict
+from main import limiter
 
 user_bp = Blueprint("user", __name__)
 
@@ -15,7 +17,7 @@ def list_users():
     conn.close()
     fields = [
         "usertag", "username", "password", "is_admin", "is_banned", "is_muted",
-        "color", "bio", "tags", "social", "avatar", "uid", "friends", "friendRequests", "role", "animatedColors"
+        "color", "bio", "tags", "social", "avatar", "uid", "friends", "friendRequests", "role", "animatedColors", "reputation"
     ]
     user_list = []
     for row in rows:
@@ -28,10 +30,12 @@ def list_users():
         user["friends"] = json.loads(user.get("friends") or "[]")
         user["friendRequests"] = json.loads(user.get("friendRequests") or "[]")
         user["animatedColors"] = json.loads(user.get("animatedColors") or "[]")
+        user["reputation"] = int(user.get("reputation") or 0)
         user_list.append(public_user_dict(user))
     return jsonify({"users": user_list})
 
 @user_bp.route("/api/auth/register", methods=["POST"])
+@limiter.limit("5 per minute")
 def register():
     data = request.json
     usertag = data.get("usertag")
@@ -62,6 +66,7 @@ def register():
     return jsonify({"success": True})
 
 @user_bp.route("/api/auth/login", methods=["POST"])
+@limiter.limit("5 per minute")
 def login():
     data = request.json
     username = data.get("username")

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Username from "./Username";
+import {ReputationBar} from "./ReputationBar";
 
 interface Profile {
   username: string;     // Display name
@@ -19,10 +20,11 @@ interface Profile {
   avatar?: string;     // URL to avatar image
   role?: string; // <-- Add this!
   animatedColors?: string[];
+  reputation?: number;
 }
 
 export default function ProfilePage() {
-  const { usertag = "" } = useParams();
+  const {usertag = "" } = useParams();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [currentUser, setCurrentUser] = useState("");
@@ -161,7 +163,9 @@ fetch("/api/auth/status", { credentials: "include" })
               </span>
             )}
           </div>
-
+            {profile.reputation !== undefined && (
+              <ReputationBar rep={profile.reputation} />
+            )}
           <div className="flex items-center justify-center mb-2">
             <span className="text-cyan-300 font-mono text-base">@{profile.usertag}</span>
             {profile.uid && (

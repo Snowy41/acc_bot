@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Username from "./Username";
 import ChatModal from "./ChatModal";
+import {ReputationBar} from "./ReputationBar";
 
 export default function MarketplacePostView({ usertag, displayName }) {
   const { postId } = useParams();
@@ -45,6 +46,7 @@ export default function MarketplacePostView({ usertag, displayName }) {
           <Username animated={!!post.animatedColors && post.animatedColors.length === 2} colors={post.animatedColors}>
             {post.username}
           </Username>
+          <ReputationBar rep={post.reputation || 0} />
         </div>
         <button
           className="bg-aqua text-midnight px-7 py-2 rounded-full font-bold shadow hover:bg-cyan-400 transition"

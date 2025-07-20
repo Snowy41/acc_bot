@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { socket } from "../socket";
 import AdminStatsPanel from "./AdminStatsPanel";
 import Username from "./Username";
+import {ReputationBar} from "./ReputationBar";
 
 interface User {
   username: string;
@@ -14,6 +15,7 @@ interface User {
   tags?: string[];
   role?: "admin" | "user" | string;
   animatedColors?: string[];
+  reputation?: number;
 }
 
 export default function AdminPanel() {
@@ -389,6 +391,35 @@ export default function AdminPanel() {
                   value={edit.bio || ""}
                   onChange={(e) => setEdit({ ...edit, bio: e.target.value })}
                 />
+              </div>
+              <div className="mb-5">
+                <label className="block text-cyan-300 mb-1">Reputation</label>
+                <input
+                  type="number"
+                  className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800"
+                  value={edit.reputation ?? 0}
+                  min={0}
+                  max={100}
+                  onChange={e => setEdit({ ...edit, reputation: parseInt(e.target.value) })}
+                />
+                <button
+                  className="bg-aqua text-midnight px-3 py-1 rounded ml-2 font-bold hover:bg-cyan-400"
+                  onClick={async () => {
+                    const res = await fetch("/api/admin/set_reputation", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      credentials: "include",
+                      body: JSON.stringify({
+                        usertag: selected.usertag,
+                        reputation: edit.reputation ?? 0
+                      })
+                    });
+                    if (res.ok) alert("Reputation updated!");
+                  }}
+                >
+                  Update Rep
+                </button>
+                <ReputationBar rep={edit.reputation ?? 0} />
               </div>
               <div className="mb-5">
                 <label className="block text-cyan-300 mb-1">

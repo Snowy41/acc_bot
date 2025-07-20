@@ -5,12 +5,15 @@ import traceback
 
 from flask import Flask, jsonify, session
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_socketio import SocketIO
 
 # --- App Setup ---
 app = Flask(__name__)
 app.secret_key = "replace-this-with-a-random-value"
 CORS(app)
+limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "50 per hour"])
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # --- Import Blueprints ---
@@ -101,6 +104,16 @@ def handle_dm(data):
 def handle_bot_log(data):
     # Just echo the bot log event to all clients.
     socketio.emit("bot_log", data)
+
+
+@app.after_request
+def add_security_headers(resp):
+    resp.headers["X-Frame-Options"] = "DENY"  # Prevent clickjacking
+    resp.headers["X-Content-Type-Options"] = "nosniff"  # Prevent content type sniffing
+    resp.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"  # Enforce HTTPS (HSTS)
+    resp.headers["Referrer-Policy"] = "same-origin"  # Don't leak cross-site referrer
+    resp.headers["X-XSS-Protection"] = "1; mode=block"  # Old but some browsers still respect
+    return resp
 
 # Add any other custom Socket.IO events here.
 

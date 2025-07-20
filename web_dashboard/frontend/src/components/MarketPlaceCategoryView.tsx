@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Username from "./Username"; // your animated username component
+import Username from "./Username";
+import {ReputationBar} from "./ReputationBar"; // your animated username component
 
 export default function MarketplaceCategoryView({ usertag, displayName }) {
   const [listings, setListings] = useState([]);
@@ -125,6 +126,8 @@ export default function MarketplaceCategoryView({ usertag, displayName }) {
                   </span>
                 </div>
               </div>
+              <ReputationBar rep={post.reputation || 0} />
+
               <div className="flex gap-2 mt-auto">
                 <button
                   className="bg-aqua text-midnight px-4 py-2 rounded-full font-bold shadow hover:bg-cyan-400 transition w-full"

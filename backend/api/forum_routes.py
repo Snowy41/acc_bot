@@ -10,6 +10,7 @@ from backend.utils import (
     load_forum,
     add_forum_comment, public_post_dict
 )
+from main import limiter
 
 forum_bp = Blueprint("forum", __name__)
 
@@ -28,6 +29,7 @@ def get_single_post(post_id):
         return jsonify({"error": "Post not found"}), 404
     return jsonify({"post": public_post_dict(post)})
 
+@limiter.limit("10 per minute")
 @forum_bp.route("/api/forum/posts", methods=["POST"])
 def create_forum_post():
     data = request.json

@@ -20,7 +20,7 @@ def get_user_by_usertag(usertag):
         return None
     fields = [
         "usertag", "username", "password", "is_admin", "is_banned", "is_muted",
-        "color", "bio", "tags", "social", "avatar", "uid", "friends", "friendRequests", "role", "animatedColors"
+        "color", "bio", "tags", "social", "avatar", "uid", "friends", "friendRequests", "role", "animatedColors", "reputation"
     ]
     user = dict(zip(fields, row))
     user["tags"] = json.loads(user.get("tags") or "[]")
@@ -31,22 +31,23 @@ def get_user_by_usertag(usertag):
     user["friends"] = json.loads(user.get("friends") or "[]")
     user["friendRequests"] = json.loads(user.get("friendRequests") or "[]")
     user["animatedColors"] = json.loads(user.get("animatedColors") or "[]")
+    user["reputation"] = int(user.get("reputation") or 0)
     return user
 
 def save_user(user):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("""
-    INSERT OR REPLACE INTO users (
-        usertag, username, password, is_admin, is_banned, is_muted,
-        color, bio, tags, social, avatar, uid, friends, friendRequests, role, animatedColors
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT OR REPLACE INTO users (
+            usertag, username, password, is_admin, is_banned, is_muted,
+            color, bio, tags, social, avatar, uid, friends, friendRequests, role, animatedColors, reputation
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         user["usertag"],
         user.get("username"),
         user.get("password"),
-        user.get("role", "user") == "admin",
+        1 if user.get("role", "user") == "admin" else 0,
         int(user.get("is_banned", False)),
         int(user.get("is_muted", False)),
         user.get("color", "#fff"),
@@ -54,11 +55,12 @@ def save_user(user):
         json.dumps(user.get("tags", [])),
         json.dumps(user.get("social", {})),
         user.get("avatar", ""),
-        user.get("uid", 0),
+        int(user.get("uid", 0)),
         json.dumps(user.get("friends", [])),
         json.dumps(user.get("friendRequests", [])),
         user.get("role", "user"),
-        json.dumps(user.get("animatedColors", []))
+        json.dumps(user.get("animatedColors", [])),
+        int(user.get("reputation", 0)),
     ))
     conn.commit()
     conn.close()
@@ -184,7 +186,7 @@ def get_all_users():
     conn.close()
     fields = [
         "usertag", "username", "password", "is_admin", "is_banned", "is_muted",
-        "color", "bio", "tags", "social", "avatar", "uid", "friends", "friendRequests", "role", "animatedColors"
+        "color", "bio", "tags", "social", "avatar", "uid", "friends", "friendRequests", "role", "animatedColors", "reputation"
     ]
     users = {}
     for row in rows:
@@ -198,6 +200,7 @@ def get_all_users():
         user["friendRequests"] = json.loads(user.get("friendRequests") or "[]")
         user["animatedColors"] = json.loads(user.get("animatedColors") or "[]")
         users[user["usertag"]] = user
+        user["reputation"] = int(user.get("reputation") or 0)
     return users
 
 def public_user_dict(user):
@@ -219,6 +222,8 @@ def public_user_dict(user):
         "frame": user.get("frame", ""),
         "isBanned": user.get("is_banned", False),
         "isMuted": user.get("is_muted", False),
+        "reputation": int(user.get("reputation", 0)),
+
         # Add fields if your frontend needs them, remove anything private!
     }
 
