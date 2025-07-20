@@ -79,6 +79,16 @@ export default function ChatModal({
     };
   }, [friend]);
 
+  useEffect(() => {
+    setPendingEmbed(initialEmbed);
+  }, [initialEmbed]);
+
+  useEffect(() => {
+    if (pendingEmbed) {
+      setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: "smooth" }), 150);
+    }
+  }, [pendingEmbed]);
+
   // --- Send Message (with optional embed) ---
   const sendMessage = () => {
     const text = input.trim();
@@ -263,8 +273,11 @@ export default function ChatModal({
             onClick={sendMessage}
             className="bg-aqua hover:bg-cyan-300 text-midnight px-6 py-2 rounded-full font-extrabold text-lg shadow transition-all active:scale-95"
             style={{
+              opacity: input.trim() === "" && !pendingEmbed ? 0.5 : 1,
+              cursor: input.trim() === "" && !pendingEmbed ? "not-allowed" : "pointer",
               boxShadow: "0 1px 8px #12fff122, 0 0 0 1.5px #19e3f588"
             }}
+            disabled={input.trim() === "" && !pendingEmbed}
           >
             Send
           </button>
