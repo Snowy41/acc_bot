@@ -96,7 +96,8 @@ return (
     >
       <div className="flex flex-col items-center w-full">
         {/* AVATAR */}
-        <div className="w-24 h-24 mb-4 flex items-center justify-center mx-auto">
+        <div className="flex flex-col items-center" style={{ marginLeft: "40px" }}>
+        <div className="w-24 h-24 mb-4 flex items-center justify-center">
           <div className={`w-24 h-24 rounded-full flex items-center justify-center text-5xl font-bold text-midnight
               shadow-xl border-2
               ${profile.frame === "gold" ? "border-yellow-400 shadow-yellow-300" : ""}
@@ -133,8 +134,9 @@ return (
           </div>
         </div>
 
+
         {/* Username + badges + rep bar (left-aligned under avatar) */}
-        <div className="flex flex-row items-center mb-2" style={{ marginLeft: "96px" }}>
+        <div className="flex flex-row items-center justify-center mb-2">
           <span className="flex items-center">
             <Username
               animated={parsedColors.length === 2}
@@ -164,7 +166,7 @@ return (
             </span>
           )}
         </div>
-
+        </div>
         {/* Usertag + ID, left-aligned under avatar */}
         <div className="flex items-center mb-2" style={{ marginLeft: "96px" }}>
           <span className="text-cyan-300 font-mono text-base">@{profile.usertag}</span>
