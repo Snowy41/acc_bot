@@ -127,47 +127,39 @@ return (
           )}
         </div>
 
-        {/* Username - Centered, Badges & Rep Bar on Right */}
-        <div className="flex items-center justify-between w-full mb-1">
-          {/* Left spacer to keep username in true center */}
-          <div style={{ width: 32 }} />
-          {/* Username, always centered */}
-          <div className="flex flex-col items-center flex-1">
-            <Username
-              animated={parsedColors.length === 2}
-              colors={parsedColors}
-              className="text-3xl"
-              style={
-                parsedColors.length !== 2
-                  ? { color: profile.color || "#fff" }
-                  : undefined
-              }
-            >
-              {profile.username}
-            </Username>
-          </div>
-          {/* Badges + Rep bar, right-aligned */}
-          <div className="flex flex-col items-end gap-1 min-w-[110px]">
-            <div className="flex items-center gap-1">
+        {/* USERNAME, BADGES, REP BAR (RESPONSIVE ROW) */}
+        <div className="w-full flex flex-col items-center">
+          <div className="flex flex-wrap items-center justify-center gap-2 w-full">
+            {/* Username always in center, badges right after */}
+            <span className="flex items-center">
+              <Username
+                animated={parsedColors.length === 2}
+                colors={parsedColors}
+                className="text-3xl"
+                style={
+                  parsedColors.length !== 2
+                    ? { color: profile.color || "#fff" }
+                    : undefined
+                }
+              >
+                {profile.username}
+              </Username>
               {profile.isAdmin && (
-                <span className="text-yellow-300 text-xl" title="Admin">
-                  🛡️
-                </span>
+                <span className="ml-2 text-yellow-300 text-xl" title="Admin">🛡️</span>
               )}
               {profile.tags?.includes("Founder") && (
-                <span className="text-pink-400 text-xl" title="Founder">
-                  👑
-                </span>
+                <span className="ml-2 text-pink-400 text-xl" title="Founder">👑</span>
               )}
               {profile.tags?.includes("Premium") && (
-                <span className="text-blue-400 text-xl" title="Premium">
-                  💎
-                </span>
+                <span className="ml-2 text-blue-400 text-xl" title="Premium">💎</span>
+              )}
+            </span>
+            {/* Rep bar is to the right on wide screens, below on small */}
+            <div className="flex-1 min-w-[150px] flex justify-center sm:justify-start">
+              {profile.reputation !== undefined && (
+                <ReputationBar rep={profile.reputation} />
               )}
             </div>
-            {profile.reputation !== undefined && (
-              <ReputationBar rep={profile.reputation} />
-            )}
           </div>
         </div>
 
@@ -352,4 +344,5 @@ return (
     `}</style>
   </div>
 );
+
 }
