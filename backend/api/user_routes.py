@@ -135,6 +135,8 @@ def update_user(usertag):
         user["reputation"] = data["reputation"]
     if "role" not in user or not user["role"]:
         user["role"] = "user"
+    if "balance" in data and is_admin:
+        user["balance"] = int(data["balance"])
 
     save_user(user)
     return jsonify({"success": True, "user": user})

@@ -137,6 +137,20 @@ export default function AdminPanel() {
   const handleTagRemove = (tag: string) => {
     setEdit({ ...edit, tags: (edit.tags || []).filter(t => t !== tag) });
   };
+  const saveField = async (data: Partial<User>) => {
+    if (!selected) return;
+    const res = await fetch(`/api/users/${selected.usertag}`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (result.success) {
+      setSuccessMsg("Saved!");
+      // optionally refresh user list
+    }
+  };
 
 
   const adjustBalance = async (delta: number) => {
@@ -344,175 +358,161 @@ export default function AdminPanel() {
 
           {/* User Editor Panel */}
           {selected && (
-            <div className="w-full md:w-[400px] bg-[#18212e]/90 border border-cyan-900/40 rounded-2xl p-8 shadow-2xl sticky top-28">
-              <h3 className="text-xl font-bold text-aqua mb-4">Edit User</h3>
-              <div className="mb-5">
-                <label className="block text-cyan-300 mb-1">Usertag</label>
-                <span className="font-mono text-cyan-300 bg-cyan-900/30 px-3 py-2 rounded">{`@${selected.usertag}`}</span>
-              </div>
-              <div className="mb-5">
-                <label className="block text-cyan-300 mb-1">Display Name</label>
-                <input
-                  className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white mb-2 border border-cyan-800"
-                  value={edit.username || ""}
-                  onChange={(e) => setEdit({ ...edit, username: e.target.value })}
-                />
-              </div>
-                <div className="mb-5">
-                  <label className="block text-cyan-300 mb-1">Color</label>
-                  <div className="flex gap-2 items-center">
-                    <input
-                      type="color"
-                      className="w-10 h-10 rounded border-2 border-cyan-800 bg-[#232e43] cursor-pointer"
-                      value={edit.color || "#ffffff"}
-                      onChange={(e) => setEdit({ ...edit, color: e.target.value })}
-                      style={{ minWidth: "2.5rem", minHeight: "2.5rem" }}
-                    />
-                    <input
-                      className="px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800 w-36"
-                      value={edit.color || ""}
-                      onChange={(e) => setEdit({ ...edit, color: e.target.value })}
-                      placeholder="#RRGGBB"
-                      maxLength={9}
-                    />
-                    {/* Show a small preview swatch */}
-                    <span
-                      className="w-8 h-8 rounded-full border border-cyan-900 shadow"
-                      style={{ background: edit.color || "#fff", display: "inline-block" }}
-                    ></span>
-                  </div>
-                </div>
+          <div className="w-full md:w-[400px] bg-[#18212e]/90 border border-cyan-900/40 rounded-2xl p-8 shadow-2xl sticky top-28">
+            <h3 className="text-xl font-bold text-aqua mb-4">Edit User</h3>
 
-              <div className="mb-5">
-                <label className="block text-cyan-300 mb-1">Tags</label>
-                <TagDropdownOverlay
-                  selectedTags={edit.tags || []}
-                  setTags={(tags) => setEdit({ ...edit, tags })}
-                />
-              </div>
-              <div className="mb-5">
-                <label className="block text-cyan-300 mb-1">Bio</label>
-                <textarea
-                  className="w-full px-4 py-2 rounded bg-[#232e43] text-white"
-                  rows={2}
-                  value={edit.bio || ""}
-                  onChange={(e) => setEdit({ ...edit, bio: e.target.value })}
-                />
-              </div>
-              <div className="mb-5">
-                <label className="block text-cyan-300 mb-1">Reputation</label>
-                <input
-                  type="number"
-                  className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800"
-                  value={edit.reputation ?? 0}
-                  min={0}
-                  max={100}
-                  onChange={e => setEdit({ ...edit, reputation: parseInt(e.target.value) })}
-                />
-                <ReputationBar rep={edit.reputation ?? 0} />
-              </div>
-              <div className="mb-5">
-                <label className="block text-cyan-300 mb-1">Balance</label>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => adjustBalance(100)}
-                    className="bg-green-500 hover:bg-green-600 text-white font-bold px-3 py-1 rounded"
-                  >
-                    +100
-                  </button>
-                  <button
-                    onClick={() => adjustBalance(-100)}
-                    className="bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-1 rounded"
-                  >
-                    -100
-                  </button>
-                </div>
-              </div>
-              <div className="mb-5">
-                <label className="block text-cyan-300 mb-1">
-                  Animated Username Colors<br />
-                  <span className="text-xs text-cyan-200">
-                    Select two HEX colors for the gradient effect.
-                  </span>
-                </label>
-                <div className="flex gap-4 items-center">
-                  <div className="flex flex-col items-center">
-                    <input
-                      type="color"
-                      className="w-10 h-10 rounded border-2 border-cyan-800 bg-[#232e43] cursor-pointer"
-                      value={edit.animatedColors?.[0] || "#18f0ff"}
-                      onChange={e =>
-                        setEdit({
-                          ...edit,
-                          animatedColors: [
-                            e.target.value,
-                            edit.animatedColors?.[1] || "#d275fa"
-                          ]
-                        })
-                      }
-                      style={{ minWidth: "2.5rem", minHeight: "2.5rem" }}
-                    />
-                    <span className="text-xs text-cyan-400 mt-1">{edit.animatedColors?.[0] || "#18f0ff"}</span>
-                  </div>
-                  <span className="text-cyan-300 font-bold px-2">→</span>
-                  <div className="flex flex-col items-center">
-                    <input
-                      type="color"
-                      className="w-10 h-10 rounded border-2 border-cyan-800 bg-[#232e43] cursor-pointer"
-                      value={edit.animatedColors?.[1] || "#d275fa"}
-                      onChange={e =>
-                        setEdit({
-                          ...edit,
-                          animatedColors: [
-                            edit.animatedColors?.[0] || "#18f0ff",
-                            e.target.value
-                          ]
-                        })
-                      }
-                      style={{ minWidth: "2.5rem", minHeight: "2.5rem" }}
-                    />
-                    <span className="text-xs text-cyan-400 mt-1">{edit.animatedColors?.[1] || "#d275fa"}</span>
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <Username
-                    animated={
-                      !!(edit.animatedColors &&
-                      edit.animatedColors[0] &&
-                      edit.animatedColors[1])
-                    }
-                    colors={edit.animatedColors}
-                    className="text-lg"
-                  >
-                    {edit.username || selected?.username}
-                  </Username>
-                </div>
-              </div>
-              <div className="mb-5">
-                <label className="block text-cyan-300 mb-1">Role</label>
-                <select
-                  className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800"
-                  value={edit.role || selected.role || "user"}
-                  onChange={e => setEdit({ ...edit, role: e.target.value })}
-                >
-                  <option value="user">User</option>
-                  <option value="moderator">Moderator</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              <button
-                className="bg-aqua text-midnight px-4 py-2 rounded font-bold mt-2 w-full hover:bg-cyan-400 transition"
-                onClick={handleSave}
-              >
-                Save Changes
-              </button>
-              {successMsg && <div className="text-green-400 mt-2">{successMsg}</div>}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Usertag</label>
+              <span className="font-mono text-cyan-300 bg-cyan-900/30 px-3 py-2 rounded">
+                @{selected.usertag}
+              </span>
             </div>
-          )}
-        </div>
+
+            {/* Username */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Display Name</label>
+              <input
+                className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white mb-2 border border-cyan-800"
+                value={edit.username || ""}
+                onChange={(e) => setEdit({ ...edit, username: e.target.value })}
+              />
+              <button onClick={() => saveField({ username: edit.username })}>Save</button>
+            </div>
+
+            {/* Color */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Color</label>
+              <div className="flex gap-2 items-center mb-2">
+                <input
+                  type="color"
+                  className="w-10 h-10 rounded border-2 border-cyan-800 bg-[#232e43] cursor-pointer"
+                  value={edit.color || "#ffffff"}
+                  onChange={(e) => setEdit({ ...edit, color: e.target.value })}
+                />
+                <input
+                  className="px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800 w-36"
+                  value={edit.color || ""}
+                  onChange={(e) => setEdit({ ...edit, color: e.target.value })}
+                  placeholder="#RRGGBB"
+                />
+              </div>
+              <button onClick={() => saveField({ color: edit.color })}>Save</button>
+            </div>
+
+            {/* Tags */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Tags</label>
+              <TagDropdownOverlay
+                selectedTags={edit.tags || []}
+                setTags={(newTags) => {
+                  setEdit({ ...edit, tags: newTags });
+                  saveField({ tags: newTags });
+                }}
+              />
+            </div>
+
+            {/* Bio */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Bio</label>
+              <textarea
+                className="w-full px-4 py-2 rounded bg-[#232e43] text-white mb-2"
+                rows={2}
+                value={edit.bio || ""}
+                onChange={(e) => setEdit({ ...edit, bio: e.target.value })}
+              />
+              <button onClick={() => saveField({ bio: edit.bio })}>Save</button>
+            </div>
+
+            {/* Reputation */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Reputation</label>
+              <input
+                type="number"
+                className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800"
+                value={edit.reputation ?? 0}
+                min={0}
+                max={100}
+                onChange={(e) =>
+                  setEdit({ ...edit, reputation: parseInt(e.target.value) })
+                }
+              />
+              <ReputationBar rep={edit.reputation ?? 0} />
+              <button onClick={() => saveField({ reputation: edit.reputation })}>Save</button>
+            </div>
+
+            {/* Balance */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Balance</label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => adjustBalance(100)}
+                  className="bg-green-500 hover:bg-green-600 text-white font-bold px-3 py-1 rounded"
+                >
+                  +100
+                </button>
+                <button
+                  onClick={() => adjustBalance(-100)}
+                  className="bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-1 rounded"
+                >
+                  -100
+                </button>
+              </div>
+            </div>
+
+            {/* Animated Colors (autosave) */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Animated Username Colors</label>
+              <div className="flex gap-4 items-center">
+                <input
+                  type="color"
+                  value={edit.animatedColors?.[0] || "#18f0ff"}
+                  onChange={(e) => {
+                    const newColors = [e.target.value, edit.animatedColors?.[1] || "#d275fa"];
+                    setEdit({ ...edit, animatedColors: newColors });
+                    saveField({ animatedColors: newColors });
+                  }}
+                  className="w-10 h-10 rounded border-2 border-cyan-800 cursor-pointer"
+                />
+                <span className="text-cyan-300">→</span>
+                <input
+                  type="color"
+                  value={edit.animatedColors?.[1] || "#d275fa"}
+                  onChange={(e) => {
+                    const newColors = [edit.animatedColors?.[0] || "#18f0ff", e.target.value];
+                    setEdit({ ...edit, animatedColors: newColors });
+                    saveField({ animatedColors: newColors });
+                  }}
+                  className="w-10 h-10 rounded border-2 border-cyan-800 cursor-pointer"
+                />
+              </div>
+            </div>
+
+            {/* Role (autosave) */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Role</label>
+              <select
+                className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800"
+                value={edit.role || selected.role || "user"}
+                onChange={(e) => {
+                  const role = e.target.value;
+                  setEdit({ ...edit, role });
+                  saveField({ role });
+                }}
+              >
+                <option value="user">User</option>
+                <option value="moderator">Moderator</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
+            {successMsg && <div className="text-green-400 mt-2">{successMsg}</div>}
+          </div>
+        )}
       </div>
-      {showStats && <AdminStatsPanel onClose={() => setShowStats(false)} />}
     </div>
+
+    {showStats && <AdminStatsPanel onClose={() => setShowStats(false)} />}
+  </div>
   );
 }
 
