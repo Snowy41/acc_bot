@@ -29,12 +29,18 @@ export default function LogViewer() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const logRef = useRef<HTMLDivElement>(null);
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
   useEffect(() => {
-    fetch("/api/logs/list")
-      .then((res) => res.json())
-      .then((data) => setLogs(data.logs))
-      .catch(() => setLogs([]));
+    fetch("/api/logs/list", { credentials: "include" })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error && data.error.toLowerCase().includes("permission")) {
+          setPermissionDenied(true);
+        } else {
+          setLogs(data.logs || []);
+        }
+      });
   }, []);
 
   const loadLog = (file: string) => {
@@ -60,6 +66,8 @@ export default function LogViewer() {
         setLoading(false);
       });
   };
+
+  if (permissionDenied) return <div className="text-red-400 p-10">Access Denied.</div>;
 
   return (
     <div className="w-full max-w-4xl mx-auto mt-16">

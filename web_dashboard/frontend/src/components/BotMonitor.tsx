@@ -18,6 +18,7 @@ export default function BotMonitor() {
   const [isRunning, setIsRunning] = useState<{ [key: string]: boolean }>({});
   const [isStarting, setIsStarting] = useState<{ [key: string]: boolean }>({});
   const [isStopping, setIsStopping] = useState<{ [key: string]: boolean }>({});
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
   // WebSocket listeners
   useEffect(() => {
@@ -49,10 +50,14 @@ export default function BotMonitor() {
     fetch("/api/bots")
       .then((res) => res.json())
       .then((data) => {
+
+      if (data.error && data.error.toLowerCase().includes("permission")) {
+        setPermissionDenied(true);
+      } else {
         const filtered = (data.bots || []).filter((name: string) =>
           name.startsWith(`${platform}_`)
         );
-        setScripts(filtered);
+        setScripts(filtered);}
       });
   }, [platform]);
 
@@ -93,8 +98,11 @@ export default function BotMonitor() {
     setIsStopping((prev) => ({ ...prev, [script]: false }));
   };
 
+  if (permissionDenied) return <div className="text-red-400 p-10">Access Denied.</div>;
+
   return (
     <div className="w-full max-w-5xl mx-auto mt-16">
+      if (permissionDenied) return <div className="text-red-400 p-10">Access Denied.</div>;
       <div className="bg-white/10 border border-cyan-700/40 shadow-2xl backdrop-blur-xl rounded-3xl p-10">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl text-aqua font-bold tracking-wide">

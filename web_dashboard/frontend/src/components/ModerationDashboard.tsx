@@ -6,11 +6,19 @@ export default function ModerationDashboard() {
     const [myUsertag, setMyUsertag] = useState(""); // <-- define this!
     const myTickets = tickets.filter(t => t.assigned_to === myUsertag);
 
-    useEffect(() => {
+  useEffect(() => {
     fetch("/api/tickets", { credentials: "include" })
       .then(res => res.json())
-      .then(data => { setTickets(data.tickets || []); setLoading(false); });
+      .then(data => {
+        if (data.error && data.error.toLowerCase().includes("permission")) {
+          setPermissionDenied(true);
+        } else {
+          setTickets(data.tickets || []);
+        }
+        setLoading(false);
+      });
   }, []);
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
   const updateTicket = async (id: string, fields: any) => {
     await fetch(`/api/tickets/${id}`, {
@@ -32,6 +40,7 @@ export default function ModerationDashboard() {
     }, []);
 
   if (loading) return <div className="text-white p-8">Loading...</div>;
+  if (permissionDenied) return <div className="text-red-400 p-10">Access Denied.</div>;
 
   return (
     <div className="max-w-4xl mx-auto py-10">
