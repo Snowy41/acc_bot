@@ -67,3 +67,16 @@ def get_single_item(category, key):
         return jsonify({"error": "Item not found"}), 404
     return jsonify({ "item": item })
 
+@shop_bp.route("/api/shop/categories", methods=["GET"])
+def list_shop_categories():
+    from backend.utils import get_all_shop_items_grouped  # if you move it there
+
+    items_by_category = get_all_shop_items_grouped()  # see utils.py helper
+    categories = []
+    for group in items_by_category:
+        categories.append({
+            "key": group["key"],
+            "name": group["name"],
+            "description": group["description"]
+        })
+    return jsonify({ "categories": categories })

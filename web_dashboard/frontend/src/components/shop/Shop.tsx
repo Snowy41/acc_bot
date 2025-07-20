@@ -1,5 +1,5 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { shopData } from "./shopData";
 import { SparklesIcon, TagIcon, UserGroupIcon } from "@heroicons/react/24/solid";
 
 const iconMap = {
@@ -9,6 +9,15 @@ const iconMap = {
 };
 
 export default function Shop() {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/shop/categories")
+      .then((res) => res.json())
+      .then((data) => setCategories(data.categories || []));
+  }, []);
+
+
   return (
     <div className="flex justify-center items-start w-full min-h-[90vh] pt-12 px-4">
         <div
@@ -38,7 +47,7 @@ export default function Shop() {
 
         {/* Category Grid */}
         <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-8 pb-12 px-2">
-          {shopData.map(cat => (
+            {categories.map((cat) => (
             <Link
               key={cat.key}
               to={`/shop/${cat.key}`}

@@ -277,6 +277,38 @@ def get_items_in_category(category):
         })
     return items
 
+def get_all_shop_items_grouped():
+    import sqlite3
+    conn = sqlite3.connect(SHOP_DB)
+    c = conn.cursor()
+    c.execute("SELECT id, category, name, description, price, type, metadata FROM shop_items")
+    rows = c.fetchall()
+    conn.close()
+
+    grouped = {}
+
+    for row in rows:
+        cat_key = row[1]
+        item = {
+            "key": row[0].split(":")[1],
+            "name": row[2],
+            "description": row[3],
+            "price": row[4],
+            "type": row[5],
+            "metadata": json.loads(row[6]) if row[6] else {},
+        }
+        if cat_key not in grouped:
+            grouped[cat_key] = {
+                "key": cat_key,
+                "name": cat_key.capitalize(),
+                "description": f"Shop items under {cat_key}",
+                "items": []
+            }
+        grouped[cat_key]["items"].append(item)
+
+    return list(grouped.values())
+
+
 def public_user_dict(user):
     """Return a public-safe user dict (no password, admin, etc)."""
     if not user:
