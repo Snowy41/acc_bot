@@ -90,8 +90,8 @@ return (
       className="border border-cyan-900/40 rounded-2xl shadow-2xl p-10"
       style={{
         background: "rgba(25, 33, 42, 0.80)",
-        maxWidth: "min(98vw, 680px)",
-        minWidth: "340px",
+        maxWidth: "min(98vw, 1080px)",
+        minWidth: "680px",
       }}
     >
       <div className="flex flex-col items-center w-full">
