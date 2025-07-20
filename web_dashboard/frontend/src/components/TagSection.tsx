@@ -1,4 +1,5 @@
 import { TAGS } from "./tags.config";
+import "./tags.css";
 
 const defaultTag = {
   label: "",
