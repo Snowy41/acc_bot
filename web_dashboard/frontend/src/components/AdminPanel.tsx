@@ -107,6 +107,7 @@ export default function AdminPanel() {
         bio: edit.bio,
         role: edit.role || selected.role || "user",
         animatedColors: edit.animatedColors,
+        reputation: edit.reputation,
       }),
     });
     setSuccessMsg("Profile updated!");
@@ -356,13 +357,14 @@ export default function AdminPanel() {
                     ></span>
                   </div>
                 </div>
-                <div className="mb-5">
-                  <label className="block text-cyan-300 mb-1">Tags</label>
-                  <TagDropdown
-                    selectedTags={edit.tags || []}
-                    setTags={tags => setEdit({ ...edit, tags })}
-                  />
-                </div>
+
+              <div className="mb-5">
+                <label className="block text-cyan-300 mb-1">Tags</label>
+                <TagDropdownOverlay
+                  selectedTags={edit.tags || []}
+                  setTags={(tags) => setEdit({ ...edit, tags })}
+                />
+              </div>
               <div className="mb-5">
                 <label className="block text-cyan-300 mb-1">Bio</label>
                 <textarea
@@ -489,46 +491,89 @@ export default function AdminPanel() {
   );
 }
 
-function TagDropdown({ selectedTags, setTags }: {
-  selectedTags: string[],
-  setTags: (tags: string[]) => void
+export function TagDropdownOverlay({
+  selectedTags,
+  setTags,
+}: {
+  selectedTags: string[];
+  setTags: (tags: string[]) => void;
 }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    window.addEventListener("mousedown", onClick);
+    return () => window.removeEventListener("mousedown", onClick);
+  }, [open]);
+
   const tagKeys = Object.keys(TAGS);
+
+  // Show just one tag, or "+ Add Tag" if none
+  const preview = selectedTags.length > 0 ? (
+    <TagSection tags={[selectedTags[0]]} />
+  ) : (
+    <span className="bg-cyan-900/70 text-cyan-100 rounded-full px-4 py-1 text-xs">+ Add Tag</span>
+  );
+
   return (
-    <div className="flex flex-col gap-2">
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-        {tagKeys.map(tag => {
-          const isSelected = selectedTags.includes(tag);
-          return (
-            <button
-              type="button"
-              key={tag}
-              onClick={() => setTags(
-                isSelected
-                  ? selectedTags.filter(t => t !== tag)
-                  : [...selectedTags, tag]
-              )}
-              className={`
-                flex items-center gap-2 px-3 py-2 rounded-lg border
-                ${isSelected
-                  ? "bg-aqua/30 border-aqua text-aqua font-bold"
-                  : "bg-cyan-900/60 border-cyan-800 text-cyan-100 opacity-90 hover:bg-cyan-900"}
-                transition cursor-pointer
-              `}
-              style={{ minWidth: 120 }}
-            >
-              <TagSection tags={[tag]} />
-              <span className="ml-2 text-xs font-mono">{tag}</span>
-              {isSelected && <span className="ml-auto text-green-300 font-bold">✔</span>}
-            </button>
-          );
-        })}
-      </div>
-      {/* Preview row */}
-      <div className="mt-2">
-        <div className="text-cyan-300 text-xs mb-1">Selected:</div>
-        <TagSection tags={selectedTags} />
-      </div>
+    <div className="relative w-full">
+      {/* Row: preview tag or Add button */}
+      <button
+        type="button"
+        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-cyan-700 bg-cyan-900/70 hover:bg-aqua/10 transition cursor-pointer text-left"
+        onClick={() => setOpen(!open)}
+        tabIndex={0}
+      >
+        {preview}
+        {selectedTags.length > 1 && (
+          <span className="ml-3 text-xs text-cyan-200">{`+${selectedTags.length - 1}`}</span>
+        )}
+        <span className="ml-auto text-cyan-400">{open ? "▲" : "▼"}</span>
+      </button>
+      {/* Overlay Dropdown */}
+      {open && (
+        <div
+          ref={ref}
+          className="absolute z-30 left-0 top-12 w-[98%] md:w-72 bg-[#141d26] border border-cyan-800 rounded-xl shadow-2xl py-2 max-h-64 overflow-y-auto custom-scrollbar animate-fade-in"
+          style={{
+            minWidth: "190px",
+            maxHeight: "calc(5 * 2.5rem + 0.5rem)", // 5 rows tall max
+          }}
+        >
+          {tagKeys.map((tag) => {
+            const isSelected = selectedTags.includes(tag);
+            return (
+              <button
+                type="button"
+                key={tag}
+                onClick={() => {
+                  setTags(
+                    isSelected
+                      ? selectedTags.filter((t) => t !== tag)
+                      : [...selectedTags, tag]
+                  );
+                  setOpen(false);
+                }}
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-transparent
+                  ${isSelected
+                    ? "bg-aqua/40 border-aqua text-aqua font-bold"
+                    : "bg-cyan-900/30 hover:bg-cyan-900 text-cyan-100"}
+                  transition cursor-pointer mb-1`}
+                tabIndex={0}
+              >
+                <TagSection tags={[tag]} />
+                <span className="ml-2 text-xs font-mono">{tag}</span>
+                {isSelected && <span className="ml-auto text-green-300 font-bold">✔</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
