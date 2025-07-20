@@ -162,10 +162,10 @@ fetch("/api/auth/status", { credentials: "include" })
                 💎
               </span>
             )}
-          </div>
-            {profile.reputation !== undefined && (
+              {profile.reputation !== undefined && (
               <ReputationBar rep={profile.reputation} />
             )}
+          </div>
           <div className="flex items-center justify-center mb-2">
             <span className="text-cyan-300 font-mono text-base">@{profile.usertag}</span>
             {profile.uid && (

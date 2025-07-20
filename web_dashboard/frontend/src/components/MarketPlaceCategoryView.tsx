@@ -123,11 +123,11 @@ export default function MarketplaceCategoryView({ usertag, displayName }) {
                     by <Username animated={!!post.animatedColors && post.animatedColors.length === 2} colors={post.animatedColors}>
                       {post.username}
                     </Username>
+                    <ReputationBar rep={post.reputation || 0} />
+
                   </span>
                 </div>
               </div>
-              <ReputationBar rep={post.reputation || 0} />
-
               <div className="flex gap-2 mt-auto">
                 <button
                   className="bg-aqua text-midnight px-4 py-2 rounded-full font-bold shadow hover:bg-cyan-400 transition w-full"
