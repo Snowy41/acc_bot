@@ -127,11 +127,9 @@ return (
           )}
         </div>
 
-        {/* Place this directly after the avatar block */}
-        <div className="flex flex-col items-center">
-          {/* This row aligns batch directly under avatar */}
-          <div className="flex flex-row items-center justify-center mt-1 mb-2">
-            {/* Username + Badges always together */}
+        <div className="flex flex-col items-center w-full">
+          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 w-full mb-2">
+            {/* Username + Badges as one block */}
             <span className="flex items-center">
               <Username
                 animated={parsedColors.length === 2}
@@ -155,9 +153,9 @@ return (
                 <span className="ml-2 text-blue-400 text-xl" title="Premium">💎</span>
               )}
             </span>
-            {/* Rep bar, always to the right */}
+            {/* Rep bar: always to the right, with a gap, wraps below if needed */}
             {profile.reputation !== undefined && (
-              <span className="ml-8 flex-shrink-0">
+              <span className="ml-8 flex-shrink-0 mt-2 sm:mt-0">
                 <ReputationBar rep={profile.reputation} />
               </span>
             )}
