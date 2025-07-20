@@ -91,9 +91,9 @@ return (
       className="border border-cyan-900/40 rounded-2xl shadow-2xl p-16"
       style={{
         background: "rgba(25, 33, 42, 0.88)",
-        maxWidth: "950px",
-        minWidth: "420px",
-        minHeight: "720px",
+        maxWidth: "1080px",
+        minWidth: "620px",
+        minHeight: "520px",
       }}
     >
       <div className="flex flex-col items-center w-full">
@@ -281,7 +281,6 @@ return (
             Edit Profile
           </button>
         )}
-
       </div>
     </div>
     {/* Animations for tags/badges... */}
