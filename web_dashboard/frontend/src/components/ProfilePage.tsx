@@ -91,14 +91,12 @@ return (
       style={{
         background: "rgba(25, 33, 42, 0.80)",
         maxWidth: "min(98vw, 680px)",
-        width: "fit-content",
-        minWidth: "340px"
+        minWidth: "340px",
       }}
     >
-      <div className="flex flex-col items-center">
-
+      <div className="flex flex-col items-center w-full">
         {/* AVATAR */}
-        <div className="w-24 h-24 flex items-center justify-center mb-4">
+        <div className="w-24 h-24 mb-4 flex items-center justify-center mx-auto">
           <div className={`w-24 h-24 rounded-full flex items-center justify-center text-5xl font-bold text-midnight
               shadow-xl border-2
               ${profile.frame === "gold" ? "border-yellow-400 shadow-yellow-300" : ""}
@@ -135,60 +133,59 @@ return (
           </div>
         </div>
 
-        {/* === THE BATCH ROW: Username, Badges, Rep Bar === */}
-        <div style={{ minHeight: "2.75rem" }} />
-          <div className="flex flex-row items-center justify-center mb-2">
-            {/* This row is only as wide as its content */}
-            <span className="flex items-center">
-              <Username
-                animated={parsedColors.length === 2}
-                colors={parsedColors}
-                className="text-3xl"
-                style={
-                  parsedColors.length !== 2
-                    ? { color: profile.color || "#fff" }
-                    : undefined
-                }
-              >
-                {profile.username}
-              </Username>
-              {profile.isAdmin && (
-                <span className="ml-2 text-yellow-300 text-xl" title="Admin">🛡️</span>
-              )}
-              {profile.tags?.includes("Founder") && (
-                <span className="ml-2 text-pink-400 text-xl" title="Founder">👑</span>
-              )}
-              {profile.tags?.includes("Premium") && (
-                <span className="ml-2 text-blue-400 text-xl" title="Premium">💎</span>
-              )}
+        {/* Username + badges + rep bar (left-aligned under avatar) */}
+        <div className="flex flex-row items-center mb-2" style={{ marginLeft: "96px" }}>
+          <span className="flex items-center">
+            <Username
+              animated={parsedColors.length === 2}
+              colors={parsedColors}
+              className="text-3xl"
+              style={
+                parsedColors.length !== 2
+                  ? { color: profile.color || "#fff" }
+                  : undefined
+              }
+            >
+              {profile.username}
+            </Username>
+            {profile.isAdmin && (
+              <span className="ml-2 text-yellow-300 text-xl" title="Admin">🛡️</span>
+            )}
+            {profile.tags?.includes("Founder") && (
+              <span className="ml-2 text-pink-400 text-xl" title="Founder">👑</span>
+            )}
+            {profile.tags?.includes("Premium") && (
+              <span className="ml-2 text-blue-400 text-xl" title="Premium">💎</span>
+            )}
+          </span>
+          {typeof profile.reputation === "number" && (
+            <span className="ml-6">
+              <ReputationBar rep={profile.reputation} />
             </span>
-            {/* Rep bar */}
-            {typeof profile.reputation === "number" && (
-              <span className="ml-6">
-                <ReputationBar rep={profile.reputation} />
-              </span>
-            )}
-          </div>
-          {/* Usertag row (centered, not full width) */}
-          <div className="flex items-center justify-center mb-2">
-            <span className="text-cyan-300 font-mono text-base">@{profile.usertag}</span>
-            {profile.uid && (
-              <span
-                className="ml-2 text-xs px-2 py-0.5 rounded border border-cyan-900/40 font-mono"
-                style={{
-                  background: 'rgba(120,130,140,0.08)',
-                  color: '#90a0b7',
-                  opacity: 0.7,
-                  letterSpacing: '0.05em'
-                }}
-                title="Internal User ID"
-              >
-                ID: {profile.uid}
-              </span>
-            )}
-            </div>
-        {/* TAGS */}
-        <div className="flex flex-wrap gap-2 mb-4 justify-center">
+          )}
+        </div>
+
+        {/* Usertag + ID, left-aligned under avatar */}
+        <div className="flex items-center mb-2" style={{ marginLeft: "96px" }}>
+          <span className="text-cyan-300 font-mono text-base">@{profile.usertag}</span>
+          {profile.uid && (
+            <span
+              className="ml-2 text-xs px-2 py-0.5 rounded border border-cyan-900/40 font-mono"
+              style={{
+                background: 'rgba(120,130,140,0.08)',
+                color: '#90a0b7',
+                opacity: 0.7,
+                letterSpacing: '0.05em'
+              }}
+              title="Internal User ID"
+            >
+              ID: {profile.uid}
+            </span>
+          )}
+        </div>
+
+        {/* TAGS, left-aligned under avatar */}
+        <div className="flex flex-wrap gap-2 mb-4" style={{ marginLeft: "96px" }}>
           {profile.tags && profile.tags.length > 0 &&
             profile.tags.map(tag => {
               const lower = tag.toLowerCase();
@@ -244,8 +241,8 @@ return (
           }
         </div>
 
-        {/* STATUS BADGES */}
-        <div className="flex gap-4 mb-4">
+        {/* STATUS BADGES, left-aligned under avatar */}
+        <div className="flex gap-4 mb-4" style={{ marginLeft: "96px" }}>
           {profile.isBanned && (
             <span className="bg-red-700/70 text-white text-xs px-3 py-1 rounded-full">Banned</span>
           )}
@@ -257,12 +254,12 @@ return (
           )}
         </div>
 
-        {/* BIO */}
-        <p className="text-white text-center mb-6">{profile.bio}</p>
+        {/* BIO, left-aligned under avatar */}
+        <p className="text-white text-left mb-6" style={{ marginLeft: "96px" }}>{profile.bio}</p>
 
         {/* Social Links */}
         {profile.social && (
-          <div className="flex gap-6 mt-3 items-center justify-center">
+          <div className="flex gap-6 mt-3 items-center" style={{ marginLeft: "96px" }}>
             {/* ...social links as before... */}
           </div>
         )}
@@ -281,6 +278,7 @@ return (
                 });
                 setIsFriend(false);
               }}
+              style={{ marginLeft: "96px" }}
             >
               Remove Friend
             </button>
@@ -297,6 +295,7 @@ return (
                 const data = await res.json();
                 alert(data.message || "Friend request sent!");
               }}
+              style={{ marginLeft: "96px" }}
             >
               Add Friend
             </button>
@@ -308,6 +307,7 @@ return (
           <button
             className="px-5 py-2 bg-aqua text-midnight rounded-lg font-semibold mt-6 hover:bg-cyan-400 transition"
             onClick={() => navigate(`/profile/${profile.usertag}/edit`)}
+            style={{ marginLeft: "96px" }}
           >
             Edit Profile
           </button>
@@ -327,6 +327,7 @@ return (
     `}</style>
   </div>
 );
+
 
 
 }
