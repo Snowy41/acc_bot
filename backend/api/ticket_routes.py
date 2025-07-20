@@ -50,6 +50,8 @@ def create_ticket():
 def get_tickets():
     usertag = session.get("username")
     user = get_user_by_usertag(usertag)
+    if user["role"] not in ("admin", "moderator"):
+        return jsonify({"error": "Admins/Mods only"}), 403
     import sqlite3
     from backend.utils import DB_PATH
     conn = sqlite3.connect(DB_PATH)

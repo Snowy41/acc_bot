@@ -27,6 +27,7 @@ import SupportPage from "./components/SupportPage";
 import ModerationDashboard from "./components/ModerationDashboard";
 import MessagesPage from "./components/MessagePage";
 import FriendsModal from "./components/FriendsModal";
+import {ProtectedRoute} from "./components/ProtectedRoute";
 
 function AppLayout() {
   const [active, setActive] = useState("home");
@@ -340,10 +341,38 @@ function AppLayout() {
                 </div>
               }
             />
-            <Route path="/logs" element={<LogViewer />} />
-            <Route path="/botSelection" element={<BotSelection />} />
-            <Route path="/monitor/:botName" element={<BotMonitor />} />
-            <Route path="/admin" element={<AdminPanel />} />
+            <Route
+              path="/logs"
+              element={
+                <ProtectedRoute allowedRoles={["admin", "moderator", "premium"]}>
+                  <LogViewer />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/botSelection"
+              element={
+                <ProtectedRoute allowedRoles={["admin", "moderator", "premium"]}>
+                  <BotSelection />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/monitor/:botName"
+              element={
+                <ProtectedRoute allowedRoles={["admin", "moderator", "premium"]}>
+                  <BotMonitor />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminPanel />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/profile/:usertag" element={<ProfilePage />} />
             <Route path="/profile/:usertag/edit" element={<ProfileEdit />} />
             <Route path="/forum" element={<ForumCategories />} />
@@ -353,7 +382,14 @@ function AppLayout() {
             <Route path="/shop/:category" element={<ShopCategory />} />
             <Route path="/shop/:category/:item" element={<ShopItemDetail />} />
             <Route path="/support" element={<SupportPage />} />
-            <Route path="/moderation" element={<ModerationDashboard />} />
+            <Route
+              path="/moderation"
+              element={
+                <ProtectedRoute allowedRoles={["admin", "moderator"]}>
+                  <ModerationDashboard />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/messages" element={<MessagesPage usertag={usertag} />} />
             <Route path="*" element={<div>Page not found!</div>} />
           </Routes>
