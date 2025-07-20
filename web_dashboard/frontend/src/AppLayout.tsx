@@ -28,6 +28,8 @@ import ModerationDashboard from "./components/admin/ModerationDashboard";
 import MessagesPage from "./components/chat/MessagePage";
 import FriendsModal from "./components/chat/FriendsModal";
 import {ProtectedRoute} from "./components/auth/ProtectedRoute";
+import BalanceBadge from "./components/wallet/BalanceBadge";
+import DepositPage from "./components/wallet/DepositPage";
 
 function AppLayout() {
   const [active, setActive] = useState("home");
@@ -250,11 +252,7 @@ function AppLayout() {
             notifications={notifications}
             onClear={() => setNotifications([])}
           />
-          {balance !== null && (
-            <span className="text-sm text-cyan-300 font-mono pr-2">
-              💰 {balance}
-            </span>
-          )}
+          <BalanceBadge balance={balance} />
           <ProfilePanel
             loggedIn={loggedIn}
             setLoggedIn={setLoggedIn}
@@ -395,6 +393,7 @@ function AppLayout() {
             <Route path="/shop" element={<Shop />} />
             <Route path="/shop/:category" element={<ShopCategory />} />
             <Route path="/shop/:category/:item" element={<ShopItemDetail />} />
+            <Route path="/shop/deposit" element={<DepositPage />} />
             <Route path="/support" element={<SupportPage />} />
             <Route
               path="/moderation"
