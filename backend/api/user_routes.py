@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, session
 import time
-from backend.utils import get_user_by_usertag, save_user, hash_pw
+from backend.utils import get_user_by_usertag, save_user, hash_pw, public_user_dict
 
 user_bp = Blueprint("user", __name__)
 
@@ -22,19 +22,13 @@ def list_users():
         user = dict(zip(fields, row))
         user["tags"] = json.loads(user.get("tags") or "[]")
         user["social"] = json.loads(user.get("social") or "{}")
-        user_list.append({
-            "usertag": user["usertag"],
-            "username": user.get("username", ""),
-            "uid": user.get("uid", None),
-            "bio": user.get("bio", ""),
-            "role": user.get("role", "user"),
-            "color": user.get("color", "#fff"),
-            "tags": user.get("tags", []),
-            "is_banned": bool(user.get("is_banned", False)),
-            "is_muted": bool(user.get("is_muted", False)),
-            "is_admin": user.get("role") == "admin",
-            "animatedColors": user.get("animatedColors", []),
-        })
+        user["is_admin"] = bool(user["is_admin"])
+        user["is_banned"] = bool(user["is_banned"])
+        user["is_muted"] = bool(user["is_muted"])
+        user["friends"] = json.loads(user.get("friends") or "[]")
+        user["friendRequests"] = json.loads(user.get("friendRequests") or "[]")
+        user["animatedColors"] = json.loads(user.get("animatedColors") or "[]")
+        user_list.append(public_user_dict(user))
     return jsonify({"users": user_list})
 
 @user_bp.route("/api/auth/register", methods=["POST"])
@@ -119,24 +113,7 @@ def status():
 def get_user(usertag):
     user = get_user_by_usertag(usertag) or get_user_by_usertag(usertag.lower())
     if user:
-        profile = {
-            "username": user.get("username", ""),
-            "usertag": user.get("usertag", usertag),
-            "isAdmin": user.get("role") == "admin",
-            "isBanned": user.get("is_banned", False),
-            "isMuted": user.get("is_muted", False),
-            "bio": user.get("bio", ""),
-            "social": user.get("social", {}),
-            "tags": user.get("tags", []),
-            "color": user.get("color", "#fff"),
-            "frame": user.get("frame", ""),
-            "banner": user.get("banner", ""),
-            "uid": user.get("uid", 0),
-            "avatar": user.get("avatar", ""),
-            "role": user.get("role", "user"),
-            "animatedColors": user.get("animatedColors", [])
-        }
-        return jsonify(profile)
+        return jsonify(public_user_dict(user))
     return jsonify({"error": "User not found"}), 404
 
 @user_bp.route("/api/users/<usertag>", methods=["PATCH"])

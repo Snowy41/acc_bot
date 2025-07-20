@@ -199,3 +199,63 @@ def get_all_users():
         user["animatedColors"] = json.loads(user.get("animatedColors") or "[]")
         users[user["usertag"]] = user
     return users
+
+def public_user_dict(user):
+    """Return a public-safe user dict (no password, admin, etc)."""
+    if not user:
+        return None
+    return {
+        "usertag": user.get("usertag", ""),
+        "username": user.get("username", ""),
+        "bio": user.get("bio", ""),
+        "avatar": user.get("avatar", ""),
+        "color": user.get("color", "#fff"),
+        "tags": user.get("tags", []),
+        "social": user.get("social", {}),
+        "role": user.get("role", "user"),
+        "animatedColors": user.get("animatedColors", []),
+        "uid": user.get("uid", 0),
+        "banner": user.get("banner", ""),
+        "frame": user.get("frame", ""),
+        "isBanned": user.get("is_banned", False),
+        "isMuted": user.get("is_muted", False),
+        # Add fields if your frontend needs them, remove anything private!
+    }
+
+def public_post_dict(post):
+    """Sanitize a forum/marketplace post for public API."""
+    return {
+        "id": post.get("id"),
+        "category": post.get("category"),
+        "title": post.get("title"),
+        "content": post.get("content"),
+        "usertag": post.get("usertag"),
+        "username": post.get("username"),
+        "comments": [public_comment_dict(cmt) for cmt in post.get("comments", [])],
+        "timestamp": post.get("timestamp"),
+        "role": post.get("role", "user"),
+        "is_announcement": post.get("is_announcement", False),
+        "animatedColors": post.get("animatedColors", []),
+        "desc": post.get("desc", ""),
+        "price": post.get("price", ""),
+    }
+
+def public_comment_dict(cmt):
+    return {
+        "usertag": cmt.get("usertag"),
+        "username": cmt.get("username"),
+        "text": cmt.get("text"),
+        "timestamp": cmt.get("timestamp"),
+        "role": cmt.get("role", "user"),
+        "animatedColors": cmt.get("animatedColors", []),
+    }
+
+def public_message_dict(msg):
+    return {
+        "from": msg.get("from"),
+        "to": msg.get("to"),
+        "text": msg.get("text"),
+        "timestamp": msg.get("timestamp"),
+        "embed": msg.get("embed", None),
+        # Only include non-sensitive fields!
+    }

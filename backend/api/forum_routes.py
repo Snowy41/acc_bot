@@ -8,7 +8,7 @@ from backend.utils import (
     get_user_by_usertag,
     save_forum_post,
     load_forum,
-    add_forum_comment
+    add_forum_comment, public_post_dict
 )
 
 forum_bp = Blueprint("forum", __name__)
@@ -17,8 +17,8 @@ forum_bp = Blueprint("forum", __name__)
 def get_forum_posts():
     category = request.args.get("category")
     posts = load_forum(category)
-    # Enrich post authors and comments here (optional; already handled if you want)
-    return jsonify({"posts": posts})
+    # Return only public dicts
+    return jsonify({"posts": [public_post_dict(p) for p in posts]})
 
 @forum_bp.route("/api/forum/posts/<post_id>", methods=["GET"])
 def get_single_post(post_id):
@@ -26,7 +26,7 @@ def get_single_post(post_id):
     post = next((p for p in posts if p["id"] == post_id), None)
     if not post:
         return jsonify({"error": "Post not found"}), 404
-    return jsonify({"post": post})
+    return jsonify({"post": public_post_dict(post)})
 
 @forum_bp.route("/api/forum/posts", methods=["POST"])
 def create_forum_post():
@@ -63,7 +63,7 @@ def create_forum_post():
         "is_announcement": is_announcement
     }
     save_forum_post(post)
-    return jsonify({"success": True})
+    return jsonify({"success": True, "post": public_post_dict(post)})
 
 @forum_bp.route("/api/forum/posts/<post_id>", methods=["DELETE"])
 def delete_forum_post(post_id):
@@ -83,7 +83,6 @@ def delete_forum_post(post_id):
     if not (is_admin or is_author):
         return jsonify({"error": "You do not have permission to delete this post."}), 403
 
-    # Remove post from DB (do actual SQL delete in real app)
     import sqlite3
     from backend.utils import FORUM_DB_PATH
     conn = sqlite3.connect(FORUM_DB_PATH)

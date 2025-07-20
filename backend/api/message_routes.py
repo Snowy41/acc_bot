@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 import time
 import uuid
-from backend.utils import get_chat_messages, save_chat_message, get_user_by_usertag
+from backend.utils import get_chat_messages, save_chat_message, get_user_by_usertag, save_user
 
 message_bp = Blueprint("message", __name__)
 
@@ -12,7 +12,7 @@ def get_messages(friend_tag):
         return jsonify({"error": "Not logged in"}), 401
 
     messages = get_chat_messages(current_user, friend_tag)
-    return jsonify({"messages": messages})
+    return jsonify({"messages": [public_message_dict(msg) for msg in messages]})
 
 @message_bp.route("/api/messages/<friend_tag>", methods=["POST"])
 def send_message(friend_tag):
@@ -44,8 +44,7 @@ def send_message(friend_tag):
             "message": f"💬 Message from @{current_user}",
             "timestamp": timestamp,
         })
-        # Optionally: save_user(recipient) if you want notifications persisted
-    # Optionally: emit socketio event for real-time updates (done in main.py socketio handlers)
+    save_user(recipient)
     return jsonify({"success": True})
 
 @message_bp.route("/api/messages/cleanup", methods=["POST"])
