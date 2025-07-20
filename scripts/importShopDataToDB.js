@@ -1,4 +1,4 @@
-const { shopData } = require("../web_dashboard/frontend/components/shop/shopData.ts");
+const { shopData } = require("../web_dashboard/frontend/src/components/shop/shopData");
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 
