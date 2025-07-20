@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Routes, Route, Link, useLocation } from "react-router-dom";
 import Sidebar from "./components/layout/Sidebar";
 import ProfilePanel from "./components/profile/ProfilePanel";
-import LogViewer from "./components/logs/LogViewer";
+import LogViewer from "./components/log/LogViewer";
 import BotSelection from "./components/bots/BotSelection";
 import BotMonitor from "./components/bots/BotMonitor";
 import LoginModal from "./components/auth/LoginModal";
