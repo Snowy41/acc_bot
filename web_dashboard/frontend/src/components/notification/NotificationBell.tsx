@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import ReactDOM from "react-dom";
 
 export type UserNotification = {
   id: string;
@@ -98,24 +99,8 @@ export default function NotificationBell({
   return (
     <div className="relative z-50" ref={dropdownRef}>
       {/* Pop notifications beside the bell */}
-      <div className="fixed top-6 right-6 flex flex-col gap-2 items-end z-[9999] pointer-events-none">
-        {popNotifications.map((n) => (
-          <div
-            key={n.id}
-            className="animate-slide-in-down animate-fade-out-up bg-aqua/90 text-midnight shadow-xl px-5 py-3 rounded-xl border-2 border-cyan-300 font-semibold text-base pointer-events-auto"
-            style={{
-              minWidth: "240px",
-              maxWidth: "320px",
-              transition: "opacity 0.3s",
-            }}
-          >
-            <span>{n.message}</span>
-            <span className="block text-xs text-cyan-900 font-normal mt-1">
-              {new Date(n.timestamp).toLocaleTimeString()}
-            </span>
-          </div>
-        ))}
-      </div>
+      <PopNotificationPortal notifications={popNotifications} />
+
 
       {/* Bell and dropdown */}
       <button onClick={() => setOpen(!open)} className="relative">
@@ -180,5 +165,29 @@ function NotificationItem({ notification }: { notification: UserNotification }) 
         {new Date(notification.timestamp).toLocaleTimeString()}
       </span>
     </button>
+  );
+}
+
+function PopNotificationPortal({ notifications }: { notifications: UserNotification[] }) {
+  return ReactDOM.createPortal(
+    <div className="fixed top-6 right-6 flex flex-col gap-2 items-end z-[9999] pointer-events-none">
+      {notifications.map((n) => (
+        <div
+          key={n.id}
+          className="animate-slide-in-down animate-fade-out-up bg-aqua/90 text-midnight shadow-xl px-5 py-3 rounded-xl border-2 border-cyan-300 font-semibold text-base pointer-events-auto"
+          style={{
+            minWidth: "240px",
+            maxWidth: "320px",
+            transition: "opacity 0.3s",
+          }}
+        >
+          <span>{n.message}</span>
+          <span className="block text-xs text-cyan-900 font-normal mt-1">
+            {new Date(n.timestamp).toLocaleTimeString()}
+          </span>
+        </div>
+      ))}
+    </div>,
+    document.body
   );
 }
