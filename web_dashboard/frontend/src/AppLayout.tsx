@@ -247,7 +247,7 @@ function AppLayout() {
           clearSidebarChatPopups={() => setSidebarChatPopups([])}
         />
         <SearchBar />
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-4 pr-2 bg-[#162330]/60 border border-cyan-900/40 backdrop-blur-md px-4 py-1 rounded-full shadow-lg">
+        <div className="fixed top-4 right-4 z-40 flex items-center gap-4 pr-2 bg-[#162330]/60 border border-cyan-900/40 backdrop-blur-md px-4 py-1 rounded-full shadow-lg">
           <NotificationBell
             notifications={notifications}
             onClear={() => setNotifications([])}
