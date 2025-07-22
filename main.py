@@ -120,6 +120,25 @@ def add_security_headers(resp):
     resp.headers["X-XSS-Protection"] = "1; mode=block"  # Old but some browsers still respect
     return resp
 
+def poll_xmr_and_credit():
+    from backend.utils import poll_xmr_deposits, update_user_balance, record_transaction
+    already_seen = set()  # store txids already credited
+    while True:
+        try:
+            txs = poll_xmr_deposits()
+            for tx in txs:
+                if tx["txid"] in already_seen:
+                    continue
+                # CREDIT: e.g. update_user_balance(tx["usertag"], tx["amount"])
+                update_user_balance(tx["usertag"], int(tx["amount"] * 1e12))  # XMR is atomic in piconero
+                record_transaction(tx["txid"], "xmr", tx["usertag"], tx["amount"], "xmr_deposit")
+                already_seen.add(tx["txid"])
+        except Exception as e:
+            print("[XMR POLLER ERROR]", e)
+        import time
+        time.sleep(60)  # poll every minute
+
+
 # Add any other custom Socket.IO events here.
 
 # --- Background Tasks (Optional) ---
@@ -130,6 +149,9 @@ def add_security_headers(resp):
 #         time.sleep(600)
 #         prune_old_messages_sql()
 # threading.Thread(target=schedule_cleanup, daemon=True).start()
+threading.Thread(target=poll_xmr_and_credit, daemon=True).start()
+
+
 
 # --- Gunicorn/Eventlet WSGI Setup ---
 eventlet.monkey_patch()

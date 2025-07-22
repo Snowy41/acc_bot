@@ -44,3 +44,12 @@ def send_tokens():
     update_user_balance(recipient, amount)
     record_transaction(str(uuid.uuid4()), sender, recipient, amount, "transfer")
     return jsonify({"success": True})
+
+@wallet_bp.route("/api/wallet/xmr_address", methods=["GET"])
+def get_xmr_deposit_address():
+    usertag = session.get("username")
+    if not usertag:
+        return jsonify({"error": "Not logged in"}), 401
+    from backend.utils import get_or_create_xmr_subaddress
+    addr = get_or_create_xmr_subaddress(usertag)
+    return jsonify({"address": addr})

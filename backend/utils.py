@@ -3,6 +3,8 @@ import sqlite3
 import json
 import time
 import hashlib
+from monero.wallet import Wallet
+from monero.backends.jsonrpc import JSONRPCWallet
 
 # --- DB Paths ---
 DB_PATH = os.path.abspath("./db/users.db")
@@ -10,6 +12,10 @@ FORUM_DB_PATH = os.path.abspath("./db/forum.db")
 MESSAGES_DB_PATH = os.path.abspath("./db/messages.db")
 TRANSACTIONS_DB_PATH = os.path.abspath("./db/transactions.db")
 SHOP_DB = os.path.abspath("./db/shop.db")
+
+# Connect to monero-wallet-rpc running locally
+WALLET_RPC_PORT = 18083
+wallet = Wallet(JSONRPCWallet(port=WALLET_RPC_PORT))
 
 # --- User Functions ---
 def get_user_by_usertag(usertag):
@@ -308,6 +314,38 @@ def get_all_shop_items_grouped():
 
     return list(grouped.values())
 
+
+def get_or_create_xmr_subaddress(usertag):
+    # Use first account (index 0) for all user subaddresses
+    account = wallet.accounts[0]
+    # Search by label first
+    for sub in account.subaddresses:
+        if sub.label == f"user_{usertag}":
+            return str(sub)
+    # Create new subaddress for user
+    new_sub = account.new_subaddress(label=f"user_{usertag}")
+    return str(new_sub)
+
+def poll_xmr_deposits():
+    # Map: subaddress label -> usertag
+    account = wallet.accounts[0]
+    result = []
+    for sub in account.subaddresses:
+        label = sub.label
+        if not label.startswith("user_"):
+            continue
+        usertag = label.replace("user_", "")
+        # Get incoming for this subaddress
+        for tx in account.incoming(subaddr_indices=[sub.index]):
+            if tx.confirmations >= 10:  # Only count confirmed deposits (adjust if needed)
+                # Save txid, amount, usertag, etc.
+                result.append({
+                    "usertag": usertag,
+                    "amount": float(tx.amount),
+                    "txid": tx.transaction.hash,
+                    "confirmations": tx.confirmations,
+                })
+    return result
 
 def public_user_dict(user):
     """Return a public-safe user dict (no password, admin, etc)."""
