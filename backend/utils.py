@@ -323,7 +323,7 @@ def get_or_create_xmr_subaddress(usertag):
         if sub.label == f"user_{usertag}":
             return str(sub)
     # Create new subaddress for user
-    new_sub = account.new_subaddress(label=f"user_{usertag}")
+    new_sub = account.new_address(label=f"user_{usertag}")
     return str(new_sub)
 
 def poll_xmr_deposits():
