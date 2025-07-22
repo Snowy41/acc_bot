@@ -30,6 +30,7 @@ import FriendsModal from "./components/chat/FriendsModal";
 import {ProtectedRoute} from "./components/auth/ProtectedRoute";
 import BalanceBadge from "./components/wallet/BalanceBadge";
 import DepositPage from "./components/wallet/DepositPage";
+import LaunchTimer from "./components/layout/LaunchTimer";
 
 function AppLayout() {
   const [active, setActive] = useState("home");
@@ -212,20 +213,26 @@ function AppLayout() {
 
   // Show login/register modal when not logged in
   if (!loggedIn) {
+    const [bypassLogin, setBypassLogin] = useState(false);
+    if (!bypassLogin) {
+      return (
+        <LaunchTimer onBypass={() => setBypassLogin(true)} />
+      );
+    }
     return (
       <>
         {showRegister ? (
           <RegisterModal
             onSuccess={(usertag, password) => {
               setShowRegister(false);
-              handleLogin(usertag, password); // Auto-login on register
+              handleLogin(usertag, password);
             }}
             onClose={() => setShowRegister(false)}
           />
         ) : (
           <LoginModal
             onLogin={handleLogin}
-            onClose={() => {}}
+            onClose={() => setBypassLogin(false)}
             onRegister={() => setShowRegister(true)}
           />
         )}
