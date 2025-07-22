@@ -331,7 +331,12 @@ def poll_xmr_deposits():
     account = wallet.accounts[0]
     result = []
     for sub in account.addresses():
-        label = sub.label
+        label = getattr(sub, "label", "")
+        idx = getattr(sub, "index", None)
+        print("DEBUG:", vars(sub))
+        if not label.startswith("user_") or idx is None:
+            continue
+
         if not label.startswith("user_"):
             continue
         usertag = label.replace("user_", "")
