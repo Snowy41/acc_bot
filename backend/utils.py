@@ -336,7 +336,7 @@ def poll_xmr_deposits():
             continue
         usertag = label.replace("user_", "")
         # Get incoming for this subaddress
-        for tx in account.incoming(subaddr_indices=[sub.index]):
+        for tx in account.incoming(subaddr_indices=[sub.address_index]):
             if tx.confirmations >= 10:  # Only count confirmed deposits (adjust if needed)
                 # Save txid, amount, usertag, etc.
                 result.append({
