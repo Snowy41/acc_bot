@@ -319,7 +319,7 @@ def get_or_create_xmr_subaddress(usertag):
     # Use first account (index 0) for all user subaddresses
     account = wallet.accounts[0]
     # Search by label first
-    for sub in account.subaddresses:
+    for sub in account.addresses:
         if sub.label == f"user_{usertag}":
             return str(sub)
     # Create new subaddress for user
@@ -330,7 +330,7 @@ def poll_xmr_deposits():
     # Map: subaddress label -> usertag
     account = wallet.accounts[0]
     result = []
-    for sub in account.subaddresses:
+    for sub in account.addresses:
         label = sub.label
         if not label.startswith("user_"):
             continue
