@@ -327,25 +327,34 @@ def get_or_create_xmr_subaddress(usertag):
     return str(new_sub)
 
 def poll_xmr_deposits():
-    # Map: subaddress label -> usertag
-    account = wallet.accounts[0]
+    """
+    Scans all incoming transactions on all subaddresses and returns a list
+    of dicts: {'usertag', 'amount', 'txid', 'confirmations'}
+    """
+    account = wallet.accounts[0]  # or another account if you use accounts
     result = []
     for idx, sub in enumerate(account.addresses()):
         label = getattr(sub, "label", "")
         if not label.startswith("user_"):
             continue
         usertag = label.replace("user_", "")
-        # Get incoming for this subaddress
-        for tx in account.incoming(subaddr_indices=[idx]):
-            if tx.confirmations >= 10:  # Only count confirmed deposits (adjust if needed)
-                # Save txid, amount, usertag, etc.
-                result.append({
-                    "usertag": usertag,
-                    "amount": float(tx.amount),
-                    "txid": tx.transaction.hash,
-                    "confirmations": tx.confirmations,
-                })
+        # account.incoming() returns all incoming txs for all subaddresses!
+        for tx in account.incoming():
+            # Only consider this subaddress
+            if getattr(tx, "subaddr_index", None) != idx:
+                continue
+            # Only confirmed txs (optional, adjust as needed)
+            if getattr(tx, "confirmations", 0) < 10:
+                continue
+            # Check if already processed by txid, or process here
+            result.append({
+                "usertag": usertag,
+                "amount": float(tx.amount),
+                "txid": str(tx.transaction.hash),
+                "confirmations": int(getattr(tx, "confirmations", 0)),
+            })
     return result
+
 
 def public_user_dict(user):
     """Return a public-safe user dict (no password, admin, etc)."""
