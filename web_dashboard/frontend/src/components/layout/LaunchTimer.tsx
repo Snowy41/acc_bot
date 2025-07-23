@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-// Define the steps in the timeline
+// Define the steps in the timeline with descriptions
 const timelineSteps = [
   { step: "DAY 1: Refactor, Harden, and Organize Everything", description: "Refactor backend (main.py), split routes (forum, user, tokens, market). Update DB schema..." },
   { step: "DAY 2: Token/Credit Payments, Escrow, Withdrawals", description: "Backend: /api/deposit, /api/withdraw, per-user deposit address, auto-update balances..." },
@@ -10,8 +10,9 @@ const timelineSteps = [
 ];
 
 export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
+  // **Hooks should always be at the top!**
   const [now, setNow] = useState(Date.now());
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);  // Set the initial step
   const [showLogin, setShowLogin] = useState(false);
 
   // Set your launch time (example: August 1st, 2025)
