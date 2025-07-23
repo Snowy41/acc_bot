@@ -56,13 +56,24 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
 
       {/* Admin control: Update the current step */}
       <button
-        className="absolute top-10 right-10 text-aqua font-bold hover:opacity-80"
+        aria-label="Admin/tester login"
         onClick={() => setShowLogin(true)}
+        style={{
+          position: "absolute",
+          top: 12,
+          right: 18,
+          opacity: 0.10,
+          width: 36,
+          height: 36,
+          zIndex: 100,
+        }}
+        className="rounded-full hover:opacity-60 focus:opacity-80 transition border border-transparent focus:border-aqua"
       >
-        Admin Login (to update timeline)
+        <span className="sr-only">Login</span>
+        <span style={{ fontSize: 26 }}>🔒</span>
       </button>
 
-      {/* Admin Login Modal */}
+      {/* Actual login modal, shown only if you click the bypass */}
       {showLogin && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="relative bg-[#1a2232]/90 border border-cyan-800 p-8 rounded-2xl">
