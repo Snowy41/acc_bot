@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-// Define the steps in the timeline with descriptions
+// Define the steps in the timeline
 const timelineSteps = [
   { step: "DAY 1: Refactor, Harden, and Organize Everything", description: "Refactor backend (main.py), split routes (forum, user, tokens, market). Update DB schema..." },
   { step: "DAY 2: Token/Credit Payments, Escrow, Withdrawals", description: "Backend: /api/deposit, /api/withdraw, per-user deposit address, auto-update balances..." },
@@ -11,7 +11,7 @@ const timelineSteps = [
 
 export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
   const [now, setNow] = useState(Date.now());
-  const [currentStep, setCurrentStep] = useState<number>(0);
+  const [currentStep, setCurrentStep] = useState(0);
   const [showLogin, setShowLogin] = useState(false);
 
   // Set your launch time (example: August 1st, 2025)
@@ -29,7 +29,7 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
   const mins = Math.floor((remaining / 1000 / 60) % 60);
   const secs = Math.floor((remaining / 1000) % 60);
 
-  // Determine the current step (based on the current day)
+  // Set the current step based on the current day
   const today = new Date();
   const currentDay = today.getDate();
   const totalDays = timelineSteps.length;
@@ -52,10 +52,6 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
             "0 0 36px #18f0ff55, 0 1.5px 0px 1px #18f0ff13, 0 0 0.5px #13e0f544",
         }}
       >
-        {/* Render the current step */}
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{timelineSteps[currentStep].step}</h2>
-        <div className="text-xl text-cyan-300 mb-6">{timelineSteps[currentStep]?.description}</div>
-
         {/* Timeline */}
         <div className="flex items-center justify-center w-full mb-6">
           <div className="relative w-full flex items-center">
