@@ -48,10 +48,12 @@ function AppLayout() {
   const [role, setRole] = useState("user");
   const [animatedColors, setAnimatedColors] = useState<string[]>([]);
   const [sidebarChatPopups, setSidebarChatPopups] = useState<
+
     { from: string; text: string; timestamp: number }[]
   >([]);
   const [unreadDMCount, setUnreadDMCount] = useState(0);
   const [balance, setBalance] = useState<number | null>(null);
+  const [bypassLogin, setBypassLogin] = useState(false);
 
   const location = useLocation();
 
@@ -213,7 +215,6 @@ function AppLayout() {
 
   // Show login/register modal when not logged in
   if (!loggedIn) {
-    const [bypassLogin, setBypassLogin] = useState(false);
     if (!bypassLogin) {
       return (
         <LaunchTimer onBypass={() => setBypassLogin(true)} />
