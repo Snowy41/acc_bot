@@ -68,19 +68,3 @@ def get_admin_stats():
         "chatThreads": chat_threads,
         "totalMessages": total_messages
     })
-
-
-@app.route('/api/timeline-step', methods=["POST"])
-def update_timeline_step():
-    if not request.json or "step" not in request.json:
-        return jsonify({"error": "Invalid request"}), 400
-
-    # For simplicity, we're saving the current step in-memory. In production, you should save it to a DB.
-    current_step = request.json["step"]
-
-    # This should be saved in a database or another persistent store
-    # For this example, assume it's stored in memory
-    global current_step_in_progress
-    current_step_in_progress = current_step
-
-    return jsonify({"message": "Step updated", "current_step": current_step}), 200
