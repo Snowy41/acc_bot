@@ -3,7 +3,7 @@ import eventlet
 import threading
 import traceback
 
-from flask import Flask, jsonify, session
+from flask import Flask, jsonify, session, send_from_directory
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -137,6 +137,15 @@ def poll_xmr_and_credit():
             print("[XMR POLLER ERROR]", e)
         import time
         time.sleep(60)  # poll every minute
+
+
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_spa(path):
+    # Only serve index.html for non-API/non-socket.io paths
+    if path.startswith("api") or path.startswith("socket.io"):
+        return jsonify({"error": "Not found"}), 404
+    return send_from_directory("/opt/whitebot/web_dashboard/frontend/dist", "index.html")
 
 
 # Add any other custom Socket.IO events here.
