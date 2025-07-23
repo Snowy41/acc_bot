@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-// Define the steps in the timeline
+// Define the steps in the timeline with descriptions
 const timelineSteps = [
   { step: "DAY 1: Refactor, Harden, and Organize Everything", description: "Refactor backend (main.py), split routes (forum, user, tokens, market). Update DB schema..." },
   { step: "DAY 2: Token/Credit Payments, Escrow, Withdrawals", description: "Backend: /api/deposit, /api/withdraw, per-user deposit address, auto-update balances..." },
@@ -11,7 +11,8 @@ const timelineSteps = [
 
 export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
   const [now, setNow] = useState(Date.now());
-  const [currentStep, setCurrentStep] = useState<string>(timelineSteps[0].step);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [hoveredStep, setHoveredStep] = useState<number | null>(null);
   const [showLogin, setShowLogin] = useState(false);
 
   // Set your launch time (example: August 1st, 2025)
@@ -31,7 +32,7 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
 
   // Update the timeline step
   const updateStep = (newStep: string) => {
-    setCurrentStep(newStep);
+    setCurrentStep(timelineSteps.findIndex((step) => step.step === newStep));
     // Send update to backend API (Flask)
     fetch('/api/timeline-step', {
       method: 'POST',
@@ -57,11 +58,35 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
             "0 0 36px #18f0ff55, 0 1.5px 0px 1px #18f0ff13, 0 0 0.5px #13e0f544",
         }}
       >
-        {/* Render the current step */}
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{currentStep}</h2>
-        <div className="text-xl text-cyan-300 mb-6">{timelineSteps.find(step => step.step === currentStep)?.description}</div>
+        {/* Timeline */}
+        <div className="flex items-center justify-center w-full mb-6">
+          <div className="relative w-full flex items-center">
+            {timelineSteps.map((step, idx) => (
+              <div
+                key={step.step}
+                className={`w-8 h-8 rounded-full 
+                  ${currentStep >= idx ? "bg-aqua" : "bg-gray-700"} 
+                  ${hoveredStep === idx ? "scale-125" : "scale-100"} 
+                  transition-all duration-300 ease-in-out 
+                  cursor-pointer flex justify-center items-center`}
+                onClick={() => updateStep(step.step)}
+                onMouseEnter={() => setHoveredStep(idx)}
+                onMouseLeave={() => setHoveredStep(null)}
+              >
+                <div className="text-xs text-white font-bold">{idx + 1}</div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        {/* Countdown Timer */}
+        {/* Hovering description */}
+        {hoveredStep !== null && (
+          <div className="text-cyan-200 mt-4 p-4 text-lg bg-[#131f29] rounded-lg shadow-xl">
+            {timelineSteps[hoveredStep].description}
+          </div>
+        )}
+
+        {/* Countdown */}
         <div className="flex justify-center gap-6 mb-3 w-full">
           <div className="flex flex-col items-center">
             <span className="text-xs text-cyan-300 mb-1 tracking-wider">days</span>
@@ -80,38 +105,17 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
             <span className="text-5xl md:text-6xl font-mono font-bold text-white">{String(secs).padStart(2, "0")}</span>
           </div>
         </div>
-
-        {/* Admin control: Update the current step */}
-        <div className="mt-6">
-          <button
-            className="bg-aqua text-midnight px-6 py-2 rounded-xl font-bold shadow hover:bg-cyan-400 transition"
-            onClick={() => updateStep("DAY 2: Token/Credit Payments, Escrow, Withdrawals")}
-          >
-            Update to Step 2
-          </button>
-        </div>
-
-        {/* Login button */}
-        <button
-          aria-label="Admin/tester login"
-          onClick={() => setShowLogin(true)}
-          style={{
-            position: "absolute",
-            top: 10,
-            right: 10,
-            opacity: 0.12,
-            width: 32,
-            height: 32,
-            zIndex: 100,
-          }}
-          className="rounded-full hover:opacity-70 focus:opacity-60 transition border border-transparent focus:border-aqua"
-        >
-          <span className="sr-only">Login</span>
-          <span style={{ fontSize: 24 }}>🔒</span>
-        </button>
       </div>
 
-      {/* Actual login modal, shown only if you click the bypass */}
+      {/* Admin control: Update the current step */}
+      <button
+        className="absolute top-10 right-10 text-aqua font-bold hover:opacity-80"
+        onClick={() => setShowLogin(true)}
+      >
+        Admin Login (to update timeline)
+      </button>
+
+      {/* Admin Login Modal */}
       {showLogin && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="relative bg-[#1a2232]/90 border border-cyan-800 p-8 rounded-2xl">
