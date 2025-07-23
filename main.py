@@ -9,6 +9,8 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_socketio import SocketIO
 
+from backend.api.timeline_routes import timeline_bp
+
 # --- App Setup ---
 app = Flask(__name__)
 app.secret_key = "replace-this-with-a-random-value"
@@ -43,6 +45,7 @@ app.register_blueprint(upload_bp)
 app.register_blueprint(logs_bp)
 app.register_blueprint(wallet_bp)
 app.register_blueprint(shop_bp)
+app.register_blueprint(timeline_bp)
 
 # --- Global Error Handler ---
 @app.errorhandler(Exception)

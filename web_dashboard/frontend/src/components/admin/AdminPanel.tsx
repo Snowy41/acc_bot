@@ -20,6 +20,13 @@ interface User {
   reputation?: number;
   balance?: number;
 }
+const timelineSteps = [
+  "DAY 1: Refactor, Harden, and Organize Everything",
+  "DAY 2: Token/Credit Payments, Escrow, Withdrawals",
+  "DAY 3: Security, Anti-Abuse, 'OG' Forums, Panic/Nuke",
+  "DAY 4: Offshore Hosting Prep & Migration",
+  "DAY 5: Red Team, Testing, Launch Prep"
+];
 
 export default function AdminPanel() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -40,6 +47,8 @@ export default function AdminPanel() {
     const lastB = allChats[b]?.[allChats[b].length - 1]?.timestamp || 0;
     return lastB - lastA; // most recent first
   });
+  const [timelineStepIdx, setTimelineStepIdx] = useState(0);
+
   useEffect(() => {
     fetch("/api/auth/status", { credentials: "include" })
       .then(res => res.json())
@@ -79,6 +88,23 @@ export default function AdminPanel() {
     };
   }, []);
 
+  useEffect(() => {
+    fetch("/api/timeline-step").then(r => r.json()).then(data => {
+      setTimelineStepIdx(data.current ?? 0);
+    });
+  }, []);
+
+  const updateTimelineStep = (idx: number) => {
+    fetch("/api/timeline-step", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ step: idx })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) setTimelineStepIdx(idx);
+      });
+  };
 
   const handleSelect = (user: User) => {
     const parsedColors = typeof user.animatedColors === "string"
@@ -277,7 +303,31 @@ export default function AdminPanel() {
             </button>
           </div>
         </div>
-
+        <div className="bg-cyan-900/20 border border-cyan-800 rounded-2xl my-10 p-6 max-w-2xl mx-auto">
+          <h3 className="text-xl font-bold text-aqua mb-3">Launch Timeline Control</h3>
+          <div className="flex flex-col gap-3">
+            {timelineSteps.map((step, idx) => (
+              <button
+                key={idx}
+                className={`px-4 py-2 rounded-lg text-lg font-bold transition ${
+                  timelineStepIdx === idx
+                    ? "bg-aqua text-midnight border-aqua border-2 opacity-90"
+                    : "bg-cyan-950/50 text-cyan-200 border border-cyan-700 hover:bg-cyan-800/80 hover:text-aqua"
+                }`}
+                disabled={timelineStepIdx === idx}
+                onClick={() => updateTimelineStep(idx)}
+              >
+                {step}
+              </button>
+            ))}
+          </div>
+          <div className="mt-4 text-cyan-300">
+            <b>Current step:</b> {timelineSteps[timelineStepIdx]}
+          </div>
+          <div className="text-sm text-cyan-600 mt-2">
+            This will update the splash page timeline for all users. Delete <code>launch_timeline.json</code> after launch to remove this.
+          </div>
+        </div>
         {/* All Users Table */}
         <div className="flex flex-col md:flex-row gap-10 items-start w-full px-4 md:px-12">
           <div className="flex-1 min-w-[380px]">

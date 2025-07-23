@@ -12,6 +12,7 @@ FORUM_DB_PATH = os.path.abspath("./db/forum.db")
 MESSAGES_DB_PATH = os.path.abspath("./db/messages.db")
 TRANSACTIONS_DB_PATH = os.path.abspath("./db/transactions.db")
 SHOP_DB = os.path.abspath("./db/shop.db")
+TIMELINE_PATH = "/opt/whitebot/launch_timeline.json"  # or wherever is safe
 
 # Connect to monero-wallet-rpc running locally
 WALLET_RPC_PORT = 18083
@@ -355,6 +356,16 @@ def poll_xmr_deposits():
             })
     return result
 
+def read_timeline():
+    if not os.path.exists(TIMELINE_PATH):
+        # Default: first step
+        return {"current": 0}
+    with open(TIMELINE_PATH, "r") as f:
+        return json.load(f)
+
+def write_timeline(data):
+    with open(TIMELINE_PATH, "w") as f:
+        json.dump(data, f)
 
 def public_user_dict(user):
     """Return a public-safe user dict (no password, admin, etc)."""
