@@ -1,14 +1,27 @@
 import { useState, useEffect } from "react";
 
-export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
-  // SET LAUNCH DATE HERE (UTC recommended)
-  const launchAt = new Date("2025-08-01T18:00:00Z").getTime();
-  const [now, setNow] = useState(Date.now());
-  const [showLogin, setShowLogin] = useState(false);
+// Define the steps in the timeline with descriptions
+const timelineSteps = [
+  { step: "DAY 1: Refactor, Harden, and Organize Everything", description: "Refactor backend (main.py), split routes (forum, user, tokens, market). Update DB schema..." },
+  { step: "DAY 2: Token/Credit Payments, Escrow, Withdrawals", description: "Backend: /api/deposit, /api/withdraw, per-user deposit address, auto-update balances..." },
+  { step: "DAY 3: Security, Anti-Abuse, 'OG' Forums, Panic/Nuke", description: "Complete system-wide rate limiting, audit for XSS/SQLi/CSRF..." },
+  { step: "DAY 4: Offshore Hosting Prep & Migration", description: "Register ProtonMail (over VPN), register for 2–3 offshore VPSs..." },
+  { step: "DAY 5: Red Team, Testing, Launch Prep", description: "Invite trusted friend(s) to try to break everything: register, trade, DM, spam..." }
+];
 
+export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
+  const [now, setNow] = useState(Date.now());
+  const [currentStep, setCurrentStep] = useState(0);
+  const [showLogin, setShowLogin] = useState(false);
+  const [hoveredStep, setHoveredStep] = useState<number | null>(null);
+
+  // Set your launch time (example: August 1st, 2025)
+  const launchAt = new Date("2025-08-01T18:00:00Z").getTime();
+
+  // Update the time remaining every second
   useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const remaining = Math.max(launchAt - now, 0);
@@ -17,10 +30,16 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
   const mins = Math.floor((remaining / 1000 / 60) % 60);
   const secs = Math.floor((remaining / 1000) % 60);
 
+  // Set the current step based on the current day
+  const today = new Date();
+  const currentDay = today.getDate();
+  const totalDays = timelineSteps.length;
+
+  const currentStepIndex = Math.min(currentDay - 1, totalDays - 1);
+  setCurrentStep(currentStepIndex);
+
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center min-h-screen
-      bg-gradient-to-tr from-[#15202b] via-[#112532] to-[#131930] z-50
-      animate__animated animate__fadeIn">
+    <div className="fixed inset-0 flex flex-col items-center justify-center min-h-screen bg-gradient-to-tr from-[#17232d] to-[#13334b] z-50 animate__animated animate__fadeIn">
       <h1 className="text-5xl md:text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-aqua via-cyan-400 to-fuchsia-400 drop-shadow-xl text-center mb-10">
         vanish.rip
       </h1>
@@ -55,6 +74,38 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
             )
           )}
         </div>
+
+        {/* Timeline */}
+        <div className="flex items-center justify-center w-full mb-6">
+          <div className="relative w-full flex items-center">
+            {/* Line connecting the steps */}
+            <div className="absolute top-1/2 w-full h-1 bg-cyan-600"></div>
+            {timelineSteps.map((step, idx) => (
+              <div
+                key={step.step}
+                className={`w-8 h-8 rounded-full
+                  ${currentStep >= idx ? "bg-aqua" : "bg-gray-500"}
+                  ${currentStep === idx ? "scale-125" : "scale-100"} 
+                  transition-all duration-300 ease-in-out 
+                  cursor-pointer flex justify-center items-center relative z-10`}
+                onClick={() => setCurrentStep(idx)} // Click to navigate between steps
+                onMouseEnter={() => setHoveredStep(idx)}
+                onMouseLeave={() => setHoveredStep(null)}
+              >
+                <div className="text-xs text-white font-bold">{idx + 1}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Hovering description */}
+        {hoveredStep !== null && (
+          <div className="text-cyan-200 mt-4 p-4 text-lg bg-[#131f29] rounded-lg shadow-xl">
+            {timelineSteps[hoveredStep].description}
+          </div>
+        )}
+
+        {/* Countdown Timer */}
         <div className="mt-4 text-cyan-200 text-lg font-semibold text-center tracking-wide">
           We launch in
           <span className="mx-2 text-aqua">{days}</span>days,
@@ -62,12 +113,13 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
           <span className="mx-2 text-aqua">{mins}</span>min,
           <span className="mx-2 text-aqua">{secs}</span>sec
         </div>
+
         <div className="mt-3 text-cyan-500/90 text-sm text-center opacity-80 font-mono">
           {remaining === 0 ? "We're live!" : "Follow our socials for exclusive updates"}
         </div>
       </div>
 
-      {/* Nearly invisible bypass/login button */}
+      {/* Admin control: Update the current step */}
       <button
         aria-label="Admin/tester login"
         onClick={() => setShowLogin(true)}
