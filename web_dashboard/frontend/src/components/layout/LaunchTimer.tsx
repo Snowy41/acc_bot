@@ -54,7 +54,7 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
         backdrop-blur-2xl"
         style={{
           boxShadow:
-            "0 0 36px #18f0ff55, 0 1.5px 0px 1px #18f0ff13, 0 0 2px #13e0f544",
+            "0 0 36px #18f0ff55, 0 1.5px 0px 1px #18f0ff13, 0 0 0.5px #13e0f544",
         }}
       >
         {/* Render the current step */}
