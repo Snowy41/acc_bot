@@ -1,7 +1,17 @@
 import { useState, useEffect } from "react";
 
+// Define the steps in the timeline
+const timelineSteps = [
+  { step: "DAY 1: Refactor, Harden, and Organize Everything", description: "Refactor backend (main.py), split routes (forum, user, tokens, market). Update DB schema..." },
+  { step: "DAY 2: Token/Credit Payments, Escrow, Withdrawals", description: "Backend: /api/deposit, /api/withdraw, per-user deposit address, auto-update balances..." },
+  { step: "DAY 3: Security, Anti-Abuse, 'OG' Forums, Panic/Nuke", description: "Complete system-wide rate limiting, audit for XSS/SQLi/CSRF..." },
+  { step: "DAY 4: Offshore Hosting Prep & Migration", description: "Register ProtonMail (over VPN), register for 2–3 offshore VPSs..." },
+  { step: "DAY 5: Red Team, Testing, Launch Prep", description: "Invite trusted friend(s) to try to break everything: register, trade, DM, spam..." }
+];
+
 export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
   const [now, setNow] = useState(Date.now());
+  const [currentStep, setCurrentStep] = useState<string>(timelineSteps[0].step);
   const [showLogin, setShowLogin] = useState(false);
 
   // Set your launch time (example: August 1st, 2025)
@@ -19,6 +29,20 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
   const mins = Math.floor((remaining / 1000 / 60) % 60);
   const secs = Math.floor((remaining / 1000) % 60);
 
+  // Update the timeline step
+  const updateStep = (newStep: string) => {
+    setCurrentStep(newStep);
+    // Send update to backend API (Flask)
+    fetch('/api/timeline-step', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ step: newStep })
+    }).then(response => response.json())
+      .then(data => {
+        console.log("Step updated:", data);
+      });
+  };
+
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center min-h-screen bg-gradient-to-tr from-[#17232d] to-[#13334b] z-50">
       <h1 className="text-5xl font-black text-aqua mb-7 drop-shadow-lg tracking-tight text-center">
@@ -30,7 +54,7 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
         backdrop-blur-2xl"
         style={{
           boxShadow:
-            "0 0 36px #18f0ff55, 0 1.5px 0px 1px #18f0ff13, 0 0 0.5px #13e0f544",
+            "0 0 36px #18f0ff55, 0 1.5px 0px 1px #18f0ff13, 0 0 2px #13e0f544",
         }}
       >
         {/* Countdown Timer */}
@@ -52,17 +76,28 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
             <span className="text-5xl md:text-6xl font-mono font-bold text-white">{String(secs).padStart(2, "0")}</span>
           </div>
         </div>
+
+        {/* Login button */}
+        <button
+          aria-label="Admin/tester login"
+          onClick={() => setShowLogin(true)}
+          style={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            opacity: 0.12,
+            width: 32,
+            height: 32,
+            zIndex: 100,
+          }}
+          className="rounded-full hover:opacity-70 focus:opacity-60 transition border border-transparent focus:border-aqua"
+        >
+          <span className="sr-only">Login</span>
+          <span style={{ fontSize: 24 }}>🔒</span>
+        </button>
       </div>
 
-      {/* Admin control: Update the current step */}
-      <button
-        className="absolute top-10 right-10 text-aqua font-bold hover:opacity-80"
-        onClick={() => setShowLogin(true)}
-      >
-        Admin Login (to update timeline)
-      </button>
-
-      {/* Admin Login Modal */}
+      {/* Actual login modal, shown only if you click the bypass */}
       {showLogin && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="relative bg-[#1a2232]/90 border border-cyan-800 p-8 rounded-2xl">
