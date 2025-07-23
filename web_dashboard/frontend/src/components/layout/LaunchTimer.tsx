@@ -11,8 +11,7 @@ const timelineSteps = [
 
 export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
   const [now, setNow] = useState(Date.now());
-  const [currentStep, setCurrentStep] = useState(0);
-  const [hoveredStep, setHoveredStep] = useState<number | null>(null);
+  const [currentStep, setCurrentStep] = useState<number>(0);
   const [showLogin, setShowLogin] = useState(false);
 
   // Set your launch time (example: August 1st, 2025)
@@ -30,19 +29,14 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
   const mins = Math.floor((remaining / 1000 / 60) % 60);
   const secs = Math.floor((remaining / 1000) % 60);
 
-  // Update the timeline step
-  const updateStep = (newStep: string) => {
-    setCurrentStep(timelineSteps.findIndex((step) => step.step === newStep));
-    // Send update to backend API (Flask)
-    fetch('/api/timeline-step', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ step: newStep })
-    }).then(response => response.json())
-      .then(data => {
-        console.log("Step updated:", data);
-      });
-  };
+  // Determine the current step (based on the current day)
+  const today = new Date();
+  const currentDay = today.getDate();
+  const totalDays = timelineSteps.length;
+
+  // Set the current step based on the current day
+  const currentStepIndex = Math.min(currentDay - 1, totalDays - 1);
+  setCurrentStep(currentStepIndex);
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center min-h-screen bg-gradient-to-tr from-[#17232d] to-[#13334b] z-50">
@@ -58,20 +52,24 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
             "0 0 36px #18f0ff55, 0 1.5px 0px 1px #18f0ff13, 0 0 0.5px #13e0f544",
         }}
       >
+        {/* Render the current step */}
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{timelineSteps[currentStep].step}</h2>
+        <div className="text-xl text-cyan-300 mb-6">{timelineSteps[currentStep]?.description}</div>
+
         {/* Timeline */}
         <div className="flex items-center justify-center w-full mb-6">
           <div className="relative w-full flex items-center">
+            {/* Line connecting the steps */}
+            <div className="absolute top-1/2 w-full h-1 bg-cyan-600"></div>
             {timelineSteps.map((step, idx) => (
               <div
                 key={step.step}
-                className={`w-8 h-8 rounded-full 
-                  ${currentStep >= idx ? "bg-aqua" : "bg-gray-700"} 
-                  ${hoveredStep === idx ? "scale-125" : "scale-100"} 
+                className={`w-8 h-8 rounded-full
+                  ${currentStep >= idx ? "bg-aqua" : "bg-gray-500"}
+                  ${currentStep === idx ? "scale-125" : "scale-100"} 
                   transition-all duration-300 ease-in-out 
-                  cursor-pointer flex justify-center items-center`}
-                onClick={() => updateStep(step.step)}
-                onMouseEnter={() => setHoveredStep(idx)}
-                onMouseLeave={() => setHoveredStep(null)}
+                  cursor-pointer flex justify-center items-center relative z-10`}
+                onClick={() => setCurrentStep(idx)} // Click to navigate between steps
               >
                 <div className="text-xs text-white font-bold">{idx + 1}</div>
               </div>
@@ -80,13 +78,11 @@ export default function LaunchTimer({ onBypass }: { onBypass: () => void }) {
         </div>
 
         {/* Hovering description */}
-        {hoveredStep !== null && (
-          <div className="text-cyan-200 mt-4 p-4 text-lg bg-[#131f29] rounded-lg shadow-xl">
-            {timelineSteps[hoveredStep].description}
-          </div>
-        )}
+        <div className="text-cyan-200 mt-4 p-4 text-lg bg-[#131f29] rounded-lg shadow-xl">
+          {timelineSteps[currentStep]?.description}
+        </div>
 
-        {/* Countdown */}
+        {/* Countdown Timer */}
         <div className="flex justify-center gap-6 mb-3 w-full">
           <div className="flex flex-col items-center">
             <span className="text-xs text-cyan-300 mb-1 tracking-wider">days</span>
