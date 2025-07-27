@@ -48,6 +48,9 @@ export default function AdminPanel() {
     return lastB - lastA; // most recent first
   });
   const [timelineStepIdx, setTimelineStepIdx] = useState(0);
+  const [aiScores, setAiScores] = useState<{ [id: string]: number }>({});
+  const [selectedSession, setSelectedSession] = useState<string | null>(null);
+  const [editScore, setEditScore] = useState<number>(0);
 
   useEffect(() => {
     fetch("/api/auth/status", { credentials: "include" })
@@ -92,6 +95,12 @@ export default function AdminPanel() {
     fetch("/api/timeline-step").then(r => r.json()).then(data => {
       setTimelineStepIdx(data.current ?? 0);
     });
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/admin/ai/scores", { credentials: "include" })
+      .then(res => res.json())
+      .then(data => setAiScores(data.scores || {}));
   }, []);
 
   const updateTimelineStep = (idx: number) => {
@@ -406,6 +415,47 @@ export default function AdminPanel() {
             </div>
           </div>
 
+          <div className="my-10 bg-[#1b2435]/90 border border-cyan-900/40 rounded-2xl shadow-2xl p-6">
+            <h3 className="text-xl font-bold text-aqua mb-6">AI Risk Scores (Debug)</h3>
+            <div className="overflow-x-auto rounded border border-cyan-900/40 bg-[#162030] shadow p-4 max-h-80">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="text-cyan-300 bg-[#212e3c]">
+                    <th className="px-4 py-2 text-left">Session/User ID</th>
+                    <th className="px-4 py-2 text-left">Risk Score</th>
+                    <th className="px-4 py-2">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(aiScores).map(([id, score]) => (
+                    <tr key={id}>
+                      <td className="px-4 py-2 font-mono">{id}</td>
+                      <td className="px-4 py-2">{score}</td>
+                      <td className="px-4 py-2">
+                        <button
+                          className="px-3 py-1 rounded bg-yellow-400/80 text-black font-bold hover:bg-yellow-500 mr-2"
+                          onClick={() => { setSelectedSession(id); setEditScore(score as number); }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="px-3 py-1 bg-red-500 text-white rounded font-bold hover:bg-red-600"
+                          onClick={async () => {
+                            await fetch(`/api/admin/ai/scores/${id}`, { method: "DELETE", credentials: "include" });
+                            setAiScores(prev => { const p = { ...prev }; delete p[id]; return p; });
+                          }}
+                        >
+                          Reset
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+
           {/* User Editor Panel */}
           {selected && (
           <div className="w-full md:w-[400px] bg-[#18212e]/90 border border-cyan-900/40 rounded-2xl p-8 shadow-2xl sticky top-28">
@@ -572,6 +622,42 @@ export default function AdminPanel() {
             {successMsg && <div className="text-green-400 mt-2">{successMsg}</div>}
           </div>
         )}
+          {selectedSession && (
+            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+              <div className="bg-[#212940] p-8 rounded-2xl shadow-2xl">
+                <h3 className="text-lg font-bold mb-3">Edit AI Risk Score for <span className="font-mono">{selectedSession}</span></h3>
+                <input
+                  className="mb-4 px-4 py-2 border rounded text-black"
+                  type="number"
+                  value={editScore}
+                  onChange={e => setEditScore(Number(e.target.value))}
+                />
+                <div>
+                  <button
+                    className="px-5 py-2 bg-aqua text-black rounded font-bold mr-4"
+                    onClick={async () => {
+                      await fetch(`/api/admin/ai/scores/${selectedSession}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        credentials: "include",
+                        body: JSON.stringify({ score: editScore }),
+                      });
+                      setAiScores(prev => ({ ...prev, [selectedSession]: editScore }));
+                      setSelectedSession(null);
+                    }}
+                  >
+                    Save
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-gray-500 text-white rounded"
+                    onClick={() => setSelectedSession(null)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
       </div>
     </div>
 

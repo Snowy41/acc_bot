@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from backend.utils import get_all_users
 import sqlite3
+from sqlitedict import SqliteDict
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -68,3 +69,42 @@ def get_admin_stats():
         "chatThreads": chat_threads,
         "totalMessages": total_messages
     })
+
+@admin_bp.route("/api/admin/ai/scores", methods=["GET"])
+def get_ai_scores():
+    current_user = session.get("username")
+    users = get_all_users()
+    if not current_user or not users.get(current_user, {}).get("is_admin"):
+        return jsonify({"error": "Admin only"}), 403
+    db = SqliteDict("risk_scores.db", autocommit=True)
+    # Only return non-zero scores, or all if you wish
+    scores = {sid: score for sid, score in db.items() if score > 0}
+    db.close()
+    return jsonify({"scores": scores})
+
+@admin_bp.route("/api/admin/ai/scores/<session_id>", methods=["POST"])
+def set_ai_score(session_id):
+    current_user = session.get("username")
+    users = get_all_users()
+    if not current_user or not users.get(current_user, {}).get("is_admin"):
+        return jsonify({"error": "Admin only"}), 403
+    data = request.json
+    new_score = int(data.get("score", 0))
+    db = SqliteDict("risk_scores.db", autocommit=True)
+    db[session_id] = new_score
+    db.commit()
+    db.close()
+    return jsonify({"success": True, "session_id": session_id, "score": new_score})
+
+@admin_bp.route("/api/admin/ai/scores/<session_id>", methods=["DELETE"])
+def reset_ai_score(session_id):
+    current_user = session.get("username")
+    users = get_all_users()
+    if not current_user or not users.get(current_user, {}).get("is_admin"):
+        return jsonify({"error": "Admin only"}), 403
+    db = SqliteDict("risk_scores.db", autocommit=True)
+    if session_id in db:
+        del db[session_id]
+        db.commit()
+    db.close()
+    return jsonify({"success": True, "session_id": session_id})
