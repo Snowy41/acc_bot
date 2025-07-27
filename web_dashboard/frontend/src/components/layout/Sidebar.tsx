@@ -44,6 +44,7 @@ export default function Sidebar({
 
   const [open, setOpen] = useState(true);
   const location = useLocation();
+  const [showText, setShowText] = useState(open);
 
   useEffect(() => {
     const currentPath = location.pathname;
@@ -53,6 +54,15 @@ export default function Sidebar({
     if (currentPath === "/moderation") setActive("moderation");
   }, [location, setActive]);
 
+
+  useEffect(() => {
+    if (open) {
+      const timer = setTimeout(() => setShowText(true), 230); // match your sidebar transition
+      return () => clearTimeout(timer);
+    } else {
+      setShowText(false);
+    }
+  }, [open]);
 
   return (
   <div className="relative h-screen">
@@ -135,6 +145,7 @@ export default function Sidebar({
             item={item}
             open={open}
             active={active}
+            showText={showText}
             setActive={setActive}
           />
         ))}
@@ -195,6 +206,7 @@ export default function Sidebar({
               item={item}
               open={open}
               active={active}
+              showText={showText}
               setActive={setActive}
               unread={item.key === "messages" ? unreadDM : 0}
             />
@@ -213,12 +225,14 @@ function SidebarItem({
   item,
   open,
   active,
+  showText,
   setActive,
   unread = 0, // <--- add default
 }: {
   item: { name: string; icon: any; key: string; path: string };
   open: boolean;
   active: string;
+  showText: boolean;
   setActive: (k: string) => void;
   unread?: number;
 
@@ -252,11 +266,17 @@ function SidebarItem({
           }
         `}
       />
-      {open && (
+      {showText && (
         <span
-          className={`font-semibold tracking-wide text-[1.08rem] transition-all
+          className={`font-semibold tracking-wide text-[1.08rem] transition-all duration-200 whitespace-nowrap overflow-hidden
             ${isActive ? "text-midnight" : "text-cyan-50 group-hover:text-aqua"}
+            ${open ? "opacity-100 pl-2" : "opacity-0 pl-0"}
           `}
+          style={{
+            transitionProperty: "opacity,padding-left",
+            transitionDuration: "250ms",
+            transitionDelay: open ? "80ms" : "0ms"
+          }}
         >
           {item.name}
         </span>
