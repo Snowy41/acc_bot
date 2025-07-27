@@ -63,21 +63,18 @@ export default function Sidebar({
       setCanShowText(false);
       return;
     }
-    const checkWidth = () => {
-      if (sidebarRef.current && sidebarRef.current.offsetWidth >= 190) {
+    let stopped = false;
+    function checkWidth() {
+      if (sidebarRef.current && sidebarRef.current.offsetWidth >= 180) {
         setCanShowText(true);
+        stopped = true;
       } else {
         setCanShowText(false);
       }
-    };
-    // Check repeatedly during animation
-    let anim: any;
-    const poll = () => {
-      checkWidth();
-      if (!canShowText) anim = setTimeout(poll, 16);
-    };
-    poll();
-    return () => clearTimeout(anim);
+      if (!stopped) setTimeout(checkWidth, 16); // keep polling until width is enough
+    }
+    checkWidth();
+    return () => { stopped = true; };
   }, [open]);
 
   return (
