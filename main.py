@@ -1,10 +1,13 @@
 import eventlet
+
+from backend.utils import get_session_risk
+
 eventlet.monkey_patch()
 
 import threading
 import traceback
 
-from flask import Flask, jsonify, session, send_from_directory
+from flask import Flask, jsonify, session, send_from_directory, request
 from flask_cors import CORS
 
 from flask_socketio import SocketIO
@@ -87,19 +90,34 @@ def catch_message(msg):
 
 @socketio.on("dm")
 def handle_dm(data):
-    # You may want to move save_chat_message and get_user_by_usertag to backend.utils
-    from backend.utils import save_chat_message, get_user_by_usertag
+    from flask_socketio import emit
+    from flask import session, request
+    from backend.utils import save_chat_message, get_user_by_usertag, get_session_risk, send_to_ai
+
     sender = session.get("username")
     to = data.get("to")
     text = data.get("text", "").strip()
     embed = data.get("embed", None)
 
+    # === AI Risk Check ===
+    risk = get_session_risk(session.get("id", sender))
+    if risk > 9:
+        emit("dm_error", {"error": "Your session is restricted for security reasons."}, room=request.sid)
+        return
+
     if not sender or not to or not text:
         return
 
-    import time, uuid
+    import time
     timestamp = int(time.time() * 1000)
-
+    save_chat_message(sender, to, sender, text, timestamp, embed)
+    socketio.emit("dm", {
+        "from": sender,
+        "to": to,
+        "text": text,
+        "timestamp": timestamp,
+        "embed": embed
+    })
     from backend.utils import send_to_ai
     send_to_ai("chat_message", {
         "from": sender,
@@ -109,15 +127,6 @@ def handle_dm(data):
         "session_id": session.get("id", sender)
     })
 
-    save_chat_message(sender, to, sender, text, timestamp, embed)
-    socketio.emit("dm", {
-        "from": sender,
-        "to": to,
-        "text": text,
-        "timestamp": timestamp,
-        "embed": embed
-    })
-    # Optionally handle notifications or extra logging here
 
 @socketio.on("bot_log")
 def handle_bot_log(data):
