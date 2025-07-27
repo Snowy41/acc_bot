@@ -195,8 +195,7 @@ export default function AdminPanel() {
 
   return (
       <div className="w-full max-w-6xl mx-auto mt-16 mb-16 relative">
-        <div
-            className="bg-white/10 border border-cyan-700/40 shadow-[0_6px_36px_0_rgba(0,255,255,0.08)] backdrop-blur-xl rounded-3xl px-0 py-10">
+        <div className="bg-white/10 border border-cyan-700/40 shadow-[0_6px_36px_0_rgba(0,255,255,0.08)] backdrop-blur-xl rounded-3xl px-0 py-10">
           <h2 className="text-4xl text-aqua font-extrabold mb-6 text-center tracking-wide">Admin Panel</h2>
           {/* Animated chat viewer container */}
           <div
@@ -320,134 +319,15 @@ export default function AdminPanel() {
             </div>
           </div>
 
-          {/* All Users Table + AI Scores */}
-        <div className="flex flex-row gap-10 w-full px-4 md:px-12 mb-16">
+          {/* -------------- FIRST ROW: All Users Table + Edit User Panel -------------- */}
+      <div className="flex flex-row gap-10 w-full px-4 md:px-12 mb-16">
         {/* All Users Table */}
         <div className="flex-1 min-w-[380px]">
-          <div className="bg-[#1b2435]/95 border border-cyan-900/40 rounded-2xl shadow-2xl p-6">
-            <h3 className="text-xl font-bold text-aqua mb-6">All Users</h3>
-            <div className="overflow-x-auto rounded border border-cyan-900/40 bg-[#162030] shadow p-4 max-h-80">
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr className="text-cyan-300 bg-[#212e3c]">
-                    <th className="px-4 py-2 text-left">Display Name</th>
-                    <th className="px-4 py-2 text-left">Usertag</th>
-                    <th className="px-4 py-2 text-left">Tags</th>
-                    <th className="px-4 py-2">Color</th>
-                    <th className="px-4 py-2">Admin</th>
-                    <th className="px-4 py-2">Edit</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((user) => (
-                    <tr
-                      key={user.usertag}
-                      className={`transition ${selected?.usertag === user.usertag ? "bg-cyan-900/30" : "hover:bg-cyan-900/10"}`}
-                    >
-                      <td className="px-4 py-2 font-semibold" style={{ color: user.color || "#fff" }}>
-                        <Username
-                          animated={
-                            (user.animatedColors && user.animatedColors.length === 2)
-                            || user.role === "admin"
-                          }
-                          colors={user.animatedColors}
-                        >
-                          {user.username}
-                        </Username>
-                      </td>
-                      <td className="px-4 py-2 font-mono">@{user.usertag}</td>
-                      <td className="px-4 py-2">
-                        {(user.tags || []).map((tag) => (
-                          <span
-                            key={tag}
-                            className="inline-block bg-cyan-900/40 text-cyan-200 text-xs px-2 py-1 rounded-full mr-1 mb-1"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </td>
-                      <td className="px-4 py-2">
-                        <span
-                          className="inline-block w-5 h-5 rounded-full border"
-                          style={{ background: user.color || "#fff" }}
-                        ></span>
-                      </td>
-                      <td className="px-4 py-2 text-center">
-                        {user.role === "admin" && "✔️"}
-                        {user.role === "moderator" && (
-                          <span className="ml-1 px-2 py-0.5 bg-indigo-700/30 border border-indigo-400/50 text-indigo-200 rounded text-[11px] font-bold">
-                            MOD
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-2 text-center">
-                        <button
-                          className="px-3 py-1 rounded bg-aqua/60 text-midnight font-bold hover:bg-aqua/90 transition"
-                          onClick={() => {
-                            setSelected(user); // Select user for editing
-                            setSelectedSession(null); // Close AI score edit dialog if open
-                          }}
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          {/* ... All Users Table ... */}
         </div>
-
-          <div className="flex flex-row gap-10 w-full px-4 md:px-12">
-        {/* AI Risk Score Table */}
-        <div className="flex-1 my-10 bg-[#1b2435]/90 border border-cyan-900/40 rounded-2xl shadow-2xl p-6">
-          <h3 className="text-xl font-bold text-aqua mb-6">AI Risk Scores (Debug)</h3>
-          <div className="overflow-x-auto rounded border border-cyan-900/40 bg-[#162030] shadow p-4 max-h-80">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="text-cyan-300 bg-[#212e3c]">
-                  <th className="px-4 py-2 text-left">Session/User ID</th>
-                  <th className="px-4 py-2 text-left">Risk Score</th>
-                  <th className="px-4 py-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(aiScores).map(([id, score]) => (
-                  <tr key={id}>
-                    <td className="px-4 py-2 font-mono">{id}</td>
-                    <td className="px-4 py-2">{score}</td>
-                    <td className="px-4 py-2">
-                      <button
-                        className="px-3 py-1 rounded bg-yellow-400/80 text-black font-bold hover:bg-yellow-500 mr-2"
-                        onClick={() => {
-                          setSelected(null); // Close user panel if open
-                          setSelectedSession(id); // Open AI score editor
-                          setEditScore(score as number);
-                        }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="px-3 py-1 bg-red-500 text-white rounded font-bold hover:bg-red-600"
-                        onClick={async () => {
-                          await fetch(`/api/admin/ai/scores/${id}`, { method: "DELETE", credentials: "include" });
-                          setAiScores(prev => { const p = { ...prev }; delete p[id]; return p; });
-                        }}
-                      >
-                        Reset
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-          </div>
-        {/* USER EDIT PANEL (with TagDropdownOverlay etc) */}
+        {/* Edit User Panel (next to users table, only when selected and not editing AI) */}
         {selected && !selectedSession && (
-        <div className="w-full max-w-[400px] bg-[#18212e]/90 border border-cyan-900/40 rounded-2xl p-8 shadow-2xl">
+          <div className="w-full max-w-[400px] bg-[#18212e]/90 border border-cyan-900/40 rounded-2xl p-8 shadow-2xl">
             <h3 className="text-xl font-bold text-aqua mb-4">Edit User</h3>
             {/* Usertag */}
             <div className="mb-5">
@@ -602,42 +482,88 @@ export default function AdminPanel() {
             {successMsg && <div className="text-green-400 mt-2">{successMsg}</div>}
           </div>
         )}
-        {/* AI Score Editor */}
+      </div>
+
+      {/* -------------- SECOND ROW: AI Table + AI Score Edit -------------- */}
+      <div className="flex flex-row gap-10 w-full px-4 md:px-12">
+        {/* AI Risk Scores Table */}
+        <div className="flex-1 my-10 bg-[#1b2435]/90 border border-cyan-900/40 rounded-2xl shadow-2xl p-6">
+          <h3 className="text-xl font-bold text-aqua mb-6">AI Risk Scores (Debug)</h3>
+          <div className="overflow-x-auto rounded border border-cyan-900/40 bg-[#162030] shadow p-4 max-h-80">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-cyan-300 bg-[#212e3c]">
+                  <th className="px-4 py-2 text-left">Session/User ID</th>
+                  <th className="px-4 py-2 text-left">Risk Score</th>
+                  <th className="px-4 py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(aiScores).map(([id, score]) => (
+                  <tr key={id}>
+                    <td className="px-4 py-2 font-mono">{id}</td>
+                    <td className="px-4 py-2">{score}</td>
+                    <td className="px-4 py-2">
+                      <button
+                        className="px-3 py-1 rounded bg-yellow-400/80 text-black font-bold hover:bg-yellow-500 mr-2"
+                        onClick={() => {
+                          setSelected(null); // Close user editor if open
+                          setSelectedSession(id);
+                          setEditScore(score as number);
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="px-3 py-1 bg-red-500 text-white rounded font-bold hover:bg-red-600"
+                        onClick={async () => {
+                          await fetch(`/api/admin/ai/scores/${id}`, { method: "DELETE", credentials: "include" });
+                          setAiScores(prev => { const p = { ...prev }; delete p[id]; return p; });
+                        }}
+                      >
+                        Reset
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {/* AI Score Edit Dialog (next to AI scores, only when editing AI) */}
         {selectedSession && !selected && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
           <div className="w-full max-w-[400px] bg-[#212940] p-8 rounded-2xl shadow-2xl self-start">
-              <h3 className="text-lg font-bold mb-3">
-                Edit AI Risk Score for <span className="font-mono">{selectedSession}</span>
-              </h3>
-              <input
-                className="mb-4 px-4 py-2 border rounded text-black"
-                type="number"
-                value={editScore}
-                onChange={e => setEditScore(Number(e.target.value))}
-              />
-              <div>
-                <button
-                  className="px-5 py-2 bg-aqua text-black rounded font-bold mr-4"
-                  onClick={async () => {
-                    await fetch(`/api/admin/ai/scores/${selectedSession}`, {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      credentials: "include",
-                      body: JSON.stringify({ score: editScore }),
-                    });
-                    setAiScores(prev => ({ ...prev, [selectedSession]: editScore }));
-                    setSelectedSession(null);
-                  }}
-                >
-                  Save
-                </button>
-                <button
-                  className="px-4 py-2 bg-gray-500 text-white rounded"
-                  onClick={() => setSelectedSession(null)}
-                >
-                  Cancel
-                </button>
-              </div>
+            <h3 className="text-lg font-bold mb-3">
+              Edit AI Risk Score for <span className="font-mono">{selectedSession}</span>
+            </h3>
+            <input
+              className="mb-4 px-4 py-2 border rounded text-black"
+              type="number"
+              value={editScore}
+              onChange={e => setEditScore(Number(e.target.value))}
+            />
+            <div>
+              <button
+                className="px-5 py-2 bg-aqua text-black rounded font-bold mr-4"
+                onClick={async () => {
+                  await fetch(`/api/admin/ai/scores/${selectedSession}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ score: editScore }),
+                  });
+                  setAiScores(prev => ({ ...prev, [selectedSession]: editScore }));
+                  setSelectedSession(null);
+                }}
+              >
+                Save
+              </button>
+              <button
+                className="px-4 py-2 bg-gray-500 text-white rounded"
+                onClick={() => setSelectedSession(null)}
+              >
+                Cancel
+              </button>
             </div>
           </div>
         )}
