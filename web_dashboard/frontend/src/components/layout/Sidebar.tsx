@@ -65,7 +65,7 @@ export default function Sidebar({
     }
     let stopped = false;
     function checkWidth() {
-      if (sidebarRef.current && sidebarRef.current.offsetWidth >= 180) {
+      if (sidebarRef.current && sidebarRef.current.offsetWidth >= 150) {
         setCanShowText(true);
         stopped = true;
       } else {
@@ -181,7 +181,18 @@ export default function Sidebar({
             }}
           >
             <span className="h-6 w-6 flex items-center justify-center drop-shadow-[0_0_4px_#ffe97a99]">🛡️</span>
-            {open && <span className="font-bold">Admin Panel</span>}
+            {canShowText && (
+              <span
+                className="font-bold transition-all duration-200 whitespace-nowrap overflow-hidden"
+                style={{
+                  opacity: open ? 1 : 0,
+                  paddingLeft: open ? 8 : 0,
+                  transition: "opacity 0.25s, padding-left 0.25s"
+                }}
+              >
+                Admin Panel
+              </span>
+            )}
             <span className="absolute top-0 right-0 h-2 w-2 bg-yellow-400 rounded-full shadow-lg animate-pulse"></span>
           </Link>
         )}
@@ -205,7 +216,18 @@ export default function Sidebar({
             <span className="h-6 w-6 flex items-center justify-center drop-shadow-[0_0_4px_#7da8fa]">
               <ShieldCheckIcon className="h-6 w-6 text-indigo-400" />
             </span>
-            {open && <span className="font-bold">Moderation</span>}
+            {canShowText && (
+              <span
+                className="font-bold transition-all duration-200 whitespace-nowrap overflow-hidden"
+                style={{
+                  opacity: open ? 1 : 0,
+                  paddingLeft: open ? 8 : 0,
+                  transition: "opacity 0.25s, padding-left 0.25s"
+                }}
+              >
+                Moderation
+              </span>
+            )}
             <span className="absolute top-0 right-0 h-2 w-2 bg-indigo-400 rounded-full shadow-lg animate-pulse"></span>
           </Link>
         )}
