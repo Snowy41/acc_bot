@@ -1,21 +1,20 @@
-import os
 import eventlet
 import threading
 import traceback
 
 from flask import Flask, jsonify, session, send_from_directory
 from flask_cors import CORS
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+
 from flask_socketio import SocketIO
 
+from backend.limiter import limiter
 from backend.api.timeline_routes import timeline_bp
 
 # --- App Setup ---
 app = Flask(__name__)
 app.secret_key = "replace-this-with-a-random-value"
 CORS(app)
-limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "50 per hour"])
+limiter.init_app(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # --- Import Blueprints ---

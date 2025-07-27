@@ -10,7 +10,7 @@ from backend.utils import (
     load_forum,
     add_forum_comment, public_post_dict, send_to_ai, get_session_risk
 )
-from main import limiter
+from backend.limiter import limiter
 
 forum_bp = Blueprint("forum", __name__)
 

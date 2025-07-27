@@ -5,7 +5,7 @@ import time
 
 from backend.utils import get_user_by_usertag, save_user, hash_pw, public_user_dict, update_user_balance, \
     record_transaction, get_user_balance, get_all_users
-from main import limiter
+from backend.limiter import limiter
 
 user_bp = Blueprint("user", __name__)
 
