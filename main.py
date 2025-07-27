@@ -99,6 +99,16 @@ def handle_dm(data):
 
     import time, uuid
     timestamp = int(time.time() * 1000)
+
+    from backend.utils import send_to_ai
+    send_to_ai("chat_message", {
+        "from": sender,
+        "to": to,
+        "text": text,
+        "timestamp": timestamp,
+        "session_id": session.get("id", sender)
+    })
+
     save_chat_message(sender, to, sender, text, timestamp, embed)
     socketio.emit("dm", {
         "from": sender,
