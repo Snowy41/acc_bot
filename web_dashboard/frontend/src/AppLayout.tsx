@@ -31,6 +31,7 @@ import {ProtectedRoute} from "./components/auth/ProtectedRoute";
 import BalanceBadge from "./components/wallet/BalanceBadge";
 import DepositPage from "./components/wallet/DepositPage";
 import LaunchTimer from "./components/layout/LaunchTimer";
+import HomePage from "./components/layout/HomePage";
 
 function AppLayout() {
   const [active, setActive] = useState("home");
@@ -309,61 +310,7 @@ function AppLayout() {
 
         <main className="flex-1 p-10 flex flex-col items-center justify-center text-white transition relative">
           <Routes>
-            <Route
-              path="/"
-              element={
-                <div className="dashboard-container">
-                  {/* Hero Section */}
-                  <div className="w-full flex flex-col items-center justify-center mb-2">
-                    <img
-                      src="/logo_for_website.png"
-                      alt="vanish.rip logo banner"
-                      className="max-w-lg w-full h-auto drop-shadow-lg"
-                      style={{ marginBottom: '10px' }}
-                    />
-                  </div>
-                  {/* Info Section */}
-                  <div className="info-section mt-12 flex flex-wrap justify-center gap-10">
-                    <div className="info-card animate__animated animate__fadeIn animate__delay-1s flex flex-col p-8 bg-gradient-to-tr from-cyan-500 to-aqua-500 rounded-lg shadow-lg max-w-xs">
-                      <h3 className="text-xl font-bold text-white">Monitor Your Bots</h3>
-                      <p className="text-gray-200 mt-4 flex-grow">Keep track of your bots in real-time. Stay informed about their performance, and troubleshoot if needed.</p>
-                      <div className="cta-container flex justify-center mt-4">
-                        <Link
-                          to="/botSelection"
-                          className="cta-button bg-transparent text-white border-2 border-white hover:bg-white hover:text-midnight transition py-2 px-6 rounded-full text-lg font-semibold w-full text-center"
-                        >
-                          View Bots
-                        </Link>
-                      </div>
-                    </div>
-                    <div className="info-card animate__animated animate__fadeIn animate__delay-2s flex flex-col p-8 bg-gradient-to-tr from-aqua to-cyan-500 rounded-lg shadow-lg max-w-xs">
-                      <h3 className="text-xl font-bold text-white">Logs</h3>
-                      <p className="text-gray-200 mt-4 flex-grow">View detailed logs of bot activities. Analyze and optimize performance with historical data.</p>
-                      <div className="cta-container flex justify-center mt-4">
-                        <Link
-                          to="/logs"
-                          className="cta-button bg-transparent text-white border-2 border-white hover:bg-white hover:text-midnight transition py-2 px-6 rounded-full text-lg font-semibold w-full text-center"
-                        >
-                          View Logs
-                        </Link>
-                      </div>
-                    </div>
-                    <div className="info-card animate__animated animate__fadeIn animate__delay-3s flex flex-col p-8 bg-gradient-to-tr from-cyan-500 to-aqua-500 rounded-lg shadow-lg max-w-xs">
-                      <h3 className="text-xl font-bold text-white">Bot Selection</h3>
-                      <p className="text-gray-200 mt-4 flex-grow">Select and configure your automation bots with ease. Choose from various bot types and set configurations.</p>
-                      <div className="cta-container flex justify-center mt-4">
-                        <Link
-                          to="/botSelection"
-                          className="cta-button bg-transparent text-white border-2 border-white hover:bg-white hover:text-midnight transition py-2 px-6 rounded-full text-lg font-semibold w-full text-center"
-                        >
-                          Select Bot
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              }
-            />
+            <Route path="/" element={<HomePage />} />
             <Route
               path="/logs"
               element={
