@@ -321,344 +321,330 @@ export default function AdminPanel() {
           </div>
 
           {/* All Users Table + AI Scores */}
-          <div className="flex flex-col md:flex-row gap-10 items-start w-full px-4 md:px-12">
-            {/* User Table */}
-            <div className="flex-1 min-w-[380px]">
-              <div className="bg-[#1b2435]/95 border border-cyan-900/40 rounded-2xl shadow-2xl p-6">
-                <h3 className="text-xl font-bold text-aqua mb-6">All Users</h3>
-                <div className="overflow-x-auto rounded border border-cyan-900/40 bg-[#162030] shadow p-4 max-h-80">
-                  <table className="min-w-full text-sm">
-                    <thead>
-                    <tr className="text-cyan-300 bg-[#212e3c]">
-                      <th className="px-4 py-2 text-left">Display Name</th>
-                      <th className="px-4 py-2 text-left">Usertag</th>
-                      <th className="px-4 py-2 text-left">Tags</th>
-                      <th className="px-4 py-2">Color</th>
-                      <th className="px-4 py-2">Admin</th>
-                      <th className="px-4 py-2">Edit</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {users.map((user) => (
-                        <tr
-                            key={user.usertag}
-                            className={`transition ${
-                                selected?.usertag === user.usertag ? "bg-cyan-900/30" : "hover:bg-cyan-900/10"
-                            }`}
+                <div className="flex flex-col md:flex-row gap-10 items-start w-full px-4 md:px-12">
+        {/* All Users Table */}
+        <div className="flex-1 min-w-[380px]">
+          <div className="bg-[#1b2435]/95 border border-cyan-900/40 rounded-2xl shadow-2xl p-6">
+            <h3 className="text-xl font-bold text-aqua mb-6">All Users</h3>
+            <div className="overflow-x-auto rounded border border-cyan-900/40 bg-[#162030] shadow p-4 max-h-80">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="text-cyan-300 bg-[#212e3c]">
+                    <th className="px-4 py-2 text-left">Display Name</th>
+                    <th className="px-4 py-2 text-left">Usertag</th>
+                    <th className="px-4 py-2 text-left">Tags</th>
+                    <th className="px-4 py-2">Color</th>
+                    <th className="px-4 py-2">Admin</th>
+                    <th className="px-4 py-2">Edit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <tr
+                      key={user.usertag}
+                      className={`transition ${selected?.usertag === user.usertag ? "bg-cyan-900/30" : "hover:bg-cyan-900/10"}`}
+                    >
+                      <td className="px-4 py-2 font-semibold" style={{ color: user.color || "#fff" }}>
+                        <Username
+                          animated={
+                            (user.animatedColors && user.animatedColors.length === 2)
+                            || user.role === "admin"
+                          }
+                          colors={user.animatedColors}
                         >
-                          <td className="px-4 py-2 font-semibold" style={{color: user.color || "#fff"}}>
-                            <Username
-                                animated={
-                                    (user.animatedColors && user.animatedColors.length === 2)
-                                    || user.role === "admin"
-                                }
-                                colors={user.animatedColors}
-                            >
-                              {user.username}
-                            </Username>
-                          </td>
-                          <td className="px-4 py-2 font-mono">@{user.usertag}</td>
-                          <td className="px-4 py-2">
-                            {(user.tags || []).map((tag) => (
-                                <span
-                                    key={tag}
-                                    className="inline-block bg-cyan-900/40 text-cyan-200 text-xs px-2 py-1 rounded-full mr-1 mb-1"
-                                >
+                          {user.username}
+                        </Username>
+                      </td>
+                      <td className="px-4 py-2 font-mono">@{user.usertag}</td>
+                      <td className="px-4 py-2">
+                        {(user.tags || []).map((tag) => (
+                          <span
+                            key={tag}
+                            className="inline-block bg-cyan-900/40 text-cyan-200 text-xs px-2 py-1 rounded-full mr-1 mb-1"
+                          >
                             {tag}
                           </span>
-                            ))}
-                          </td>
-                          <td className="px-4 py-2">
+                        ))}
+                      </td>
+                      <td className="px-4 py-2">
                         <span
-                            className="inline-block w-5 h-5 rounded-full border"
-                            style={{background: user.color || "#fff"}}
+                          className="inline-block w-5 h-5 rounded-full border"
+                          style={{ background: user.color || "#fff" }}
                         ></span>
-                          </td>
-                          <td className="px-4 py-2 text-center">
-                            {user.role === "admin" && "✔️"}
-                            {user.role === "moderator" && (
-                                <span
-                                    className="ml-1 px-2 py-0.5 bg-indigo-700/30 border border-indigo-400/50 text-indigo-200 rounded text-[11px] font-bold">
+                      </td>
+                      <td className="px-4 py-2 text-center">
+                        {user.role === "admin" && "✔️"}
+                        {user.role === "moderator" && (
+                          <span className="ml-1 px-2 py-0.5 bg-indigo-700/30 border border-indigo-400/50 text-indigo-200 rounded text-[11px] font-bold">
                             MOD
                           </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-2 text-center">
-                            <button
-                                className="px-3 py-1 rounded bg-aqua/60 text-midnight font-bold hover:bg-aqua/90 transition"
-                                onClick={() => {
-                                  setSelectedSession(null); // Close AI Score dialog if open
-                                  handleSelect(user);
-                                }}
-                            >
-                              Edit
-                            </button>
-                          </td>
-                        </tr>
-                    ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-            {/* AI Score Table */}
-            <div className="my-10 bg-[#1b2435]/90 border border-cyan-900/40 rounded-2xl shadow-2xl p-6">
-              <h3 className="text-xl font-bold text-aqua mb-6">AI Risk Scores (Debug)</h3>
-              <div className="overflow-x-auto rounded border border-cyan-900/40 bg-[#162030] shadow p-4 max-h-80">
-                <table className="min-w-full text-sm">
-                  <thead>
-                  <tr className="text-cyan-300 bg-[#212e3c]">
-                    <th className="px-4 py-2 text-left">Session/User ID</th>
-                    <th className="px-4 py-2 text-left">Risk Score</th>
-                    <th className="px-4 py-2">Actions</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  {Object.entries(aiScores).map(([id, score]) => (
-                      <tr key={id}>
-                        <td className="px-4 py-2 font-mono">{id}</td>
-                        <td className="px-4 py-2">{score}</td>
-                        <td className="px-4 py-2">
-                          <button
-                              className="px-3 py-1 rounded bg-yellow-400/80 text-black font-bold hover:bg-yellow-500 mr-2"
-                              onClick={() => {
-                                setSelected(null); // Close user panel if open
-                                setSelectedSession(id);
-                                setEditScore(score as number);
-                              }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                              className="px-3 py-1 bg-red-500 text-white rounded font-bold hover:bg-red-600"
-                              onClick={async () => {
-                                await fetch(`/api/admin/ai/scores/${id}`, {method: "DELETE", credentials: "include"});
-                                setAiScores(prev => {
-                                  const p = {...prev};
-                                  delete p[id];
-                                  return p;
-                                });
-                              }}
-                          >
-                            Reset
-                          </button>
-                        </td>
-                      </tr>
-                  ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            {/* User Editor Panel */}
-            {selected && (
-              <div className="w-full md:w-[400px] bg-[#18212e]/90 border border-cyan-900/40 rounded-2xl p-8 shadow-2xl sticky top-28">
-                <h3 className="text-xl font-bold text-aqua mb-4">Edit User</h3>
-                {/* Usertag */}
-                <div className="mb-5">
-                  <label className="block text-cyan-300 mb-1">Usertag</label>
-                  <span className="font-mono text-cyan-300 bg-cyan-900/30 px-3 py-2 rounded">
-                    @{selected.usertag}
-                  </span>
-                </div>
-
-                {/* Username */}
-                <div className="mb-5">
-                  <label className="block text-cyan-300 mb-1">Display Name</label>
-                  <input
-                    className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white mb-2 border border-cyan-800"
-                    value={edit.username || ""}
-                    onChange={(e) => setEdit({ ...edit, username: e.target.value })}
-                  />
-                  <button
-                    onClick={() => saveField({ username: edit.username })}
-                    className="bg-aqua text-midnight px-4 py-1 rounded font-bold text-sm hover:bg-cyan-400 transition mt-2"
-                  >
-                    Save
-                  </button>
-                </div>
-
-                {/* Color */}
-                <div className="mb-5">
-                  <label className="block text-cyan-300 mb-1">Color</label>
-                  <div className="flex gap-2 items-center mb-2">
-                    <input
-                      type="color"
-                      className="w-10 h-10 rounded border-2 border-cyan-800 bg-[#232e43] cursor-pointer"
-                      value={edit.color || "#ffffff"}
-                      onChange={(e) => setEdit({ ...edit, color: e.target.value })}
-                    />
-                    <input
-                      className="px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800 w-36"
-                      value={edit.color || ""}
-                      onChange={(e) => setEdit({ ...edit, color: e.target.value })}
-                      placeholder="#RRGGBB"
-                    />
-                  </div>
-                </div>
-
-                {/* Tags (uses TagDropdownOverlay!) */}
-                <div className="mb-5">
-                  <label className="block text-cyan-300 mb-1">Tags</label>
-                  <TagDropdownOverlay
-                    selectedTags={edit.tags || []}
-                    setTags={(newTags) => {
-                      setEdit({ ...edit, tags: newTags });
-                      saveField({ tags: newTags });
-                    }}
-                  />
-                </div>
-
-                {/* Bio */}
-                <div className="mb-5">
-                  <label className="block text-cyan-300 mb-1">Bio</label>
-                  <textarea
-                    className="w-full px-4 py-2 rounded bg-[#232e43] text-white mb-2"
-                    rows={2}
-                    value={edit.bio || ""}
-                    onChange={(e) => setEdit({ ...edit, bio: e.target.value })}
-                  />
-                  <button
-                    onClick={() => saveField({ bio: edit.bio })}
-                    className="bg-aqua text-midnight px-4 py-1 rounded font-bold text-sm hover:bg-cyan-400 transition mt-2"
-                  >
-                    Save
-                  </button>
-                </div>
-
-                {/* Reputation */}
-                <div className="mb-5">
-                  <label className="block text-cyan-300 mb-1">Reputation</label>
-                  <input
-                    type="number"
-                    className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800"
-                    value={edit.reputation ?? 0}
-                    min={0}
-                    max={100}
-                    onChange={(e) =>
-                      setEdit({ ...edit, reputation: parseInt(e.target.value) })
-                    }
-                  />
-                  <ReputationBar rep={edit.reputation ?? 0} />
-                  <button
-                    onClick={() => saveField({ reputation: edit.reputation })}
-                    className="bg-aqua text-midnight px-4 py-1 rounded font-bold text-sm hover:bg-cyan-400 transition mt-2"
-                  >
-                    Save
-                  </button>
-                </div>
-
-                {/* Balance */}
-                <div className="mb-5">
-                  <label className="block text-cyan-300 mb-1">Balance</label>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => adjustBalance(100)}
-                      className="bg-green-500 hover:bg-green-600 text-white font-bold px-3 py-1 rounded"
-                    >
-                      +100
-                    </button>
-                    <button
-                      onClick={() => adjustBalance(-100)}
-                      className="bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-1 rounded"
-                    >
-                      -100
-                    </button>
-                  </div>
-                </div>
-
-                {/* Animated Colors */}
-                <div className="mb-5">
-                  <label className="block text-cyan-300 mb-1">Animated Username Colors</label>
-                  <div className="flex gap-4 items-center">
-                    <input
-                      type="color"
-                      value={edit.animatedColors?.[0] || "#18f0ff"}
-                      onChange={(e) => {
-                        const newColors = [e.target.value, edit.animatedColors?.[1] || "#d275fa"];
-                        setEdit({ ...edit, animatedColors: newColors });
-                        saveField({ animatedColors: newColors });
-                      }}
-                      className="w-10 h-10 rounded border-2 border-cyan-800 cursor-pointer"
-                    />
-                    <span className="text-cyan-300">→</span>
-                    <input
-                      type="color"
-                      value={edit.animatedColors?.[1] || "#d275fa"}
-                      onChange={(e) => {
-                        const newColors = [edit.animatedColors?.[0] || "#18f0ff", e.target.value];
-                        setEdit({ ...edit, animatedColors: newColors });
-                        saveField({ animatedColors: newColors });
-                      }}
-                      className="w-10 h-10 rounded border-2 border-cyan-800 cursor-pointer"
-                    />
-                  </div>
-                </div>
-
-                {/* Role */}
-                <div className="mb-5">
-                  <label className="block text-cyan-300 mb-1">Role</label>
-                  <select
-                    className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800"
-                    value={edit.role || selected.role || "user"}
-                    onChange={(e) => {
-                      const role = e.target.value;
-                      setEdit({ ...edit, role });
-                      saveField({ role });
-                    }}
-                  >
-                    <option value="user">User</option>
-                    <option value="moderator">Moderator</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-
-                {successMsg && <div className="text-green-400 mt-2">{successMsg}</div>}
-              </div>
-            )}
-
-            {/* AI Risk Score Editor Dialog */}
-            {selectedSession && (
-                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-                  <div className="bg-[#212940] p-8 rounded-2xl shadow-2xl">
-                    <h3 className="text-lg font-bold mb-3">Edit AI Risk Score for <span
-                        className="font-mono">{selectedSession}</span></h3>
-                    <input
-                        className="mb-4 px-4 py-2 border rounded text-black"
-                        type="number"
-                        value={editScore}
-                        onChange={e => setEditScore(Number(e.target.value))}
-                    />
-                    <div>
-                      <button
-                          className="px-5 py-2 bg-aqua text-black rounded font-bold mr-4"
-                          onClick={async () => {
-                            await fetch(`/api/admin/ai/scores/${selectedSession}`, {
-                              method: "POST",
-                              headers: {"Content-Type": "application/json"},
-                              credentials: "include",
-                              body: JSON.stringify({score: editScore}),
-                            });
-                            setAiScores(prev => ({...prev, [selectedSession]: editScore}));
-                            setSelectedSession(null);
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-center">
+                        <button
+                          className="px-3 py-1 rounded bg-aqua/60 text-midnight font-bold hover:bg-aqua/90 transition"
+                          onClick={() => {
+                            setSelected(user); // Select user for editing
+                            setSelectedSession(null); // Close AI score edit dialog if open
                           }}
-                      >
-                        Save
-                      </button>
-                      <button
-                          className="px-4 py-2 bg-gray-500 text-white rounded"
-                          onClick={() => setSelectedSession(null)}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </div>
-            )}
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-        {showStats && <AdminStatsPanel onClose={() => setShowStats(false)}/>}
+
+        {/* AI Risk Score Table */}
+        <div className="my-10 bg-[#1b2435]/90 border border-cyan-900/40 rounded-2xl shadow-2xl p-6">
+          <h3 className="text-xl font-bold text-aqua mb-6">AI Risk Scores (Debug)</h3>
+          <div className="overflow-x-auto rounded border border-cyan-900/40 bg-[#162030] shadow p-4 max-h-80">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-cyan-300 bg-[#212e3c]">
+                  <th className="px-4 py-2 text-left">Session/User ID</th>
+                  <th className="px-4 py-2 text-left">Risk Score</th>
+                  <th className="px-4 py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(aiScores).map(([id, score]) => (
+                  <tr key={id}>
+                    <td className="px-4 py-2 font-mono">{id}</td>
+                    <td className="px-4 py-2">{score}</td>
+                    <td className="px-4 py-2">
+                      <button
+                        className="px-3 py-1 rounded bg-yellow-400/80 text-black font-bold hover:bg-yellow-500 mr-2"
+                        onClick={() => {
+                          setSelected(null); // Close user panel if open
+                          setSelectedSession(id); // Open AI score editor
+                          setEditScore(score as number);
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="px-3 py-1 bg-red-500 text-white rounded font-bold hover:bg-red-600"
+                        onClick={async () => {
+                          await fetch(`/api/admin/ai/scores/${id}`, { method: "DELETE", credentials: "include" });
+                          setAiScores(prev => { const p = { ...prev }; delete p[id]; return p; });
+                        }}
+                      >
+                        Reset
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* USER EDIT PANEL (with TagDropdownOverlay etc) */}
+        {selected && !selectedSession && (
+          <div className="w-full md:w-[400px] bg-[#18212e]/90 border border-cyan-900/40 rounded-2xl p-8 shadow-2xl sticky top-28">
+            <h3 className="text-xl font-bold text-aqua mb-4">Edit User</h3>
+            {/* Usertag */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Usertag</label>
+              <span className="font-mono text-cyan-300 bg-cyan-900/30 px-3 py-2 rounded">
+                @{selected.usertag}
+              </span>
+            </div>
+            {/* Username */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Display Name</label>
+              <input
+                className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white mb-2 border border-cyan-800"
+                value={edit.username || ""}
+                onChange={(e) => setEdit({ ...edit, username: e.target.value })}
+              />
+              <button
+                onClick={() => saveField({ username: edit.username })}
+                className="bg-aqua text-midnight px-4 py-1 rounded font-bold text-sm hover:bg-cyan-400 transition mt-2"
+              >
+                Save
+              </button>
+            </div>
+            {/* Color */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Color</label>
+              <div className="flex gap-2 items-center mb-2">
+                <input
+                  type="color"
+                  className="w-10 h-10 rounded border-2 border-cyan-800 bg-[#232e43] cursor-pointer"
+                  value={edit.color || "#ffffff"}
+                  onChange={(e) => setEdit({ ...edit, color: e.target.value })}
+                />
+                <input
+                  className="px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800 w-36"
+                  value={edit.color || ""}
+                  onChange={(e) => setEdit({ ...edit, color: e.target.value })}
+                  placeholder="#RRGGBB"
+                />
+              </div>
+            </div>
+            {/* Tags */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Tags</label>
+              <TagDropdownOverlay
+                selectedTags={edit.tags || []}
+                setTags={(newTags) => {
+                  setEdit({ ...edit, tags: newTags });
+                  saveField({ tags: newTags });
+                }}
+              />
+            </div>
+            {/* Bio */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Bio</label>
+              <textarea
+                className="w-full px-4 py-2 rounded bg-[#232e43] text-white mb-2"
+                rows={2}
+                value={edit.bio || ""}
+                onChange={(e) => setEdit({ ...edit, bio: e.target.value })}
+              />
+              <button
+                onClick={() => saveField({ bio: edit.bio })}
+                className="bg-aqua text-midnight px-4 py-1 rounded font-bold text-sm hover:bg-cyan-400 transition mt-2"
+              >
+                Save
+              </button>
+            </div>
+            {/* Reputation */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Reputation</label>
+              <input
+                type="number"
+                className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800"
+                value={edit.reputation ?? 0}
+                min={0}
+                max={100}
+                onChange={(e) =>
+                  setEdit({ ...edit, reputation: parseInt(e.target.value) })
+                }
+              />
+              <ReputationBar rep={edit.reputation ?? 0} />
+              <button
+                onClick={() => saveField({ reputation: edit.reputation })}
+                className="bg-aqua text-midnight px-4 py-1 rounded font-bold text-sm hover:bg-cyan-400 transition mt-2"
+              >
+                Save
+              </button>
+            </div>
+            {/* Balance */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Balance</label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => adjustBalance(100)}
+                  className="bg-green-500 hover:bg-green-600 text-white font-bold px-3 py-1 rounded"
+                >
+                  +100
+                </button>
+                <button
+                  onClick={() => adjustBalance(-100)}
+                  className="bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-1 rounded"
+                >
+                  -100
+                </button>
+              </div>
+            </div>
+            {/* Animated Colors */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Animated Username Colors</label>
+              <div className="flex gap-4 items-center">
+                <input
+                  type="color"
+                  value={edit.animatedColors?.[0] || "#18f0ff"}
+                  onChange={(e) => {
+                    const newColors = [e.target.value, edit.animatedColors?.[1] || "#d275fa"];
+                    setEdit({ ...edit, animatedColors: newColors });
+                    saveField({ animatedColors: newColors });
+                  }}
+                  className="w-10 h-10 rounded border-2 border-cyan-800 cursor-pointer"
+                />
+                <span className="text-cyan-300">→</span>
+                <input
+                  type="color"
+                  value={edit.animatedColors?.[1] || "#d275fa"}
+                  onChange={(e) => {
+                    const newColors = [edit.animatedColors?.[0] || "#18f0ff", e.target.value];
+                    setEdit({ ...edit, animatedColors: newColors });
+                    saveField({ animatedColors: newColors });
+                  }}
+                  className="w-10 h-10 rounded border-2 border-cyan-800 cursor-pointer"
+                />
+              </div>
+            </div>
+            {/* Role */}
+            <div className="mb-5">
+              <label className="block text-cyan-300 mb-1">Role</label>
+              <select
+                className="w-full px-4 py-2 rounded-lg bg-[#232e43] text-white border border-cyan-800"
+                value={edit.role || selected.role || "user"}
+                onChange={(e) => {
+                  const role = e.target.value;
+                  setEdit({ ...edit, role });
+                  saveField({ role });
+                }}
+              >
+                <option value="user">User</option>
+                <option value="moderator">Moderator</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            {successMsg && <div className="text-green-400 mt-2">{successMsg}</div>}
+          </div>
+        )}
+        {/* AI Score Editor */}
+        {selectedSession && !selected && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+            <div className="bg-[#212940] p-8 rounded-2xl shadow-2xl">
+              <h3 className="text-lg font-bold mb-3">
+                Edit AI Risk Score for <span className="font-mono">{selectedSession}</span>
+              </h3>
+              <input
+                className="mb-4 px-4 py-2 border rounded text-black"
+                type="number"
+                value={editScore}
+                onChange={e => setEditScore(Number(e.target.value))}
+              />
+              <div>
+                <button
+                  className="px-5 py-2 bg-aqua text-black rounded font-bold mr-4"
+                  onClick={async () => {
+                    await fetch(`/api/admin/ai/scores/${selectedSession}`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      credentials: "include",
+                      body: JSON.stringify({ score: editScore }),
+                    });
+                    setAiScores(prev => ({ ...prev, [selectedSession]: editScore }));
+                    setSelectedSession(null);
+                  }}
+                >
+                  Save
+                </button>
+                <button
+                  className="px-4 py-2 bg-gray-500 text-white rounded"
+                  onClick={() => setSelectedSession(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-  );
+    </div>
+    {showStats && <AdminStatsPanel onClose={() => setShowStats(false)} />}
+  </div>
+);
 }
 
 export function TagDropdownOverlay({
