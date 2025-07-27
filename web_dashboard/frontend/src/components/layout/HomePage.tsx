@@ -13,7 +13,7 @@ export default function HomePage() {
             <img
               src="/logo_for_website.png"
               alt="vanish.rip logo"
-              className="max-w-xs w-full h-auto rounded-xl shadow-lg drop-shadow-lg border "
+              className="max-w-xs w-full h-auto rounded-xl shadow-lg drop-shadow-lg"
               draggable={false}
               style={{
                 filter: "drop-shadow(0 0 32px #18f0ff66)"
