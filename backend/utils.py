@@ -20,6 +20,10 @@ TIMELINE_PATH = "/opt/whitebot/launch_timeline.json"  # or wherever is safe
 WALLET_RPC_PORT = 18083
 wallet = Wallet(JSONRPCWallet(port=WALLET_RPC_PORT))
 
+# Logger
+logger = logging.getLogger("whitebot.debug")
+logger.setLevel(logging.INFO)
+
 # --- User Functions ---
 def get_user_by_usertag(usertag):
     conn = sqlite3.connect(DB_PATH)
@@ -370,7 +374,6 @@ def write_timeline(data):
         json.dump(data, f)
 
 def send_to_ai(event_type, data):
-    logging.basicConfig(level=logging.INFO)
     logging.info(f"AI Event: {event_type} {data}")
 
     """Send a background event to AI brain. Non-blocking."""
