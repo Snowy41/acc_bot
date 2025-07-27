@@ -71,7 +71,7 @@ export default function Sidebar({
       }
     };
     // Check repeatedly during animation
-    let anim: NodeJS.Timeout;
+    let anim: any;
     const poll = () => {
       checkWidth();
       if (!canShowText) anim = setTimeout(poll, 16);
