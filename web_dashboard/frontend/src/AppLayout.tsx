@@ -245,15 +245,17 @@ function AppLayout() {
     <>
       <ParticleBackground />
       <div className="flex min-h-screen relative z-10">
-        <Sidebar
-          active={active}
-          setActive={setActive}
-          isAdmin={isAdmin}
-          isPremium={isPremium}
-          unreadDM={unreadDMCount}
-          sidebarChatPopups={sidebarChatPopups}
-          clearSidebarChatPopups={() => setSidebarChatPopups([])}
-        />
+        <div className="fixed top-4 left-4 z-40 flex flex-col bg-[#162330]/80 border border-cyan-900/40 backdrop-blur-md px-0 py-2 rounded-2xl shadow-lg w-60">
+          <Sidebar
+            active={active}
+            setActive={setActive}
+            isAdmin={isAdmin}
+            isPremium={isPremium}
+            unreadDM={unreadDMCount}
+            sidebarChatPopups={sidebarChatPopups}
+            clearSidebarChatPopups={() => setSidebarChatPopups([])}
+          />
+        </div>
         <SearchBar />
         <div className="fixed top-4 right-4 z-40 flex items-center gap-4 pr-2 bg-[#162330]/60 border border-cyan-900/40 backdrop-blur-md px-4 py-1 rounded-full shadow-lg">
           <NotificationBell
