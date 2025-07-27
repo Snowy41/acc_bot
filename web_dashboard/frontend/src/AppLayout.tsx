@@ -245,7 +245,7 @@ function AppLayout() {
     <>
       <ParticleBackground />
       <div className="flex min-h-screen relative z-10">
-        <div className="fixed top-4 left-4 z-40 flex flex-col bg-[#162330]/80 border border-cyan-900/40 backdrop-blur-md px-0 py-2 rounded-2xl shadow-lg w-60">
+        <div className="fixed top-0 left-0 z-50 h-screen w-60">
           <Sidebar
             active={active}
             setActive={setActive}
