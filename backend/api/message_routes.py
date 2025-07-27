@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify, session
 import time
 import uuid
-from backend.utils import get_chat_messages, save_chat_message, get_user_by_usertag, save_user, public_message_dict
+from backend.utils import get_chat_messages, save_chat_message, get_user_by_usertag, save_user, public_message_dict, \
+    send_to_ai, get_session_risk
 
 message_bp = Blueprint("message", __name__)
 
@@ -17,6 +18,9 @@ def get_messages(friend_tag):
 @message_bp.route("/api/messages/<friend_tag>", methods=["POST"])
 def send_message(friend_tag):
     current_user = session.get("username")
+    risk = get_session_risk(session.get("id", current_user))
+    if risk > 6:
+        return jsonify({"error": "Your session is restricted for security reasons."}), 403
     if not current_user:
         return jsonify({"error": "Not logged in"}), 401
 
@@ -44,6 +48,15 @@ def send_message(friend_tag):
             "message": f"💬 Message from @{current_user}",
             "timestamp": timestamp,
         })
+
+    send_to_ai("chat_message", {
+        "from": current_user,
+        "to": friend_tag,
+        "text": text,
+        "timestamp": timestamp,
+        "session_id": session.get("id", current_user)
+    })
+
     save_user(recipient)
     return jsonify({"success": True})
 

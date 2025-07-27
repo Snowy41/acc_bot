@@ -5,6 +5,7 @@ import time
 import hashlib
 from monero.wallet import Wallet
 from monero.backends.jsonrpc import JSONRPCWallet
+import requests
 
 # --- DB Paths ---
 DB_PATH = os.path.abspath("./db/users.db")
@@ -366,6 +367,30 @@ def read_timeline():
 def write_timeline(data):
     with open(TIMELINE_PATH, "w") as f:
         json.dump(data, f)
+
+def send_to_ai(event_type, data):
+    """Send a background event to AI brain. Non-blocking."""
+    try:
+        requests.post(
+            "http://127.0.0.1:5005/ai/event",
+            json={"event": event_type, **data},
+            timeout=0.2
+        )
+    except Exception as e:
+        print(f"[AI Security Brain] Send failed: {e}")
+
+def get_session_risk(session_id):
+    """Get risk score for current session or usertag."""
+    try:
+        r = requests.get(
+            "http://127.0.0.1:5005/ai/session-risk",
+            params={"session_id": session_id},
+            timeout=0.2
+        )
+        return r.json().get("score", 0)
+    except Exception:
+        return 0
+
 
 def public_user_dict(user):
     """Return a public-safe user dict (no password, admin, etc)."""

@@ -8,7 +8,7 @@ from backend.utils import (
     get_user_by_usertag,
     save_forum_post,
     load_forum,
-    add_forum_comment, public_post_dict
+    add_forum_comment, public_post_dict, send_to_ai, get_session_risk
 )
 from main import limiter
 
@@ -37,6 +37,9 @@ def create_forum_post():
     if not all(data.get(field) for field in required_fields):
         return jsonify({"error": "Missing fields"}), 400
 
+    risk = get_session_risk(session.get("id", data["usertag"]))
+    if risk > 6:
+        return jsonify({"error": "Posting restricted for security reasons."}), 403
     if data["category"] == "marketplace":
         try:
             parsed = json.loads(data["content"])
@@ -64,6 +67,16 @@ def create_forum_post():
         "timestamp": int(time.time() * 1000),
         "is_announcement": is_announcement
     }
+
+    send_to_ai("forum_post", {
+        "usertag": data["usertag"],
+        "username": data["username"],
+        "title": data["title"],
+        "text": data["content"],
+        "category": data["category"],
+        "session_id": session.get("id", data["usertag"])
+    })
+
     save_forum_post(post)
     return jsonify({"success": True, "post": public_post_dict(post)})
 
@@ -97,11 +110,21 @@ def delete_forum_post(post_id):
 @forum_bp.route("/api/forum/posts/<post_id>/comments", methods=["POST"])
 def add_comment(post_id):
     data = request.json
+    risk = get_session_risk(session.get("id", data["usertag"]))
+    if risk > 6:
+        return jsonify({"error": "Your session is restricted for security reasons."}), 403
     comment = {
         "usertag": data["usertag"],
         "username": data["username"],
         "text": data["text"],
         "timestamp": int(time.time() * 1000)
     }
+    send_to_ai("forum_comment", {
+        "usertag": data["usertag"],
+        "username": data["username"],
+        "text": data["text"],
+        "post_id": post_id,
+        "session_id": session.get("id", data["usertag"])
+    })
     add_forum_comment(post_id, comment)
     return jsonify({"success": True})
