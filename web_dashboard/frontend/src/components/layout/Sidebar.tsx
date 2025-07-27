@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect, useRef} from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   HomeIcon,
@@ -44,7 +44,9 @@ export default function Sidebar({
 
   const [open, setOpen] = useState(true);
   const location = useLocation();
-  const [showText, setShowText] = useState(open);
+
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const [canShowText, setCanShowText] = useState(open);
 
   useEffect(() => {
     const currentPath = location.pathname;
@@ -55,13 +57,27 @@ export default function Sidebar({
   }, [location, setActive]);
 
 
+
   useEffect(() => {
-    if (open) {
-      const timer = setTimeout(() => setShowText(true), 230); // match your sidebar transition
-      return () => clearTimeout(timer);
-    } else {
-      setShowText(false);
+    if (!open) {
+      setCanShowText(false);
+      return;
     }
+    const checkWidth = () => {
+      if (sidebarRef.current && sidebarRef.current.offsetWidth >= 190) {
+        setCanShowText(true);
+      } else {
+        setCanShowText(false);
+      }
+    };
+    // Check repeatedly during animation
+    let anim: NodeJS.Timeout;
+    const poll = () => {
+      checkWidth();
+      if (!canShowText) anim = setTimeout(poll, 16);
+    };
+    poll();
+    return () => clearTimeout(anim);
   }, [open]);
 
   return (
@@ -98,6 +114,7 @@ export default function Sidebar({
 
     {/* Main Sidebar */}
     <div
+      ref={sidebarRef}
       className={`
         flex flex-col h-screen transition-all duration-300 z-20
         ${open ? "w-60" : "w-20"}
@@ -145,7 +162,7 @@ export default function Sidebar({
             item={item}
             open={open}
             active={active}
-            showText={showText}
+            canShowText={canShowText}
             setActive={setActive}
           />
         ))}
@@ -206,7 +223,7 @@ export default function Sidebar({
               item={item}
               open={open}
               active={active}
-              showText={showText}
+              canShowText={canShowText}
               setActive={setActive}
               unread={item.key === "messages" ? unreadDM : 0}
             />
@@ -224,18 +241,17 @@ export default function Sidebar({
 function SidebarItem({
   item,
   open,
+  canShowText,
   active,
-  showText,
   setActive,
-  unread = 0, // <--- add default
+  unread = 0,
 }: {
   item: { name: string; icon: any; key: string; path: string };
   open: boolean;
+  canShowText: boolean;
   active: string;
-  showText: boolean;
   setActive: (k: string) => void;
   unread?: number;
-
 }) {
   const isActive = active === item.key;
 
@@ -266,17 +282,12 @@ function SidebarItem({
           }
         `}
       />
-      {showText && (
+      {canShowText && (
         <span
           className={`font-semibold tracking-wide text-[1.08rem] transition-all duration-200 whitespace-nowrap overflow-hidden
             ${isActive ? "text-midnight" : "text-cyan-50 group-hover:text-aqua"}
             ${open ? "opacity-100 pl-2" : "opacity-0 pl-0"}
           `}
-          style={{
-            transitionProperty: "opacity,padding-left",
-            transitionDuration: "250ms",
-            transitionDelay: open ? "80ms" : "0ms"
-          }}
         >
           {item.name}
         </span>
@@ -284,7 +295,7 @@ function SidebarItem({
       {isActive && (
         <span className="absolute -left-2 top-1/2 -translate-y-1/2 h-5 w-1 rounded-full bg-aqua shadow-lg blur-[1px]"></span>
       )}
-            {item.key === "messages" && unread > 0 && (
+      {item.key === "messages" && unread > 0 && (
         <span className="absolute right-2 top-3 bg-aqua text-midnight text-xs px-2 rounded-full shadow animate-pulse">
           {unread}
         </span>
