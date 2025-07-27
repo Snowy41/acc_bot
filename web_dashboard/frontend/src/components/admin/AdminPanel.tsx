@@ -327,7 +327,7 @@ export default function AdminPanel() {
           <div className="bg-[#1b2435]/95 border border-cyan-900/40 rounded-2xl shadow-2xl p-6">
             <h3 className="text-xl font-bold text-aqua mb-6">All Users</h3>
             <div className="rounded border border-cyan-900/40 bg-[#162030] shadow p-4 max-h-96 overflow-y-auto">
-              <table className="min-w-full text-sm table-fixed">
+              <table className="w-full text-sm">
                 <thead>
                   <tr className="text-cyan-300 bg-[#212e3c]">
                     <th className="px-4 py-2 text-left">Display Name</th>
@@ -335,7 +335,7 @@ export default function AdminPanel() {
                     <th className="px-4 py-2 text-left">Tags</th>
                     <th className="px-4 py-2">Color</th>
                     <th className="px-4 py-2">Admin</th>
-                    <th className="px-4 py-2">Edit</th>
+                    <th className="px-4 py-2 w-20">Edit</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -344,7 +344,7 @@ export default function AdminPanel() {
                       key={user.usertag}
                       className={`transition ${selected?.usertag === user.usertag ? "bg-cyan-900/30" : "hover:bg-cyan-900/10"}`}
                     >
-                      <td className="px-4 py-2 font-semibold" style={{ color: user.color || "#fff" }}>
+                      <td className="px-4 py-2 font-semibold truncate max-w-[120px]" style={{ color: user.color || "#fff" }}>
                         <Username
                           animated={
                             (user.animatedColors && user.animatedColors.length === 2)
@@ -355,8 +355,8 @@ export default function AdminPanel() {
                           {user.username}
                         </Username>
                       </td>
-                      <td className="px-4 py-2 font-mono">@{user.usertag}</td>
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-2 font-mono truncate max-w-[120px]">@{user.usertag}</td>
+                      <td className="px-4 py-2 whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]">
                         {(user.tags || []).map((tag) => (
                           <span
                             key={tag}
@@ -380,7 +380,7 @@ export default function AdminPanel() {
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-2 text-center">
+                      <td className="px-4 py-2 w-20 text-center">
                         <button
                           className="px-3 py-1 rounded bg-aqua/60 text-midnight font-bold hover:bg-aqua/90 transition"
                           onClick={() => {
