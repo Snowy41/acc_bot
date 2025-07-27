@@ -121,7 +121,7 @@ export default function Sidebar({
         relative
       `}
       style={{
-        backgroundColor: "rgba(16, 24, 41, 0.80)",
+        backgroundColor: "rgba(16, 24, 41, 0.50)",
         boxShadow:
           "8px 0 24px 0 #19e3f566, 0 4px 40px 0 #18f0ff18, 0 0px 0px 1px #1bd6e811",
         borderRight: "2.5px solid rgba(18,244,255,0.09)"
