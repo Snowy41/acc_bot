@@ -323,7 +323,81 @@ export default function AdminPanel() {
       <div className="flex flex-row gap-10 w-full px-4 md:px-12 mb-16">
         {/* All Users Table */}
         <div className="flex-1 min-w-[380px]">
-          {/* ... All Users Table ... */}
+          <div className="flex-1 min-w-[380px]">
+          <div className="bg-[#1b2435]/95 border border-cyan-900/40 rounded-2xl shadow-2xl p-6">
+            <h3 className="text-xl font-bold text-aqua mb-6">All Users</h3>
+            <div className="overflow-x-auto rounded border border-cyan-900/40 bg-[#162030] shadow p-4 max-h-80">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="text-cyan-300 bg-[#212e3c]">
+                    <th className="px-4 py-2 text-left">Display Name</th>
+                    <th className="px-4 py-2 text-left">Usertag</th>
+                    <th className="px-4 py-2 text-left">Tags</th>
+                    <th className="px-4 py-2">Color</th>
+                    <th className="px-4 py-2">Admin</th>
+                    <th className="px-4 py-2">Edit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <tr
+                      key={user.usertag}
+                      className={`transition ${selected?.usertag === user.usertag ? "bg-cyan-900/30" : "hover:bg-cyan-900/10"}`}
+                    >
+                      <td className="px-4 py-2 font-semibold" style={{ color: user.color || "#fff" }}>
+                        <Username
+                          animated={
+                            (user.animatedColors && user.animatedColors.length === 2)
+                            || user.role === "admin"
+                          }
+                          colors={user.animatedColors}
+                        >
+                          {user.username}
+                        </Username>
+                      </td>
+                      <td className="px-4 py-2 font-mono">@{user.usertag}</td>
+                      <td className="px-4 py-2">
+                        {(user.tags || []).map((tag) => (
+                          <span
+                            key={tag}
+                            className="inline-block bg-cyan-900/40 text-cyan-200 text-xs px-2 py-1 rounded-full mr-1 mb-1"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </td>
+                      <td className="px-4 py-2">
+                        <span
+                          className="inline-block w-5 h-5 rounded-full border"
+                          style={{ background: user.color || "#fff" }}
+                        ></span>
+                      </td>
+                      <td className="px-4 py-2 text-center">
+                        {user.role === "admin" && "✔️"}
+                        {user.role === "moderator" && (
+                          <span className="ml-1 px-2 py-0.5 bg-indigo-700/30 border border-indigo-400/50 text-indigo-200 rounded text-[11px] font-bold">
+                            MOD
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-center">
+                        <button
+                          className="px-3 py-1 rounded bg-aqua/60 text-midnight font-bold hover:bg-aqua/90 transition"
+                          onClick={() => {
+                            setSelected(user); // Select user for editing
+                            setSelectedSession(null); // Close AI score edit dialog if open
+                          }}
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
         </div>
         {/* Edit User Panel (next to users table, only when selected and not editing AI) */}
         {selected && !selectedSession && (
