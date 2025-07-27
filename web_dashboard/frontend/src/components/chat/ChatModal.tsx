@@ -42,6 +42,7 @@ export default function ChatModal({
   const [friendAvatar, setFriendAvatar] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [dmError, setDmError] = useState<string | null>(null);
 
   // Fetch avatar and online status
   useEffect(() => {
@@ -64,6 +65,7 @@ export default function ChatModal({
         setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
       });
   }, [friend]);
+
 
   // Listen for new DMs
   useEffect(() => {
@@ -88,6 +90,18 @@ export default function ChatModal({
       setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: "smooth" }), 150);
     }
   }, [pendingEmbed]);
+
+  // Handle Error Messages (for example, if a user is blocked or permission denied)
+  useEffect(() => {
+    const errorHandler = (data: { error: string, risk?: number }) => {
+      setDmError(data.error || "Unknown error");
+      setTimeout(() => setDmError(null), 6000); // auto-hide after 6 seconds
+    };
+    socket.on("dm_error", errorHandler);
+    return () => {
+      socket.off("dm_error", errorHandler);
+    };
+  }, []);
 
   // --- Send Message (with optional embed) ---
   const sendMessage = () => {
@@ -249,6 +263,23 @@ export default function ChatModal({
               </div>
             </div>
           )}
+
+        {/* ERROR MESSAGE */}
+        {dmError && (
+          <div style={{
+            background: '#1e293b',
+            color: '#ffecb3',
+            border: '2px solid #ffb300',
+            padding: '12px',
+            borderRadius: '12px',
+            margin: '12px 0',
+            fontWeight: 'bold',
+            fontSize: '1.06rem'
+          }}>
+            {dmError}
+          </div>
+        )}
+
         {/* INPUT */}
         <div className="flex items-center gap-2 px-6 py-5 bg-[#1b2537]/90 border-t border-cyan-800">
           {/* Preview Embed ABOVE the input row */}

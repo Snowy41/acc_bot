@@ -102,7 +102,10 @@ def handle_dm(data):
     # === AI Risk Check ===
     risk = get_session_risk(session.get("id", sender))
     if risk > 9:
-        emit("dm_error", {"error": "Your session is restricted for security reasons."}, room=request.sid)
+        emit("dm_error", {
+            "error": f"Blocked by OpSec AI: risk score {risk}. (DENIED: {text[:80]})",
+            "risk": risk
+        })
         return
 
     if not sender or not to or not text:
