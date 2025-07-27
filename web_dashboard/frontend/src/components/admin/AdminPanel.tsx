@@ -326,8 +326,8 @@ export default function AdminPanel() {
           <div className="flex-1 min-w-[380px]">
           <div className="bg-[#1b2435]/95 border border-cyan-900/40 rounded-2xl shadow-2xl p-6">
             <h3 className="text-xl font-bold text-aqua mb-6">All Users</h3>
-            <div className="overflow-x-auto rounded border border-cyan-900/40 bg-[#162030] shadow p-4 max-h-80">
-              <table className="min-w-full text-sm">
+            <div className="rounded border border-cyan-900/40 bg-[#162030] shadow p-4 max-h-96 overflow-y-auto">
+              <table className="min-w-full text-sm table-fixed">
                 <thead>
                   <tr className="text-cyan-300 bg-[#212e3c]">
                     <th className="px-4 py-2 text-left">Display Name</th>
