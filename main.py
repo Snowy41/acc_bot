@@ -1,4 +1,6 @@
 import eventlet
+eventlet.monkey_patch()
+
 import threading
 import traceback
 
@@ -165,5 +167,4 @@ threading.Thread(target=poll_xmr_and_credit, daemon=True).start()
 
 
 # --- Gunicorn/Eventlet WSGI Setup ---
-eventlet.monkey_patch()
 application = app
