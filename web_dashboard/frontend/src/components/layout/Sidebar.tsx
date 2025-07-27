@@ -55,7 +55,7 @@ export default function Sidebar({
 
 
   return (
-  <div className="relative h-screen">
+  <div className="relative">
     {/* Sidebar DM Popup */}
     {sidebarChatPopups && sidebarChatPopups.length > 0 && (
       <div className="fixed left-7 bottom-8 z-50 animate__animated animate__fadeInUp pointer-events-auto">
@@ -89,7 +89,7 @@ export default function Sidebar({
     {/* Main Sidebar */}
     <div
       className={`
-        flex flex-col h-screen transition-all duration-300 z-20
+        flex flex-col transition-all duration-300 z-20
         ${open ? "w-60" : "w-20"}
         border-r border-cyan-800/40
         shadow-[8px_0_28px_0_rgba(21,235,255,0.13)]
