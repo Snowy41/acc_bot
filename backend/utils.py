@@ -1,12 +1,15 @@
 import logging
+import sys
 import os
 import sqlite3
 import json
 import time
 import hashlib
+import requests
+
 from monero.wallet import Wallet
 from monero.backends.jsonrpc import JSONRPCWallet
-import requests
+
 
 # --- DB Paths ---
 DB_PATH = os.path.abspath("./db/users.db")
@@ -20,9 +23,14 @@ TIMELINE_PATH = "/opt/whitebot/launch_timeline.json"  # or wherever is safe
 WALLET_RPC_PORT = 18083
 wallet = Wallet(JSONRPCWallet(port=WALLET_RPC_PORT))
 
-# Logger
 logger = logging.getLogger("whitebot.debug")
 logger.setLevel(logging.INFO)
+if not logger.hasHandlers():
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 # --- User Functions ---
 def get_user_by_usertag(usertag):
@@ -374,7 +382,7 @@ def write_timeline(data):
         json.dump(data, f)
 
 def send_to_ai(event_type, data):
-    logging.info(f"AI Event: {event_type} {data}")
+    logger.info(f"AI Event: {event_type} {data}")
 
     """Send a background event to AI brain. Non-blocking."""
 
