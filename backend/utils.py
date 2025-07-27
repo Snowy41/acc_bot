@@ -1,3 +1,4 @@
+import logging
 import os
 import sqlite3
 import json
@@ -369,7 +370,8 @@ def write_timeline(data):
         json.dump(data, f)
 
 def send_to_ai(event_type, data):
-    print(f"AI Event: {event_type} {data}", flush=True)
+    logging.basicConfig(level=logging.INFO)
+    logging.info(f"AI Event: {event_type} {data}")
 
     """Send a background event to AI brain. Non-blocking."""
 
