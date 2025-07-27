@@ -6,35 +6,47 @@ export default function HomePage() {
   // Terminal-style intro loading animation
   const [loadingDone, setLoadingDone] = useState(false);
   const [terminalText, setTerminalText] = useState("");
-  const fullText = [
-    "Initializing secure connection...",
-    "Authenticating via onion relay...",
-    "Bypassing surface web...",
-    "Decrypted handshake complete.",
-    "Access granted. Welcome to vanish.rip."
-  ];
+    const fullText = [
+      "Initializing secure connection...",
+      "Authenticating via onion relay...",
+      "Bypassing surface web...",
+      "Decrypted handshake complete.",
+      "Access granted. Welcome to vanish.rip."
+    ];
 
-  useEffect(() => {
-    let i = 0, line = 0, currentLine = "";
-    function typeNext() {
-      if (line < fullText.length) {
-        if (i < fullText[line].length) {
-          setTerminalText(prev => prev + fullText[line][i]);
-          i++;
-          setTimeout(typeNext, 26);
+
+    useEffect(() => {
+      let line = 0;
+      let char = 0;
+      let running = true;
+      let content = "";
+
+      function typeNext() {
+        if (!running) return;
+        if (line < fullText.length) {
+          if (char < fullText[line].length) {
+            content += fullText[line][char];
+            setTerminalText(content + (char % 2 === 0 ? "|" : " ")); // blinking cursor effect
+            char++;
+            setTimeout(typeNext, 22);
+          } else {
+            content += "\n";
+            setTerminalText(content);
+            line++;
+            char = 0;
+            setTimeout(typeNext, 340);
+          }
         } else {
-          setTerminalText(prev => prev + "\n");
-          line++;
-          i = 0;
-          setTimeout(typeNext, 320);
+          setTimeout(() => setLoadingDone(true), 700);
         }
-      } else {
-        setTimeout(() => setLoadingDone(true), 450);
       }
-    }
-    typeNext();
-    // eslint-disable-next-line
-  }, []);
+
+      typeNext();
+
+      return () => {
+        running = false;
+      };
+    }, []);
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center z-10 select-none">
@@ -43,10 +55,9 @@ export default function HomePage() {
       {/* Terminal intro overlay */}
       {!loadingDone && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c141f]/95 backdrop-blur-xl pointer-events-none transition-all duration-500">
-          <div className="text-aqua font-mono text-[1.25rem] md:text-[1.5rem] px-8 py-6 rounded-lg shadow-2xl border-2 border-cyan-800/40 bg-[#111d29]/90 w-[410px] max-w-[90vw] whitespace-pre leading-snug tracking-wide animate-pulse">
-            {terminalText}
-            {!terminalText.endsWith("\n") && <span className="animate-pulse text-cyan-300">|</span>}
-          </div>
+        <div className="font-mono text-aqua text-[1.1rem] md:text-[1.45rem] px-8 py-6 rounded-lg shadow-2xl border-2 border-cyan-800/40 bg-[#111d29]/90 w-[410px] max-w-[90vw] whitespace-pre leading-snug tracking-wide">
+          {terminalText}
+        </div>
         </div>
       )}
 
