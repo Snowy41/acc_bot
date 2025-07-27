@@ -321,7 +321,7 @@ export default function AdminPanel() {
           </div>
 
           {/* All Users Table + AI Scores */}
-                <div className="flex flex-col md:flex-row gap-10 items-start w-full px-4 md:px-12">
+        <div className="flex flex-row gap-10 w-full px-4 md:px-12 mb-16">
         {/* All Users Table */}
         <div className="flex-1 min-w-[380px]">
           <div className="bg-[#1b2435]/95 border border-cyan-900/40 rounded-2xl shadow-2xl p-6">
@@ -399,8 +399,9 @@ export default function AdminPanel() {
           </div>
         </div>
 
+          <div className="flex flex-row gap-10 w-full px-4 md:px-12">
         {/* AI Risk Score Table */}
-        <div className="my-10 bg-[#1b2435]/90 border border-cyan-900/40 rounded-2xl shadow-2xl p-6">
+        <div className="flex-1 my-10 bg-[#1b2435]/90 border border-cyan-900/40 rounded-2xl shadow-2xl p-6">
           <h3 className="text-xl font-bold text-aqua mb-6">AI Risk Scores (Debug)</h3>
           <div className="overflow-x-auto rounded border border-cyan-900/40 bg-[#162030] shadow p-4 max-h-80">
             <table className="min-w-full text-sm">
@@ -443,10 +444,10 @@ export default function AdminPanel() {
             </table>
           </div>
         </div>
-
+          </div>
         {/* USER EDIT PANEL (with TagDropdownOverlay etc) */}
         {selected && !selectedSession && (
-          <div className="w-full md:w-[400px] bg-[#18212e]/90 border border-cyan-900/40 rounded-2xl p-8 shadow-2xl sticky top-28">
+        <div className="w-full max-w-[400px] bg-[#18212e]/90 border border-cyan-900/40 rounded-2xl p-8 shadow-2xl">
             <h3 className="text-xl font-bold text-aqua mb-4">Edit User</h3>
             {/* Usertag */}
             <div className="mb-5">
@@ -604,7 +605,7 @@ export default function AdminPanel() {
         {/* AI Score Editor */}
         {selectedSession && !selected && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-            <div className="bg-[#212940] p-8 rounded-2xl shadow-2xl">
+          <div className="w-full max-w-[400px] bg-[#212940] p-8 rounded-2xl shadow-2xl self-start">
               <h3 className="text-lg font-bold mb-3">
                 Edit AI Risk Score for <span className="font-mono">{selectedSession}</span>
               </h3>
