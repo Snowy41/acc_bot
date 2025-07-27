@@ -65,7 +65,7 @@ export default function Sidebar({
     }
     let stopped = false;
     function checkWidth() {
-      if (sidebarRef.current && sidebarRef.current.offsetWidth >= 180) {
+      if (sidebarRef.current && sidebarRef.current.offsetWidth >= 250) {
         setCanShowText(true);
         stopped = true;
       } else {
