@@ -369,6 +369,7 @@ def write_timeline(data):
         json.dump(data, f)
 
 def send_to_ai(event_type, data):
+    print(f"AI Event: {event_type} {data}")  # <-- add this for debugging
     """Send a background event to AI brain. Non-blocking."""
     try:
         requests.post(
