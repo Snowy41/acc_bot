@@ -103,19 +103,20 @@ export default function Sidebar({
         borderRight: "2.5px solid rgba(18,244,255,0.09)"
       }}
     >
-      <div className="flex items-center h-[56px] px-3">
-        {open && (
-          <img
-            src="/logo_for_website.png"
-            alt="Vanish Logo"
-            className="h-[42px] w-auto mr-2 rounded drop-shadow"
-            style={{ objectFit: "contain", maxHeight: "42px" }}
-            draggable={false}
-          />
-        )}
+    <div className="flex items-center h-[56px] px-3">
+      {open && (
+        <img
+          src="/logo_for_website.png"
+          alt="Vanish Logo"
+          className="h-[42px] w-auto mr-2 rounded drop-shadow"
+          style={{ objectFit: "contain", maxHeight: "42px" }}
+          draggable={false}
+        />
+      )}
+      <div className={open ? "flex-1 flex justify-end" : "flex-1 flex justify-center"}>
         <button
           onClick={() => setOpen((o) => !o)}
-          className="ml-auto p-2 hover:bg-cyan-800/20 rounded transition"
+          className="p-2 hover:bg-cyan-800/20 rounded transition"
           aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
           style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
         >
@@ -126,6 +127,7 @@ export default function Sidebar({
           )}
         </button>
       </div>
+    </div>
       <nav className="flex-1 flex flex-col mt-2 gap-2">
         {nav.slice(0, 1).map((item) => (
           <SidebarItem
