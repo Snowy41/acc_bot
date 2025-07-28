@@ -3,20 +3,20 @@ import { Link } from "react-router-dom";
 import TerminalIntro from "./TerminalIntro";
 import ParticleBackground from "./ParticleBackground";
 
+let terminalShown = false;
+
 export default function HomePage() {
     const [showMain, setShowMain] = useState(
       // Only show terminal if flag NOT set
       !sessionStorage.getItem("vanish_terminal_ran")
     );
-   useEffect(() => {
-      // Only run on first mount after reload
-      if (!sessionStorage.getItem("vanish_terminal_ran")) {
-        sessionStorage.setItem("vanish_terminal_ran", "1");
+    useEffect(() => {
+      if (!terminalShown) {
+        terminalShown = true; // Will persist until next real reload
+        setShowMain(false);
+      } else {
+        setShowMain(true);
       }
-      // Clear on full reload
-      const clear = () => sessionStorage.removeItem("vanish_terminal_ran");
-      window.addEventListener("beforeunload", clear);
-      return () => window.removeEventListener("beforeunload", clear);
     }, []);
 
   return (
