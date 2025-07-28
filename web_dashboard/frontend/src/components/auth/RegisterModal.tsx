@@ -1,4 +1,12 @@
 import { useState } from "react";
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
+
+async function getDeviceFingerprint() {
+  const fpPromise = FingerprintJS.load();
+  const fp = await fpPromise;
+  const result = await fp.get();
+  return result.visitorId;
+}
 
 interface RegisterModalProps {
   onSuccess: (usertag: string, password: string) => void;
@@ -27,6 +35,9 @@ export default function RegisterModal({ onSuccess, onClose }: RegisterModalProps
       return;
     }
     setLoading(true);
+
+    const fingerprint = await getDeviceFingerprint();
+
     const res = await fetch(`/api/users/${usertag}`);
     if (res.ok) {
       setLoading(false);
@@ -35,7 +46,10 @@ export default function RegisterModal({ onSuccess, onClose }: RegisterModalProps
     }
     const regRes = await fetch("/api/auth/register", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Device-Fingerprint": fingerprint,
+      },
       body: JSON.stringify({ usertag, username, password }),
     });
     const data = await regRes.json();
@@ -49,6 +63,7 @@ export default function RegisterModal({ onSuccess, onClose }: RegisterModalProps
       setError(data.error || "Registration failed.");
     }
   };
+
 
   return (
     <div className="fixed inset-0 flex justify-center items-center z-50 transition-all duration-300 bg-black/70">

@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
+async function getDeviceFingerprint() {
+  const fpPromise = FingerprintJS.load();
+  const fp = await fpPromise;
+  const result = await fp.get();
+  return result.visitorId;
+}
 interface LoginModalProps {
   onLogin: (usertag: string, password: string) => void;
   onClose: () => void;
@@ -19,27 +26,31 @@ export default function LoginModal({ onLogin, onClose, onRegister }: LoginModalP
     }
   }, [isVisible]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    const fingerprint = await getDeviceFingerprint();
 
     fetch("/api/auth/login", {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Device-Fingerprint": fingerprint,
+      },
       body: JSON.stringify({ username: usertag, password }),
     })
       .then((res) => res.json())
       .then((d) => {
         if (d.success) {
-          onLogin(usertag, password); // This triggers fetch of user info in App
-          setIsVisible(false); // Close with animation after successful login
+          onLogin(usertag, password);
+          setIsVisible(false);
         } else {
           setError(d.error || "Login failed");
         }
       });
   };
-
   const [usertag, setUsertag] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

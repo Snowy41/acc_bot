@@ -196,6 +196,40 @@ export default function Sidebar({
             <span className="absolute top-0 right-0 h-2 w-2 bg-yellow-400 rounded-full shadow-lg animate-pulse"></span>
           </Link>
         )}
+        {(isAdmin) && (
+          <Link
+            to="/brain"
+            className={`
+              group flex items-center gap-3 px-4 py-3 mx-1 rounded-xl transition font-bold
+              bg-gradient-to-tr from-[#22e55c] bg-green-600 to-[#78ffa2]
+              text-midnight shadow-[0_0_16px_#ffe97a99]
+              border border-green-300/50 relative overflow-hidden
+              ${open ? "justify-start" : "justify-center"}
+            `}
+            onClick={() => setActive("admin-panel")}
+            style={{
+              boxShadow: "0 0 18px #ffe97aaa, 0 0 0 2px #ffd30030",
+              border: "1.5px solid #ffe97a88",
+              opacity: 1,
+            }}
+          >
+            <span className="h-6 w-6 flex items-center justify-center drop-shadow-[0_0_4px_#ffe97a99]">🛡️</span>
+            {canShowText && (
+              <span
+                className="font-bold transition-all duration-200 whitespace-nowrap overflow-hidden"
+                style={{
+                  opacity: open ? 1 : 0,
+                  paddingLeft: open ? 8 : 0,
+                  transition: "opacity 0.25s, padding-left 0.25s"
+                }}
+              >
+                Brain
+              </span>
+            )}
+            <span className="absolute top-0 right-0 h-2 w-2 bg-green-500 rounded-full shadow-lg animate-pulse"></span>
+          </Link>
+        )}
+
         {(isAdmin || isModerator) && (
           <Link
             to="/moderation"

@@ -1,6 +1,6 @@
 import eventlet
 
-from backend.utils import get_session_risk
+from backend.utils import get_session_risk, send_to_ai
 
 eventlet.monkey_patch()
 
@@ -137,6 +137,14 @@ def handle_bot_log(data):
     socketio.emit("bot_log", data)
 
 
+@app.before_request
+def track_page():
+    pages = session.get("visited_pages", [])
+    path = request.path
+    if not pages or pages[-1] != path:
+        pages.append(path)
+    session["visited_pages"] = pages[-50:]
+
 @app.after_request
 def add_security_headers(resp):
     resp.headers["X-Frame-Options"] = "DENY"  # Prevent clickjacking
@@ -190,3 +198,5 @@ threading.Thread(target=poll_xmr_and_credit, daemon=True).start()
 
 # --- Gunicorn/Eventlet WSGI Setup ---
 application = app
+
+

@@ -32,6 +32,7 @@ import BalanceBadge from "./components/wallet/BalanceBadge";
 import DepositPage from "./components/wallet/DepositPage";
 import LaunchTimer from "./components/layout/LaunchTimer";
 import HomePage from "./components/layout/HomePage";
+import AIBrainMonitor from "./components/admin/AIBrainMonitor";
 
 function AppLayout() {
   const [active, setActive] = useState("home");
@@ -342,6 +343,11 @@ function AppLayout() {
                   <AdminPanel />
                 </ProtectedRoute>
               }
+            />
+            <Route path={"/brain"} element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                  <AIBrainMonitor />
+              </ProtectedRoute>}
             />
             <Route path="/profile/:usertag" element={<ProfilePage />} />
             <Route path="/profile/:usertag/edit" element={<ProfileEdit />} />
