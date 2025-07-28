@@ -4,12 +4,16 @@ const USERNAME = "anon";
 const HOST = "vanish";
 const PROMPT = "$";
 
-const introLines = [
-  { command: "nc vanish.rip 31337", output: "" },
-  { command: "ssh -o ProxyCommand=onion vanish", output: "" },
-  { command: "vanish --connect --crypto", output: "" },
-  { command: "", output: "🔓 AUTH OK — entering underground..." },
-  { command: "", output: "🎉 WELCOME TO vanish.rip — forum & marketplace loaded." },
+type TerminalLine =
+  | { type: "cmd"; command: string }
+  | { type: "output"; output: string; color?: string };
+
+const introLines: TerminalLine[] = [
+  { type: "cmd", command: "nc vanish.rip 31337" },
+  { type: "cmd", command: "ssh -o ProxyCommand=onion vanish" },
+  { type: "cmd", command: "vanish --connect --crypto" },
+  { type: "output", output: "🔓 AUTH OK — entering underground...", color: "gold" },
+  { type: "output", output: "🎉 WELCOME TO vanish.rip — forum & marketplace loaded.", color: "cyan" },
 ];
 
 function getTimestamp(offset = 0) {
@@ -23,13 +27,15 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
   const [cursor, setCursor] = useState({ line: 0, char: 0 });
   const [blinking, setBlinking] = useState(true);
 
+  // Blinking block cursor (█)
   useEffect(() => {
     if (!done) {
-      const interval = setInterval(() => setBlinking((b) => !b), 340);
+      const interval = setInterval(() => setBlinking((b) => !b), 350);
       return () => clearInterval(interval);
     }
   }, [done]);
 
+  // Typing effect per char
   useEffect(() => {
     if (done) return;
     const { line, char } = cursor;
@@ -39,25 +45,29 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
       return;
     }
     const ts = getTimestamp(line);
-    const command = introLines[line].command;
-    const output = introLines[line].output;
+    const entry = introLines[line];
     let basePrompt = ts + " ";
-    if (command)
-      basePrompt += `${USERNAME}@${HOST}:~${PROMPT} ` + command;
+    if (entry.type === "cmd")
+      basePrompt += `<span class="text-green-400">${USERNAME}</span>@<span class="text-blue-400">${HOST}</span>:~<span class="text-yellow-400">${PROMPT}</span> <span class="text-white">${entry.command}</span>`;
     else
-      basePrompt += " " + output;
-    const lineText = basePrompt;
+      basePrompt += entry.output
+        ? `<span class="text-${entry.color === "gold" ? "amber-300" : entry.color === "cyan" ? "aqua" : "white"}">${entry.output}</span>`
+        : "";
+
+    // Remove any previous span tags for typing per char
+    const noTags = basePrompt.replace(/<[^>]+>/g, "");
+
     if (char === 0 && typedLines.length === line)
       setTypedLines((d) => [...d, ""]);
-    if (char < lineText.length) {
+    if (char < noTags.length) {
       setTimeout(() => {
         setTypedLines((d) => {
           const arr = [...d];
-          arr[line + 1] = (arr[line + 1] || "") + lineText[char];
+          arr[line + 1] = (arr[line + 1] || "") + noTags[char];
           return arr;
         });
         setCursor((pos) => ({ line, char: char + 1 }));
-      }, command ? 14 + Math.random() * 29 : 32);
+      }, entry.type === "cmd" ? 13 + Math.random() * 19 : 27);
     } else {
       setTimeout(() => {
         setTypedLines((d) => {
@@ -66,24 +76,57 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
           return arr;
         });
         setCursor({ line: line + 1, char: 0 });
-      }, command ? 340 + Math.random() * 300 : 900 + Math.random() * 320);
+      }, entry.type === "cmd" ? 320 + Math.random() * 270 : 920 + Math.random() * 220);
     }
     // eslint-disable-next-line
   }, [cursor, done]);
 
-  // Always compute the upcoming longest line and expand the box preemptively
-  const upcomingLine = (() => {
+  // For rendering, apply spans for color after fully typed
+  function colorize(line: string, idx: number) {
+    const entry = introLines[line];
+    if (entry.type === "cmd") {
+      const ts = getTimestamp(idx);
+      const command = entry.command;
+      const prompt =
+        `<span class="text-green-400">${USERNAME}</span>@<span class="text-blue-400">${HOST}</span>:~<span class="text-yellow-400">${PROMPT}</span> `;
+      // Replace line with colored prompt/command after typing
+      if (line.startsWith(ts + " ")) {
+        return (
+          <span>
+            <span className="text-cyan-300">{ts}</span>{" "}
+            <span dangerouslySetInnerHTML={{ __html: prompt }} />
+            <span className="text-white">{command}</span>
+          </span>
+        );
+      }
+    }
+    if (entry.type === "output" && entry.output) {
+      const ts = getTimestamp(idx);
+      const color =
+        entry.color === "gold"
+          ? "text-amber-300"
+          : entry.color === "cyan"
+          ? "text-aqua"
+          : "text-white";
+      return (
+        <span>
+          <span className="text-cyan-300">{ts}</span> <span className={color}>{entry.output}</span>
+        </span>
+      );
+    }
+    // fallback: just the line
+    return <span className="text-white">{line}</span>;
+  }
+
+  // Always compute the next line's length for box width
+  const nextLine = (() => {
     const line = cursor.line;
     if (line < introLines.length) {
       const ts = getTimestamp(line);
-      const command = introLines[line].command;
-      const output = introLines[line].output;
-      let basePrompt = ts + " ";
-      if (command)
-        basePrompt += `${USERNAME}@${HOST}:~${PROMPT} ` + command;
-      else
-        basePrompt += " " + output;
-      return basePrompt;
+      const entry = introLines[line];
+      if (entry.type === "cmd")
+        return `${ts} ${USERNAME}@${HOST}:~${PROMPT} ${entry.command}`;
+      else return `${ts} ${entry.output}`;
     }
     return "";
   })();
@@ -94,32 +137,53 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
       : l
   );
 
-  // Calculate the width to always fit current or upcoming line, plus a buffer
-  const charWidth = 11.4;
-  const minWidth = 340, maxWidth = 720;
-  const widestLen = Math.max(...displayLines.map(l => l.length), upcomingLine.length);
-  const boxWidth = Math.min(Math.max(minWidth, widestLen * charWidth + 56), maxWidth);
+  // Get max length (typed or next line)
+  const charWidth = 12.5;
+  const minWidth = 370,
+    maxWidth = 760;
+  const widestLen = Math.max(
+    ...displayLines.map((l) => l.length),
+    nextLine.length
+  );
+  const boxWidth = Math.min(Math.max(minWidth, widestLen * charWidth + 52), maxWidth);
 
   return (
     <div
-      className={`font-mono text-aqua text-[1.13rem] md:text-[1.28rem] px-7 py-7 rounded-2xl border border-cyan-800/40 bg-[#0e1a23]/95 shadow-xl transition-all duration-700 
+      className={`relative font-mono text-aqua text-[1.17rem] md:text-[1.22rem] px-7 py-8 rounded-2xl border border-cyan-800/40 bg-[#111e26]/98 shadow-2xl transition-all duration-700
         ${done ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       style={{
         width: boxWidth,
         minWidth,
         maxWidth,
         whiteSpace: "pre",
-        lineHeight: 1.45,
-        letterSpacing: "0.017em",
+        lineHeight: 1.54,
         margin: "0 auto",
-        marginTop: "7vh",
-        marginBottom: "7vh",
-        boxShadow: "0 8px 40px #19e3f555, 0 2px 14px #0ff7",
-        zIndex: 1200,
-        background: "linear-gradient(130deg, #0e1a23 75%, #0c121b 100%)"
+        marginTop: "6vh",
+        marginBottom: "6vh",
+        boxShadow: "0 10px 54px #18fff966, 0 3px 18px #0ff7",
+        zIndex: 1100,
+        background: "linear-gradient(133deg, #101c24 80%, #182c36 100%)",
       }}
     >
-      {displayLines.length ? displayLines.join("") : ""}
+      {/* Mac-style window controls */}
+      <div className="absolute left-5 top-4 flex gap-2">
+        <span className="inline-block w-3 h-3 rounded-full bg-red-500"></span>
+        <span className="inline-block w-3 h-3 rounded-full bg-yellow-400"></span>
+        <span className="inline-block w-3 h-3 rounded-full bg-green-500"></span>
+      </div>
+      <div className="mt-5" />
+      {displayLines.map((l, idx) => (
+        <div
+          key={idx}
+          style={{
+            minHeight: "1.5em",
+            display: "flex",
+            alignItems: "center"
+          }}
+        >
+          {colorize(l, idx)}
+        </div>
+      ))}
     </div>
   );
 }
