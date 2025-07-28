@@ -1,92 +1,48 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import TerminalIntro from "./TerminalIntro";
 import ParticleBackground from "./ParticleBackground";
 
 export default function HomePage() {
-  // Terminal-style intro loading animation
-  const [loadingDone, setLoadingDone] = useState(false);
-  const [terminalText, setTerminalText] = useState("");
-    const fullText = [
-      "Initializing secure connection...",
-      "Authenticating via onion relay...",
-      "Bypassing surface web...",
-      "Decrypted handshake complete.",
-      "Access granted. Welcome to vanish.rip."
-    ];
-
-
-    useEffect(() => {
-      let line = 0;
-      let char = 0;
-      let running = true;
-      let content = "";
-
-      function typeNext() {
-        if (!running) return;
-        if (line < fullText.length) {
-          if (char < fullText[line].length) {
-            content += fullText[line][char];
-            setTerminalText(content + (char % 2 === 0 ? "|" : " ")); // blinking cursor effect
-            char++;
-            setTimeout(typeNext, 22);
-          } else {
-            content += "\n";
-            setTerminalText(content);
-            line++;
-            char = 0;
-            setTimeout(typeNext, 340);
-          }
-        } else {
-          setTimeout(() => setLoadingDone(true), 700);
-        }
-      }
-
-      typeNext();
-
-      return () => {
-        running = false;
-      };
-    }, []);
+  const [showMain, setShowMain] = useState(false);
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center z-10 select-none">
       <ParticleBackground />
-
       {/* Terminal intro overlay */}
-      {!loadingDone && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c141f]/95 backdrop-blur-xl pointer-events-none transition-all duration-500">
-        <div className="font-mono text-aqua text-[1.1rem] md:text-[1.45rem] px-8 py-6 rounded-lg shadow-2xl border-2 border-cyan-800/40 bg-[#111d29]/90 w-[410px] max-w-[90vw] whitespace-pre leading-snug tracking-wide">
-          {terminalText}
-        </div>
+      {!showMain && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#101926]/95 backdrop-blur-xl pointer-events-none">
+          <TerminalIntro onFinish={() => setShowMain(true)} />
         </div>
       )}
 
-      {/* Main HomePage content, appears after loading */}
-      <div className={`w-full flex flex-col items-center justify-center pt-20 pb-16 z-20 relative transition-opacity duration-700 ${loadingDone ? "opacity-100" : "opacity-0 pointer-events-none select-none"}`}>
-        {/* Logo and site title */}
-        <div className="flex flex-col items-center mb-4">
+      {/* Main HomePage content */}
+      <div className={`w-full flex flex-col items-center justify-center pt-20 pb-16 z-20 relative transition-opacity duration-700 ${showMain ? "opacity-100" : "opacity-0 pointer-events-none select-none"}`}>
+        {/* Logo & Title */}
+        <div className="flex flex-col items-center mb-2">
           <img
             src="/logo_for_website.png"
             alt="vanish.rip logo"
-            className="h-[100px] w-auto rounded-[2.5rem] shadow-2xl border border-cyan-800/30 bg-[#141a24] p-3 mb-3"
+            className="h-[100px] w-auto rounded-[2.5rem] shadow-2xl border border-cyan-800/30 bg-[#141a24] p-3 mb-2"
             style={{ objectFit: "contain", maxHeight: "100px" }}
             draggable={false}
           />
-          <h1 className="text-[2.6rem] md:text-[4.1rem] font-extrabold tracking-wide text-transparent bg-gradient-to-r from-cyan-400 via-teal-300 to-aqua bg-clip-text drop-shadow-lg text-center mb-0 leading-[1.1]">
+          <h1 className="text-[2.5rem] md:text-[4rem] font-extrabold tracking-wide text-transparent bg-gradient-to-r from-cyan-400 via-teal-300 to-aqua bg-clip-text drop-shadow-lg text-center mb-0 leading-[1.1]">
             vanish.rip
           </h1>
-          <div className="text-cyan-400 text-xl md:text-2xl font-semibold uppercase tracking-widest mt-2 mb-1 drop-shadow-md text-center">
+          <div className="text-cyan-400 text-lg md:text-2xl font-semibold uppercase tracking-widest mt-1 mb-2 drop-shadow-md text-center">
             <span className="bg-[#181f2b]/70 px-5 py-2 rounded-full shadow">Underground Forum & Market</span>
           </div>
-          <div className="mt-5 text-cyan-200 max-w-2xl text-center text-lg md:text-xl px-3 font-medium drop-shadow">
-            The next-gen blackmarket for accounts, leaks, tools, info, and trade.<br />
-            <span className="block text-cyan-300/80 mt-2">
-              Uncensored. Anonymous. Built by and for the scene.
-            </span>
-          </div>
         </div>
-        {/* Buttons: Marketplace, Shop, Forum */}
-        <div className="flex flex-col md:flex-row gap-6 mt-10 mb-8 items-center">
+        {/* Tagline */}
+        <div className="mt-3 text-cyan-200 max-w-2xl text-center text-[1.15rem] md:text-xl px-3 font-medium drop-shadow mb-4">
+          The next-gen blackmarket for accounts, leaks, tools, info, and trade.<br />
+          <span className="block text-cyan-300/80 mt-2">
+            Uncensored. Anonymous. Built by and for the scene.
+          </span>
+        </div>
+        {/* Main Buttons */}
+        <div className="flex flex-col md:flex-row gap-6 mt-7 mb-7 items-center">
           <Link
             to="/marketplace"
             className="rounded-full px-10 py-4 text-[1.27rem] font-extrabold shadow-lg tracking-wide
@@ -115,7 +71,7 @@ export default function HomePage() {
             Enter Forum
           </Link>
         </div>
-        {/* Features / Selling points */}
+        {/* Features / selling points */}
         <div className="w-full flex flex-wrap justify-center gap-8 mt-8 mb-8 z-10">
           <div className="flex flex-col items-center bg-[#181f2b]/95 border border-cyan-800/40 rounded-2xl p-7 min-w-[240px] max-w-xs shadow-md hover:shadow-aqua/30 transition-all">
             <span className="text-aqua text-3xl mb-2">🕵️‍♂️</span>
@@ -138,7 +94,7 @@ export default function HomePage() {
             <div className="text-cyan-300 text-[15px] text-center">End-to-end encrypted DMs. Cloudflare + onion. Advanced anti-LE & anti-scam protection.</div>
           </div>
         </div>
-        {/* Section links */}
+        {/* Section Links */}
         <div className="flex flex-wrap justify-center gap-4 mt-2 mb-6">
           <Link to="/forum" className="text-cyan-300 underline hover:text-aqua text-base transition">
             Forum Categories
