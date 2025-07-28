@@ -4,7 +4,7 @@ from flask import Blueprint, request, jsonify, session
 import time
 
 from backend.utils import get_user_by_usertag, save_user, hash_pw, public_user_dict, update_user_balance, \
-    record_transaction, get_user_balance, get_all_users
+    record_transaction, get_user_balance, get_all_users, send_to_ai
 from backend.limiter import limiter
 
 user_bp = Blueprint("user", __name__)
@@ -65,10 +65,41 @@ def login():
         return jsonify({"error": "Invalid credentials"}), 401
 
     session["username"] = username
+
+    session_id = session.get("id", username)
+    user_ip = request.remote_addr  # Or your real IP getter
+    hour = time.gmtime().tm_hour  # UTC hour; use localtime if you prefer
+
+    send_to_ai("session_start", {
+        "ip": user_ip,
+        "asn": request.headers.get("X-ASN", ""),  # Or pass from frontend if available
+        "org": request.headers.get("X-ORG", ""),  # Or pass from frontend if available
+        "hour": hour,
+        "session_id": session_id,
+    })
+
+    # Device fingerprint (pass from frontend as header or body field)
+    fingerprint = request.headers.get("X-Device-Fingerprint")
+    if fingerprint:
+        send_to_ai("device_fingerprint", {
+            "fingerprint": fingerprint,
+            "session_id": session_id,
+        })
+
+    # --- Account switch detection ---
+    prev_usertag = session.get("prev_usertag")  # You'll need to store this in session before logout!
+    if prev_usertag and fingerprint and prev_usertag != session.get("username"):
+        send_to_ai("account_switch", {
+            "from_usertag": prev_usertag,
+            "to_usertag": session.get("username"),
+            "fingerprint": fingerprint,
+        })
+
     return jsonify({"success": True})
 
 @user_bp.route("/api/auth/logout", methods=["POST"])
 def logout():
+    session["prev_usertag"] = session.get("username")
     session.pop("username", None)
     return jsonify({"success": True})
 
