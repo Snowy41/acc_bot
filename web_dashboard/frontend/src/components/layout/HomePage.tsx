@@ -1,10 +1,23 @@
-import { useState } from "react";
+import {useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import TerminalIntro from "./TerminalIntro";
 import ParticleBackground from "./ParticleBackground";
 
 export default function HomePage() {
-  const [showMain, setShowMain] = useState(false);
+    const [showMain, setShowMain] = useState(
+      // Only show terminal if flag NOT set
+      !sessionStorage.getItem("vanish_terminal_ran")
+    );
+   useEffect(() => {
+      // Only run on first mount after reload
+      if (!sessionStorage.getItem("vanish_terminal_ran")) {
+        sessionStorage.setItem("vanish_terminal_ran", "1");
+      }
+      // Clear on full reload
+      const clear = () => sessionStorage.removeItem("vanish_terminal_ran");
+      window.addEventListener("beforeunload", clear);
+      return () => window.removeEventListener("beforeunload", clear);
+    }, []);
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center z-10 select-none">
@@ -115,7 +128,9 @@ export default function HomePage() {
       </div>
       {/* Footer */}
       <div className="absolute bottom-3 w-full flex justify-center pointer-events-none select-none">
-        <span className="text-xs text-cyan-800/70 font-mono tracking-wide">vanish.rip &copy; {new Date().getFullYear()} | Underground. Private. Free.</span>
+        <span className="text-xs text-cyan-800/70 font-mono tracking-wide">
+          vanish.rip &copy; {new Date().getFullYear()} | Underground. Private. Free.
+        </span>
       </div>
     </div>
   );

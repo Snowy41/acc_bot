@@ -15,15 +15,27 @@ const introLines: TerminalLine[] = [
   { type: "output", output: "🎉 WELCOME TO vanish.rip — forum & marketplace loaded.", color: "cyan" },
 ];
 
-function getTimestamp(offset = 0) {
-  const d = new Date(Date.now() - 20000 + offset * 1350);
-  return `[${d.toLocaleTimeString("en-GB", { hour12: false })}]`;
+// Helper for zero-padding
+function pad(num: number) {
+  return num < 10 ? "0" + num : "" + num;
 }
 
-function getPromptColored(typed: string, idx: number, entry: TerminalLine) {
+// Generate the timestamps ONCE per session
+function buildStaticTimestamps(count: number) {
+  const now = new Date();
+  now.setMilliseconds(0);
+  const timestamps: string[] = [];
+  for (let i = 0; i < count; ++i) {
+    const t = new Date(now.getTime() + i * 1000);
+    timestamps.push(
+      `[${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}]`
+    );
+  }
+  return timestamps;
+}
+
+function getPromptColored(typed: string, idx: number, entry: TerminalLine, ts: string) {
   if (entry.type !== "cmd") return <span className="text-white">{typed}</span>;
-  // Build prompt parts, but only show what has actually been typed
-  const ts = getTimestamp(idx);
   const fullPrompt = `${ts} ${USERNAME}@${HOST}:~${PROMPT} `;
   const total = fullPrompt.length;
   if (typed.length <= ts.length + 1)
@@ -31,10 +43,7 @@ function getPromptColored(typed: string, idx: number, entry: TerminalLine) {
   if (typed.length <= total) {
     return (
       <>
-        <span className="text-cyan-300">
-          {typed.slice(0, ts.length)}
-        </span>
-        {" "}
+        <span className="text-cyan-300">{typed.slice(0, ts.length)}</span>{" "}
         <span className="text-green-400">
           {typed.slice(ts.length + 1, ts.length + 1 + USERNAME.length)}
         </span>
@@ -52,7 +61,6 @@ function getPromptColored(typed: string, idx: number, entry: TerminalLine) {
       </>
     );
   }
-  // Rest is command, all prompt parts have been shown
   return (
     <>
       <span className="text-cyan-300">{ts}</span>{" "}
@@ -66,8 +74,7 @@ function getPromptColored(typed: string, idx: number, entry: TerminalLine) {
   );
 }
 
-function getOutputColored(typed: string, idx: number, entry: TerminalLine) {
-  const ts = getTimestamp(idx);
+function getOutputColored(typed: string, idx: number, entry: TerminalLine, ts: string) {
   const prefix = `${ts} `;
   const color =
     entry.type === "output" && entry.color === "gold"
@@ -86,18 +93,12 @@ function getOutputColored(typed: string, idx: number, entry: TerminalLine) {
 }
 
 export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
+  // Create the timestamps only once when the component mounts
+  const [timestamps] = useState(() => buildStaticTimestamps(introLines.length));
   const [typedLines, setTypedLines] = useState<string[]>([""]);
   const [done, setDone] = useState(false);
   const [cursor, setCursor] = useState({ line: 0, char: 0 });
   const [blinking, setBlinking] = useState(true);
-
-  // Only show on first site visit
-  useEffect(() => {
-    if (sessionStorage.getItem("vanish_terminal_seen") === "1") setDone(true);
-  }, []);
-  useEffect(() => {
-    if (done) sessionStorage.setItem("vanish_terminal_seen", "1");
-  }, [done]);
 
   useEffect(() => {
     if (!done) {
@@ -106,7 +107,6 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
     }
   }, [done]);
 
-  // Typing effect
   useEffect(() => {
     if (done) return;
     const { line, char } = cursor;
@@ -116,8 +116,7 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
       if (onFinish) setTimeout(onFinish, 900);
       return;
     }
-    // Prepare line as one string (with prompt/output)
-    const ts = getTimestamp(line);
+    const ts = timestamps[line] || "[00:00:00]";
     let lineStr = "";
     if (entry.type === "cmd")
       lineStr = `${ts} ${USERNAME}@${HOST}:~${PROMPT} ${entry.command}`;
@@ -146,11 +145,10 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
     // eslint-disable-next-line
   }, [cursor, done]);
 
-  // Precompute width for upcoming line (so the box expands ahead of time)
   const nextLine = (() => {
     const line = cursor.line;
     if (line < introLines.length) {
-      const ts = getTimestamp(line);
+      const ts = timestamps[line] || "[00:00:00]";
       const entry = introLines[line];
       if (entry.type === "cmd")
         return `${ts} ${USERNAME}@${HOST}:~${PROMPT} ${entry.command}`;
@@ -163,7 +161,6 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
     i === arr.length - 1 && !done ? l + (blinking ? "█" : " ") : l
   );
 
-  // Calculate width to fit next line, with padding
   const charWidth = 12.7;
   const minWidth = 400,
     maxWidth = 780;
@@ -173,7 +170,6 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
   );
   const boxWidth = Math.min(Math.max(minWidth, widestLen * charWidth + 58), maxWidth);
 
-  // Mac-style bar
   return (
     <div
       className={`relative font-mono text-aqua text-[1.18rem] md:text-[1.28rem] px-8 py-8 rounded-2xl border border-cyan-800/40 bg-[#111e26]/98 shadow-2xl transition-all duration-700
@@ -192,7 +188,7 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
         background: "linear-gradient(133deg, #101c24 80%, #182c36 100%)",
       }}
     >
-      {/* Mac bar */}
+      {/* Mac-style bar */}
       <div className="absolute left-0 top-0 w-full flex items-center h-7 px-6 bg-[#1c2432]/95 rounded-t-2xl border-b border-cyan-800/30 z-10">
         <div className="flex gap-2">
           <span className="inline-block w-3 h-3 rounded-full bg-red-500"></span>
@@ -206,11 +202,12 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
       <div style={{ marginTop: 24 }}></div>
       {displayLines.map((l, idx) => {
         const entry = introLines[idx];
+        const ts = timestamps[idx] || "[00:00:00]";
         if (!entry) return <span key={idx} className="text-white">{l}</span>;
         if (entry.type === "cmd")
-          return <div key={idx}>{getPromptColored(l, idx, entry)}</div>;
+          return <div key={idx}>{getPromptColored(l, idx, entry, ts)}</div>;
         else
-          return <div key={idx}>{getOutputColored(l, idx, entry)}</div>;
+          return <div key={idx}>{getOutputColored(l, idx, entry, ts)}</div>;
       })}
     </div>
   );
