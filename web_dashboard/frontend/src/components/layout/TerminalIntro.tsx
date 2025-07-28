@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 const USERNAME = "anon";
 const HOST = "vanish";
@@ -12,7 +12,7 @@ const introLines = [
   { command: "", output: "🎉 WELCOME TO vanish.rip — forum & marketplace loaded." },
 ];
 
-function getTimestamp(offset: number) {
+function getTimestamp(offset = 0) {
   const d = new Date(Date.now() - 20000 + offset * 1350);
   return `[${d.toLocaleTimeString("en-GB", { hour12: false })}]`;
 }
@@ -23,41 +23,32 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
   const [cursor, setCursor] = useState({ line: 0, char: 0 });
   const [blinking, setBlinking] = useState(true);
 
-  // Cursor animation
   useEffect(() => {
     if (!done) {
-      const interval = setInterval(() => setBlinking((b) => !b), 350);
+      const interval = setInterval(() => setBlinking((b) => !b), 340);
       return () => clearInterval(interval);
     }
   }, [done]);
 
-  // Type out each line like a real hacker shell
   useEffect(() => {
     if (done) return;
     const { line, char } = cursor;
-
     if (line >= introLines.length) {
       setTimeout(() => setDone(true), 800);
       if (onFinish) setTimeout(onFinish, 1200);
       return;
     }
-
     const ts = getTimestamp(line);
     const command = introLines[line].command;
     const output = introLines[line].output;
-
     let basePrompt = ts + " ";
     if (command)
       basePrompt += `${USERNAME}@${HOST}:~${PROMPT} ` + command;
     else
-      basePrompt += " ";
-
-    const lineText = command ? basePrompt : basePrompt + output;
-
-    if (char === 0 && typedLines.length === line) {
+      basePrompt += " " + output;
+    const lineText = basePrompt;
+    if (char === 0 && typedLines.length === line)
       setTypedLines((d) => [...d, ""]);
-    }
-
     if (char < lineText.length) {
       setTimeout(() => {
         setTypedLines((d) => {
@@ -66,9 +57,8 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
           return arr;
         });
         setCursor((pos) => ({ line, char: char + 1 }));
-      }, command ? 16 + Math.random() * 34 : 30); // Faster for commands, slower for output
+      }, command ? 14 + Math.random() * 29 : 32);
     } else {
-      // Pause longer for output, short for commands
       setTimeout(() => {
         setTypedLines((d) => {
           const arr = [...d];
@@ -76,27 +66,43 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
           return arr;
         });
         setCursor({ line: line + 1, char: 0 });
-      }, command ? 330 + Math.random() * 300 : 900 + Math.random() * 320);
+      }, command ? 340 + Math.random() * 300 : 900 + Math.random() * 320);
     }
     // eslint-disable-next-line
   }, [cursor, done]);
 
-  // Only the current line gets a blinking block cursor (█)
+  // Always compute the upcoming longest line and expand the box preemptively
+  const upcomingLine = (() => {
+    const line = cursor.line;
+    if (line < introLines.length) {
+      const ts = getTimestamp(line);
+      const command = introLines[line].command;
+      const output = introLines[line].output;
+      let basePrompt = ts + " ";
+      if (command)
+        basePrompt += `${USERNAME}@${HOST}:~${PROMPT} ` + command;
+      else
+        basePrompt += " " + output;
+      return basePrompt;
+    }
+    return "";
+  })();
+
   const displayLines = typedLines.slice(1).map((l, i, arr) =>
     i === arr.length - 1 && !done
       ? l + (blinking ? "█" : " ")
       : l
   );
 
-  // Dynamic width for terminal
-  const longest = displayLines.reduce((a, b) => (b.length > a.length ? b : a), "");
-  const charWidth = 11.3;
-  const minWidth = 330, maxWidth = 640;
-  const boxWidth = Math.min(Math.max(minWidth, longest.length * charWidth + 40), maxWidth);
+  // Calculate the width to always fit current or upcoming line, plus a buffer
+  const charWidth = 11.4;
+  const minWidth = 340, maxWidth = 720;
+  const widestLen = Math.max(...displayLines.map(l => l.length), upcomingLine.length);
+  const boxWidth = Math.min(Math.max(minWidth, widestLen * charWidth + 56), maxWidth);
 
   return (
     <div
-      className={`font-mono text-aqua text-[1.13rem] md:text-[1.24rem] px-7 py-7 rounded-2xl border border-cyan-800/40 bg-[#0e1a23]/95 shadow-xl transition-all duration-700 
+      className={`font-mono text-aqua text-[1.13rem] md:text-[1.28rem] px-7 py-7 rounded-2xl border border-cyan-800/40 bg-[#0e1a23]/95 shadow-xl transition-all duration-700 
         ${done ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       style={{
         width: boxWidth,
@@ -104,12 +110,13 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
         maxWidth,
         whiteSpace: "pre",
         lineHeight: 1.45,
-        letterSpacing: "0.015em",
+        letterSpacing: "0.017em",
         margin: "0 auto",
-        marginTop: "6vh",
-        marginBottom: "6vh",
+        marginTop: "7vh",
+        marginBottom: "7vh",
         boxShadow: "0 8px 40px #19e3f555, 0 2px 14px #0ff7",
         zIndex: 1200,
+        background: "linear-gradient(130deg, #0e1a23 75%, #0c121b 100%)"
       }}
     >
       {displayLines.length ? displayLines.join("") : ""}
