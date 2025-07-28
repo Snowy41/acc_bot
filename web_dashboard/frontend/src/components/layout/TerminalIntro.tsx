@@ -126,9 +126,6 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
       return <span className="text-white">{line}</span>;
     }
 
-    // fallback: just the line
-    return <span className="text-white">{line}</span>;
-  }
 
   // Always compute the next line's length for box width
   const nextLine = (() => {
