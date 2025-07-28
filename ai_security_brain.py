@@ -70,7 +70,7 @@ async def handle_event(req: Request):
 @app.get("/ai/admin/log")
 async def brain_log(admin_key: str = ""):
     # In production, use a real admin session/token check!
-    if admin_key != "YOUR_SECRET_ADMIN_KEY":
+    if admin_key != "YT123":
         raise HTTPException(status_code=403, detail="Admins only")
     return {"log": list(BRAIN_LOG)[-150:], "risk_db": dict(risk_db)}
 

@@ -6,10 +6,10 @@ export default function AIBrainMonitor() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: any;
     const fetchLog = async () => {
       try {
-        const res = await fetch("/ai/admin/log?admin_key=YOUR_SECRET_ADMIN_KEY");
+        const res = await fetch("/ai/admin/log?admin_key=YT123");
         const data = await res.json();
         setLog(data.log.reverse());
         setRiskDb(data.risk_db);
