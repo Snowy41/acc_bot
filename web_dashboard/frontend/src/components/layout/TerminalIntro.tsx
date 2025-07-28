@@ -46,6 +46,11 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
     }
     const ts = getTimestamp(line);
     const entry = introLines[line];
+     if (!entry) {
+        setDone(true);
+        if (onFinish) setTimeout(onFinish, 600);
+        return;
+      }
     let basePrompt = ts + " ";
     if (entry.type === "cmd")
       basePrompt += `<span class="text-green-400">${USERNAME}</span>@<span class="text-blue-400">${HOST}</span>:~<span class="text-yellow-400">${PROMPT}</span> <span class="text-white">${entry.command}</span>`;
@@ -84,6 +89,7 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
   // For rendering, apply spans for color after fully typed
   function colorize(line: string, idx: number) {
     const entry = introLines[line];
+    if (!entry) return <span className="text-white">{line}</span>;
     if (entry.type === "cmd") {
       const ts = getTimestamp(idx);
       const command = entry.command;
