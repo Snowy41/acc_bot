@@ -11,7 +11,7 @@ export default function HomePage() {
       <ParticleBackground />
       {/* Terminal intro overlay */}
       {!showMain && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#101926]/95 backdrop-blur-xl pointer-events-none">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#101926]/96 backdrop-blur-xl pointer-events-none">
           <TerminalIntro onFinish={() => setShowMain(true)} />
         </div>
       )}
