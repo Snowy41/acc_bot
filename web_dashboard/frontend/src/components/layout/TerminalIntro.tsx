@@ -87,39 +87,45 @@ export default function TerminalIntro({ onFinish }: { onFinish?: () => void }) {
   }, [cursor, done]);
 
   // For rendering, apply spans for color after fully typed
-  function colorize(line: string, idx: number) {
-    const entry = introLines[line];
-    if (!entry) return <span className="text-white">{line}</span>;
-    if (entry.type === "cmd") {
-      const ts = getTimestamp(idx);
-      const command = entry.command;
-      const prompt =
-        `<span class="text-green-400">${USERNAME}</span>@<span class="text-blue-400">${HOST}</span>:~<span class="text-yellow-400">${PROMPT}</span> `;
-      // Replace line with colored prompt/command after typing
-      if (line.startsWith(ts + " ")) {
+    function colorize(line: string, idx: number) {
+      const entry = introLines[idx];
+      if (!entry) return <span className="text-white">{line}</span>;
+
+      if (entry.type === "cmd") {
+        const ts = getTimestamp(idx);
+        const command = entry.command;
+        // Split the prompt into colored spans, then append the command
         return (
           <span>
             <span className="text-cyan-300">{ts}</span>{" "}
-            <span dangerouslySetInnerHTML={{ __html: prompt }} />
-            <span className="text-white">{command}</span>
+            <span className="text-green-400">{USERNAME}</span>
+            <span className="text-white">@</span>
+            <span className="text-blue-400">{HOST}</span>
+            <span className="text-white">:~</span>
+            <span className="text-yellow-400">{PROMPT}</span>
+            <span className="text-white"> {command}</span>
           </span>
         );
       }
+      if (entry.type === "output" && entry.output) {
+        const ts = getTimestamp(idx);
+        const color =
+          entry.color === "gold"
+            ? "text-amber-300"
+            : entry.color === "cyan"
+            ? "text-aqua"
+            : "text-white";
+        return (
+          <span>
+            <span className="text-cyan-300">{ts}</span>{" "}
+            <span className={color}>{entry.output}</span>
+          </span>
+        );
+      }
+      // fallback: just the line
+      return <span className="text-white">{line}</span>;
     }
-    if (entry.type === "output" && entry.output) {
-      const ts = getTimestamp(idx);
-      const color =
-        entry.color === "gold"
-          ? "text-amber-300"
-          : entry.color === "cyan"
-          ? "text-aqua"
-          : "text-white";
-      return (
-        <span>
-          <span className="text-cyan-300">{ts}</span> <span className={color}>{entry.output}</span>
-        </span>
-      );
-    }
+
     // fallback: just the line
     return <span className="text-white">{line}</span>;
   }
